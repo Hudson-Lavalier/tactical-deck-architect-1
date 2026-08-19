@@ -125,6 +125,10 @@ export default function GameBoard() {
     setShowCardDetail({ card, readOnly: true });
   }, []);
 
+  const handleInspectQueue = useCallback((card) => {
+    setShowCardDetail({ card, readOnly: true });
+  }, []);
+
   const handleInspectDomain = useCallback(() => {
     if (state?.domain) setShowCardDetail({ card: state.domain, readOnly: true });
   }, [state?.domain]);
@@ -281,6 +285,7 @@ export default function GameBoard() {
             domain={state.domain}
             modifiers={state.domainModifiers}
             onDomainClick={handleInspectDomain}
+            onQueueCardClick={handleInspectQueue}
           />
         </div>
 
