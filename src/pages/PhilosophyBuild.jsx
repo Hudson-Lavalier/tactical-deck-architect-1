@@ -9,7 +9,7 @@ import {
   EPISTEMOLOGIES,
   getParadigmsByFamily,
 } from '@/data/epistemologies';
-import Carousel2D from '@/components/Carousel2D';
+import Carousel3D from '@/components/Carousel3D';
 import FamilyCarouselCard from '@/components/FamilyCarouselCard';
 import ParadigmCarouselCard from '@/components/ParadigmCarouselCard';
 import BuildInfoPanel from '@/components/BuildInfoPanel';
@@ -63,9 +63,16 @@ export default function PhilosophyBuild() {
   // Viewport-capped carousel sizing
   const [dims, setDims] = useState(() => computeDims());
   useEffect(() => {
-    const onResize = () => setDims(computeDims());
-    window.addEventListener('resize', onResize);
-    return () => window.removeEventListener('resize', onResize);
+    let raf = null;
+    const onResize = () => {
+      if (raf) cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => setDims(computeDims()));
+    };
+    window.addEventListener('resize', onResize, { passive: true });
+    return () => {
+      if (raf) cancelAnimationFrame(raf);
+      window.removeEventListener('resize', onResize);
+    };
   }, []);
 
   return (
@@ -98,7 +105,7 @@ export default function PhilosophyBuild() {
           <div className="text-term-faint text-ui-sm tracking-[0.15em] mb-3 font-bold text-center">
             ── PARADIGM FAMILIES ──
           </div>
-          <Carousel2D
+          <Carousel3D
             items={families}
             renderItem={(family, isCenter) => (
               <FamilyCarouselCard
@@ -156,7 +163,7 @@ export default function PhilosophyBuild() {
           </div>
 
           <div className="relative z-10 flex-1 flex flex-col justify-center w-full">
-            <Carousel2D
+            <Carousel3D
               key={activeFamily.id}
               items={paradigmsInActiveFamily}
               renderItem={(paradigm, isCenter) => (

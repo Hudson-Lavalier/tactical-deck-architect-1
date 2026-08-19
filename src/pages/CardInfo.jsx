@@ -6,7 +6,7 @@ import CosmicBackground from '@/components/CosmicBackground';
 import GlassPanel from '@/components/GlassPanel';
 import { CARD_CATEGORIES } from '@/data/cardTypes';
 import { ALL_CARDS } from '@/data/cards';
-import Carousel2D from '@/components/Carousel2D';
+import Carousel3D from '@/components/Carousel3D';
 import RichText from '@/components/RichText';
 import { ALIGNMENT_COLORS } from '@/components/game/terminalTheme';
 
@@ -24,9 +24,16 @@ export default function CardInfo() {
   // Viewport-capped card dimensions so the full card always fits on screen.
   const [dims, setDims] = useState(() => computeDims());
   useEffect(() => {
-    const onResize = () => setDims(computeDims());
-    window.addEventListener('resize', onResize);
-    return () => window.removeEventListener('resize', onResize);
+    let raf = null;
+    const onResize = () => {
+      if (raf) cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => setDims(computeDims()));
+    };
+    window.addEventListener('resize', onResize, { passive: true });
+    return () => {
+      if (raf) cancelAnimationFrame(raf);
+      window.removeEventListener('resize', onResize);
+    };
   }, []);
 
   return (
@@ -88,7 +95,7 @@ export default function CardInfo() {
           </div>
         ) : (
           <div className="flex-1 flex items-center justify-center">
-            <Carousel2D
+            <Carousel3D
               key={activeCategory.id}
               items={cards}
               renderItem={(card, isCenter) => (
