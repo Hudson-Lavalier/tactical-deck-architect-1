@@ -17,7 +17,7 @@ export default function PersistentSlots({ slots, onSlotClick, disabled }) {
             {slotLabels[slot]}
           </div>
           {card ? (
-            <Card card={card} size="medium" onClick={() => !disabled && onSlotClick?.(slot, card)} />
+            <Card card={card} size="medium" onClick={() => onSlotClick?.(slot, card)} />
           ) : (
             <div className="w-24 h-36 rounded glass-card flex items-center justify-center"
               style={{ borderColor: 'rgba(168,85,247,0.15)', borderStyle: 'dashed' }}

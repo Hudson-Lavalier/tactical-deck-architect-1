@@ -1,11 +1,12 @@
 import React from 'react';
 
 // HelpPanel — persistent, always-visible guidance strip.
-// Shows the current phase, what's allowed, and remaining actions.
+// Informs the player of their available options without locking them to a
+// strict phase order. The 'main' phase lists everything they may do and the
+// remaining counts; 'draw' and 'response' stay directive.
 const PHASE_INFO = {
   draw: { label: 'DRAW PHASE', instruction: 'Click a draw pile to draw 1 card.' },
-  board_dev: { label: 'BOARD DEVELOPMENT', instruction: 'Select a card to place 1 persistent card OR change Domain.' },
-  action: { label: 'ACTION PHASE', instruction: 'Select a card to play it to the queue, or End Turn.' },
+  main: { label: 'MAIN PHASE', instruction: 'Place a persistent card, play actions, or change the Domain — in any order. End Turn when ready.' },
   response: { label: 'RESPONSE WINDOW', instruction: 'Counter the active card or pass.' },
 };
 
@@ -13,10 +14,11 @@ export default function HelpPanel({ phase, isPlayerTurn, boardDevUsed, actionsPl
   const info = PHASE_INFO[phase] || { label: (phase || '').toUpperCase(), instruction: '' };
 
   let remaining = '';
-  if (phase === 'board_dev') remaining = boardDevUsed ? '(0 board dev remaining)' : '(1 board dev remaining)';
-  if (phase === 'action') {
-    const left = Math.max(0, actionAllowance - actionsPlayed);
-    remaining = `(${left} action${left !== 1 ? 's' : ''} left)`;
+  if (phase === 'main') {
+    const boardLeft = boardDevUsed ? 0 : 1;
+    const actionLeft = Math.max(0, actionAllowance - actionsPlayed);
+    const domainAvail = !boardDevUsed && actionsPlayed === 0;
+    remaining = `board dev: ${boardLeft} · actions: ${actionLeft} · domain: ${domainAvail ? 'available' : 'locked'}`;
   }
 
   const accent = isPlayerTurn ? '#00ff41' : '#a855f7';

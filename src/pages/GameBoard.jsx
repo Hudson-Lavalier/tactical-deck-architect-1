@@ -110,15 +110,6 @@ export default function GameBoard() {
       wasInResponseWindow.current = true;
     } else if (wasInResponseWindow.current) {
       wasInResponseWindow.current = false;
-      if (state.currentPlayer === 'player' && !state.winner) {
-        if (state.phase === 'action') {
-          setPhase('action');
-        } else if (state.phase === 'draw') {
-          setPhase('draw');
-          setActionsPlayed(0);
-          setBoardDevUsed(false);
-        }
-      }
     }
   }, [state?.responseWindow?.active]);
 
@@ -128,12 +119,21 @@ export default function GameBoard() {
     drawCard(newState, pileId);
     setState(newState);
     setBoardDevUsed(false);
-    setPhase('board_dev');
+    setPhase('main');
   }, [state, phase]);
 
   const handleSelectCard = useCallback((card) => {
-    setShowCardDetail(card);
+    setShowCardDetail({ card, readOnly: false });
   }, []);
+
+  // Inspect an already-placed card (Domain or persistent) — read-only detail.
+  const handleInspectPlaced = useCallback((_slot, card) => {
+    setShowCardDetail({ card, readOnly: true });
+  }, []);
+
+  const handleInspectDomain = useCallback(() => {
+    if (state?.domain) setShowCardDetail({ card: state.domain, readOnly: true });
+  }, [state?.domain]);
 
   // Place a persistent card. Accepts either (slot) from a slot click or
   // (card, slot) from the CardDetail "Place in Slot" button.
@@ -146,7 +146,7 @@ export default function GameBoard() {
       cardId = selectedCardId;
       slot = cardOrSlot;
     }
-    if (!state || state.currentPlayer !== 'player' || phase !== 'board_dev') return;
+    if (!state || state.currentPlayer !== 'player' || phase !== 'main') return;
     if (!cardId || !slot || boardDevUsed) return;
     const newState = cloneState(state);
     placePersistent(newState, cardId, slot);
@@ -154,9 +154,6 @@ export default function GameBoard() {
     setSelectedCardId(null);
     setShowCardDetail(null);
     setBoardDevUsed(true);
-    if (!newState.responseWindow?.active) {
-      setPhase('action');
-    }
   }, [state, phase, selectedCardId, boardDevUsed]);
 
   // Change the Domain. Per framework, this ends the turn — the engine handles
@@ -164,8 +161,8 @@ export default function GameBoard() {
   // We must NOT override the phase here.
   const handleChangeDomain = useCallback((cardArg) => {
     const cardId = cardArg?.id || selectedCardId;
-    if (!state || state.currentPlayer !== 'player' || phase !== 'board_dev') return;
-    if (!cardId || boardDevUsed) return;
+    if (!state || state.currentPlayer !== 'player' || phase !== 'main') return;
+    if (!cardId || boardDevUsed || actionsPlayed > 0) return;
     const newState = cloneState(state);
     const success = changeDomain(newState, cardId);
     setState(newState);
@@ -184,7 +181,7 @@ export default function GameBoard() {
   }, [state, phase, selectedCardId, boardDevUsed]);
 
   const handlePlayAction = useCallback((cardArg) => {
-    if (!state || state.currentPlayer !== 'player' || phase !== 'action' || state.responseWindow?.active) return;
+    if (!state || state.currentPlayer !== 'player' || phase !== 'main' || state.responseWindow?.active) return;
     const card = cardArg || state.players.player.hand.find((c) => c.id === selectedCardId);
     if (!card) return;
 
@@ -278,37 +275,47 @@ export default function GameBoard() {
         <div className="flex-1 flex flex-col min-h-0 gap-2">
           {/* Opponent persistent slots — dedicated battlefield row */}
           <div className="shrink-0">
-            <PersistentSlots slots={opponent.persistentSlots} disabled />
+            <PersistentSlots slots={opponent.persistentSlots} onSlotClick={handleInspectPlaced} />
           </div>
 
-          {/* Battlefield — queues flank the centered Domain (no DrawPiles offset) */}
+          {/* Battlefield — DrawPiles | opponent queue | Domain | player queue */}
           <div className="flex-1 flex items-center justify-center gap-6 min-h-0 overflow-hidden">
+            <DrawPiles
+              piles={{
+                metaphysics: state.drawPiles.metaphysics,
+                meta_ethics: state.drawPiles.meta_ethics,
+              }}
+              onDraw={handleDraw}
+              disabled={!isPlayerTurn || phase !== 'draw' || inResponseWindow}
+            />
             <Queue queuedCards={opponent.queue} isActive={!isPlayerTurn} className="flex-1 min-w-0 justify-center" />
-            <Domain domain={state.domain} modifiers={state.domainModifiers} />
+            <Domain domain={state.domain} modifiers={state.domainModifiers} onDomainClick={handleInspectDomain} />
             <Queue queuedCards={player.queue} isActive={isPlayerTurn} className="flex-1 min-w-0 justify-center" />
           </div>
 
           {/* Player persistent slots — dedicated battlefield row */}
           <div className="shrink-0">
-            <PersistentSlots slots={player.persistentSlots} />
+            <PersistentSlots slots={player.persistentSlots} onSlotClick={handleInspectPlaced} />
           </div>
         </div>
 
-        {/* Player strip — draw piles + points + end turn */}
-        <div className="shrink-0 px-3 py-2 rounded glass-panel cosmic-sheen flex items-center justify-between gap-3"
+        {/* Hand — sits above the points bar */}
+        <div className="shrink-0">
+          <Hand
+            cards={player.hand}
+            onSelectCard={handleSelectCard}
+            selectedCardId={selectedCardId}
+            disabled={!isPlayerTurn}
+          />
+        </div>
+
+        {/* Player points bar — compact (no draw piles) */}
+        <div className="shrink-0 px-3 py-1.5 rounded glass-panel cosmic-sheen flex items-center justify-between gap-3"
           style={{ borderColor: isPlayerTurn && !inResponseWindow ? 'rgba(0,255,65,0.3)' : 'rgba(168,85,247,0.12)' }}
         >
-          <DrawPiles
-            piles={{
-              metaphysics: state.drawPiles.metaphysics,
-              meta_ethics: state.drawPiles.meta_ethics,
-            }}
-            onDraw={handleDraw}
-            disabled={!isPlayerTurn || phase !== 'draw' || inResponseWindow}
-          />
           <PointTracker player={player} />
           <div className="flex gap-2 shrink-0">
-            {!inResponseWindow && phase !== 'draw' && isPlayerTurn && (
+            {phase === 'main' && isPlayerTurn && !inResponseWindow && (
               <button
                 onClick={handleEndTurn}
                 className="px-4 py-2 rounded text-ui-sm glass-card cosmic-sheen transition-all hover:scale-105"
@@ -319,21 +326,12 @@ export default function GameBoard() {
             )}
           </div>
         </div>
-
-        {/* Hand */}
-        <div className="shrink-0">
-          <Hand
-            cards={player.hand}
-            onSelectCard={handleSelectCard}
-            selectedCardId={selectedCardId}
-            disabled={!isPlayerTurn}
-          />
-        </div>
       </div>
 
       {showCardDetail && (
         <CardDetail
-          card={showCardDetail}
+          card={showCardDetail.card}
+          readOnly={showCardDetail.readOnly}
           state={state}
           phase={phase}
           isPlayerTurn={isPlayerTurn}

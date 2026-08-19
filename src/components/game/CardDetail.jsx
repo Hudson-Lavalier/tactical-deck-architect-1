@@ -13,6 +13,7 @@ const CATEGORY_SLOT = {
 
 export default function CardDetail({
   card,
+  readOnly = false,
   state,
   phase,
   isPlayerTurn,
@@ -44,8 +45,9 @@ export default function CardDetail({
     }
   }
 
-  const canBoardDev = isPlayerTurn && phase === 'board_dev' && !boardDevUsed;
-  const canAction = isPlayerTurn && phase === 'action' && actionsPlayed < actionAllowance;
+  const canChangeDomain = isPlayerTurn && phase === 'main' && !boardDevUsed && actionsPlayed === 0;
+  const canPlace = isPlayerTurn && phase === 'main' && !boardDevUsed;
+  const canAction = isPlayerTurn && phase === 'main' && actionsPlayed < actionAllowance;
 
   const isDomain = card.category === 'domain';
   const persistentSlot = CATEGORY_SLOT[card.category];
@@ -58,7 +60,7 @@ export default function CardDetail({
           <Card card={card} size="large" />
         </div>
         <div className="text-term-text text-sm mb-2 text-center font-bold">{card.name || 'UNNAMED CARD'}</div>
-        <div className="text-term-dim text-xs mb-4 text-center leading-relaxed whitespace-pre-line">{card.text || card.description || '[ NO DESCRIPTION ]'}</div>
+        <div className="text-term-dim text-xs mb-4 text-center leading-relaxed whitespace-pre-line max-h-40 overflow-y-auto">{card.text || card.description || '[ NO DESCRIPTION ]'}</div>
 
         {/* Resolution timing */}
         {timing && (
@@ -68,36 +70,36 @@ export default function CardDetail({
           </div>
         )}
 
-        {/* Action buttons */}
+        {/* Action buttons — hidden when inspecting an already-placed card */}
         <div className="flex flex-col gap-2">
-          {isDomain && (
+          {!readOnly && isDomain && (
             <button
               onClick={() => onChangeDomain?.(card)}
-              disabled={!canBoardDev}
+              disabled={!canChangeDomain}
               className="px-4 py-2 rounded text-xs glass-card cosmic-sheen transition-all hover:scale-105 disabled:opacity-40 disabled:cursor-not-allowed"
               style={{ borderColor: `${accent}40`, color: accent }}
             >
-              CHANGE DOMAIN{canBoardDev ? '' : ' — BOARD DEV ONLY'}
+              CHANGE DOMAIN{canChangeDomain ? '' : (boardDevUsed ? ' — ALREADY USED' : actionsPlayed > 0 ? ' — LOCKED (ACTION PLAYED)' : ' — MAIN PHASE ONLY')}
             </button>
           )}
-          {persistentSlot && (
+          {!readOnly && persistentSlot && (
             <button
               onClick={() => onPlacePersistent?.(card, persistentSlot)}
-              disabled={!canBoardDev}
+              disabled={!canPlace}
               className="px-4 py-2 rounded text-xs glass-card cosmic-sheen transition-all hover:scale-105 disabled:opacity-40 disabled:cursor-not-allowed"
               style={{ borderColor: `${accent}40`, color: accent }}
             >
-              PLACE IN SLOT{canBoardDev ? '' : (boardDevUsed ? ' — ALREADY USED' : ' — BOARD DEV ONLY')}
+              PLACE IN SLOT{canPlace ? '' : (boardDevUsed ? ' — ALREADY USED' : ' — MAIN PHASE ONLY')}
             </button>
           )}
-          {isAction && (
+          {!readOnly && isAction && (
             <button
               onClick={() => onPlayAction?.(card)}
               disabled={!canAction}
               className="px-4 py-2 rounded text-xs glass-card cosmic-sheen transition-all hover:scale-105 disabled:opacity-40 disabled:cursor-not-allowed"
               style={{ borderColor: `${accent}40`, color: accent }}
             >
-              PLAY TO QUEUE{canAction ? ` (${actionsPlayed}/${actionAllowance})` : ' — ACTION PHASE ONLY'}
+              PLAY TO QUEUE{canAction ? ` (${actionsPlayed}/${actionAllowance})` : ' — NO ACTIONS LEFT'}
             </button>
           )}
           <button
