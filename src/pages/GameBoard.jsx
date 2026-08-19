@@ -276,7 +276,7 @@ export default function GameBoard() {
           </div>
 
           <div className="mt-3 flex gap-2 justify-center">
-            {!inResponseWindow && phase === 'board_dev' && selectedCard && selectedCard.category === 'terrain' && (
+            {!inResponseWindow && phase === 'board_dev' && selectedCard && selectedCard.category === 'domain' && (
               <button
                 onClick={handleChangeDomain}
                 className="px-4 py-2 rounded text-ui-sm glass-card cosmic-sheen transition-all hover:scale-105"

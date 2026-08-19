@@ -2,7 +2,7 @@ import React from 'react';
 import Card from './Card';
 import { ALIGNMENT_COLORS } from './terminalTheme';
 
-// Domain — shared terrain card with cosmic focal treatment.
+// Domain — shared domain card with cosmic focal treatment.
 export default function Domain({ domain, modifiers, onDomainClick }) {
   const accent = domain ? ALIGNMENT_COLORS[domain.alignment]?.glow : '#a855f7';
 
@@ -34,7 +34,7 @@ export default function Domain({ domain, modifiers, onDomainClick }) {
           >
             <div className="text-center">
               <div className="text-term-purple font-mono text-xs">[ NO DOMAIN ]</div>
-              <div className="text-term-faint font-mono text-[8px] mt-1">PLACE TERRAIN</div>
+              <div className="text-term-faint font-mono text-[8px] mt-1">PLACE DOMAIN</div>
             </div>
           </div>
         )}

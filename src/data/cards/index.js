@@ -15,7 +15,7 @@ import { CARD_CATEGORIES } from '../cardTypes';
 
 // Each import below pulls from a category-specific file.
 // All are empty until the user provides card definitions.
-import { terrainCards } from './terrain';
+import { domainCards } from './domain';
 import { theoryOfTimeCards } from './theoryOfTime';
 import { universalsCards } from './universals';
 import { moralRealityCards } from './moralReality';
@@ -24,7 +24,7 @@ import { moralJudgmentCards } from './moralJudgment';
 import { rhetoricCards } from './rhetoric';
 
 export const ALL_CARDS = {
-  [CARD_CATEGORIES.TERRAIN.id]: terrainCards,
+  [CARD_CATEGORIES.DOMAIN.id]: domainCards,
   [CARD_CATEGORIES.THEORY_OF_TIME.id]: theoryOfTimeCards,
   [CARD_CATEGORIES.UNIVERSALS.id]: universalsCards,
   [CARD_CATEGORIES.MORAL_REALITY.id]: moralRealityCards,
@@ -46,12 +46,12 @@ export function getCardById(id) {
 }
 
 // Build the two draw piles per the framework:
-//   Metaphysics pile: Terrain, Theory of Time, Universals
+//   Metaphysics pile: Domain, Theory of Time, Universals
 //   Meta-Ethics pile: Moral Reality, Moral Grounding, Moral Judgment
 // (Rhetoric is drawn separately on a cadence, not from these piles.)
 export function buildDrawPiles() {
   const metaphysics = [
-    ...terrainCards,
+    ...domainCards,
     ...theoryOfTimeCards,
     ...universalsCards,
   ];

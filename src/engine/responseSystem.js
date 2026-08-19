@@ -105,7 +105,7 @@ export function closeResponseWindow(state) {
     const cat = activeCard.category;
     if (cat === 'rhetoric') {
       state.discardPiles.rhetoric.push(activeCard);
-    } else if (['terrain', 'theory_of_time', 'universals'].includes(cat)) {
+    } else if (['domain', 'theory_of_time', 'universals'].includes(cat)) {
       state.discardPiles.metaphysics.push(activeCard);
     } else if (['moral_reality', 'moral_grounding', 'moral_judgment'].includes(cat)) {
       state.discardPiles.meta_ethics.push(activeCard);

@@ -178,7 +178,7 @@ export function placePersistent(state, cardId, slot) {
   return true;
 }
 
-// Board development: change the domain (terrain)
+// Board development: change the domain
 // Per framework: placing/changing domain immediately ends the turn.
 export function changeDomain(state, cardId) {
   const player = state.players[state.currentPlayer];

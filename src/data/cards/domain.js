@@ -1,4 +1,4 @@
-// Domain (Fundamental Nature of Reality) cards.
+// Domain cards.
 // ════════════════════════════════════════════════════════════════
 // ALL text transcribed VERBATIM from the user's Domain Cards document.
 // No effects, names, or mechanics have been invented.
@@ -12,13 +12,13 @@
 //   Nihilism    → null (special, no point type)
 // ════════════════════════════════════════════════════════════════
 
-export const terrainCards = [
+export const domainCards = [
   // ── Physicalism (Alignment A — Grounding) ──────────────────────
   {
     id: 'physical_foundation',
     name: 'Physical Foundation',
     alignment: 'A',
-    category: 'terrain',
+    category: 'domain',
     subcategory: 'Physicalism',
     aspect: 'Physicalism 1 of 4',
     text: `Point Generation: At the end of each full round, both players gain 1 Grounding point.
@@ -31,7 +31,7 @@ This Domain cannot be changed or replaced by the opposing player until 2 full ro
     id: 'physical_supervenience',
     name: 'Physical Supervenience',
     alignment: 'A',
-    category: 'terrain',
+    category: 'domain',
     subcategory: 'Physicalism',
     aspect: 'Physicalism 2 of 4',
     text: `Point Generation: At the end of every second full round, the player who placed this Domain gains 1 Grounding point. The opposing player does not receive this base point generation.
@@ -44,7 +44,7 @@ While this Domain is active, whenever either player gains one or more Grounding 
     id: 'causal_completeness',
     name: 'Causal Completeness',
     alignment: 'A',
-    category: 'terrain',
+    category: 'domain',
     subcategory: 'Physicalism',
     aspect: 'Physicalism 3 of 4',
     text: `Point Generation: At the end of each full round, both players gain 1 Grounding point.
@@ -61,7 +61,7 @@ This effect may be used once per turn.`,
     id: 'the_physical_mind',
     name: 'The Physical Mind',
     alignment: 'A',
-    category: 'terrain',
+    category: 'domain',
     subcategory: 'Physicalism',
     aspect: 'Physicalism 4 of 4',
     text: `Point Generation: This Domain generates no Grounding points.
@@ -78,7 +78,7 @@ System-type cards that are not one-time-use cards are unaffected. A one-time-use
     id: 'mental_foundation',
     name: 'Mental Foundation',
     alignment: 'B',
-    category: 'terrain',
+    category: 'domain',
     subcategory: 'Idealism',
     aspect: 'Idealism 1 of 4',
     text: `Point Generation: At the end of each full round, both players gain 1 System point.
@@ -90,7 +90,7 @@ Bonus Feature: While this Domain is active, any player with a system type Moral 
     id: 'mind_dependent_reality',
     name: 'Mind-Dependent Reality',
     alignment: 'B',
-    category: 'terrain',
+    category: 'domain',
     subcategory: 'Idealism',
     aspect: 'Idealism 2 of 4',
     text: `Point Generation: At the end of each full round, any player who has Rationalism epistemology gains 2 System point. All other players at the end of each full round get 1 system point.
@@ -102,7 +102,7 @@ Bonus Feature: While this Domain is active, if both players have a System-type M
     id: 'constructive_cognition',
     name: 'Constructive Cognition',
     alignment: 'B',
-    category: 'terrain',
+    category: 'domain',
     subcategory: 'Idealism',
     aspect: 'Idealism 3 of 4',
     text: `Point Generation: At the end of each full round, both players gain 1 System point.
@@ -116,7 +116,7 @@ This effect may trigger up to twice during each player's turn.`,
     id: 'absolute_unity',
     name: 'Absolute Unity',
     alignment: 'B',
-    category: 'terrain',
+    category: 'domain',
     subcategory: 'Idealism',
     aspect: 'Idealism 4 of 4',
     text: `Point Generation: At the end of each full round, both players gain 1 System point.
@@ -132,7 +132,7 @@ The condtion remains active only for as long as that player continues to meet al
     id: 'twofold_reality',
     name: 'Twofold Reality',
     alignment: 'C',
-    category: 'terrain',
+    category: 'domain',
     subcategory: 'Dualism',
     aspect: 'Dualism 1 of 4',
     text: `Point Generation: None.
@@ -152,7 +152,7 @@ Switching between the attached Domains counts as a Domain change for abilities a
     id: 'ontological_independence',
     name: 'Ontological Independence',
     alignment: 'C',
-    category: 'terrain',
+    category: 'domain',
     subcategory: 'Dualism',
     aspect: 'Dualism 2 of 4',
     text: `Point Generation: At the end of each full round, both players gain 1 Adaptation point.
@@ -164,7 +164,7 @@ Bonus Feature: While this Domain is active, whenever an effect or card attempts 
     id: 'marks_of_mind',
     name: 'Marks of Mind',
     alignment: 'C',
-    category: 'terrain',
+    category: 'domain',
     subcategory: 'Dualism',
     aspect: 'Dualism 3 of 4',
     text: `Point Generation: At the end of each full round, both players gain 1 Adaptation point.
@@ -180,7 +180,7 @@ Additionally, whenever another player changes one of your non-Adaptation points 
     id: 'bridge_between_realms',
     name: 'Bridge Between Realms',
     alignment: 'C',
-    category: 'terrain',
+    category: 'domain',
     subcategory: 'Dualism',
     aspect: 'Dualism 4 of 4',
     text: `Point Generation: None.
@@ -199,7 +199,7 @@ Change 2 of the same points of either Grounding or System from your point pool t
     id: 'black_hole_domain',
     name: 'Black Hole Domain',
     alignment: null,
-    category: 'terrain',
+    category: 'domain',
     subcategory: 'Nihilism',
     aspect: 'Nihilism 1 of 1',
     text: `When Placed: For the next 3 full rounds, at the start of each player's turn, that player must discard 3 cards of their choice from their hand.
