@@ -145,4 +145,10 @@ When a card or ability allows a player to immediately play a card, that play doe
 The card must still obey any other applicable restrictions unless the effect specifically overrides them.
 
 This matters because "play immediately" appears outside Theory of Time too.`,
+
+  moral_reality: `Moral Reality Card Ability Worksheet
+
+Moral Reality cards are persistent cards. Each player may have one Moral Reality card active at a time.
+
+Each card has its own individual Bonus Feature. There is no shared philosophy-wide System Effect for Moral Realism, Error Theory, or Moral Relativism.`,
 };
