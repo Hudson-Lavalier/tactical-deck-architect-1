@@ -151,4 +151,10 @@ This matters because "play immediately" appears outside Theory of Time too.`,
 Moral Reality cards are persistent cards. Each player may have one Moral Reality card active at a time.
 
 Each card has its own individual Bonus Feature. There is no shared philosophy-wide System Effect for Moral Realism, Error Theory, or Moral Relativism.`,
+
+  moral_grounding: `Moral Grounding Card Ability Worksheet
+
+Moral Grounding cards are persistent cards. Each player may have one Moral Grounding card active at a time.
+
+Each card has its own individual Bonus Feature. There is no shared philosophy-wide System Effect unless you decide to add one later.`,
 };
