@@ -3,7 +3,7 @@ import Card from '@/components/game/Card';
 
 // QueueLane — 4-column horizontal lane inside a bordered grid frame.
 // Leftmost column = row 1 (1 turn, resolves first). Up to 2 cards per column.
-export default function QueueLane({ queuedCards, isActive, accent = '#888888', label = 'QUEUE', hidden = false }) {
+export default function QueueLane({ queuedCards, isActive, accent = '#888888', label = 'QUEUE', hidden = false, onCardClick }) {
   const rows = [1, 2, 3, 4];
 
   const cardsByRow = {};
@@ -27,7 +27,7 @@ export default function QueueLane({ queuedCards, isActive, accent = '#888888', l
                 if (queued) {
                   return (
                     <div key={col} className="relative">
-                      <Card card={queued.card} faceDown={hidden} size="small" />
+                      <Card card={queued.card} faceDown={hidden} size="small" onClick={!hidden ? () => onCardClick?.(queued.card) : undefined} />
                       {queued.faceDown && (
                         <div
                           className="absolute -top-1 -right-1 text-[10px] font-mono bg-cosmic-deep px-1 rounded"

@@ -129,6 +129,10 @@ export default function GameBoard() {
     if (state?.domain) setShowCardDetail({ card: state.domain, readOnly: true });
   }, [state?.domain]);
 
+  const handleInspectQueue = useCallback((card) => {
+    setShowCardDetail({ card, readOnly: true });
+  }, []);
+
   const handlePlacePersistent = useCallback((cardOrSlot, slotArg) => {
     let cardId, slot;
     if (slotArg) {
@@ -281,6 +285,7 @@ export default function GameBoard() {
             domain={state.domain}
             modifiers={state.domainModifiers}
             onDomainClick={handleInspectDomain}
+            onQueueCardClick={handleInspectQueue}
           />
         </div>
 
