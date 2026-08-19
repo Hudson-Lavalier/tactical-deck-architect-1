@@ -10,6 +10,7 @@ import { playRhetoricResponse, passResponse } from '@/engine/responseSystem';
 import { executeNPCTurn, npcPlayNextAction, npcDecideRhetoric } from '@/logic/npcAI';
 import ResponseWindow from '@/components/game/ResponseWindow';
 import GameLog from '@/components/game/GameLog';
+import CardDetail from '@/components/game/CardDetail';
 
 import Hand from '@/components/game/Hand';
 import PersistentSlots from '@/components/game/PersistentSlots';
@@ -27,6 +28,8 @@ export default function GameBoard() {
   const [phase, setPhase] = useState('draw'); // draw | board_dev | action | response
   const [actionsPlayed, setActionsPlayed] = useState(0);
   const wasInResponseWindow = useRef(false);
+  const [showCardDetail, setShowCardDetail] = useState(null);
+  const [showEndTurnDialog, setShowEndTurnDialog] = useState(false);
 
   // Initialize game on mount
   useEffect(() => {
@@ -133,7 +136,7 @@ export default function GameBoard() {
 
   // Handle selecting a card from hand
   const handleSelectCard = useCallback((card) => {
-    setSelectedCardId(card.id);
+    setShowCardDetail(card);
   }, []);
 
   // Handle placing a persistent card
@@ -192,12 +195,18 @@ export default function GameBoard() {
   // Handle ending turn
   const handleEndTurn = useCallback(() => {
     if (!state || state.currentPlayer !== 'player') return;
+    setShowEndTurnDialog(true);
+  }, [state]);
+
+  const handleConfirmEndTurn = useCallback(() => {
+    if (!state || state.currentPlayer !== 'player') return;
     const newState = cloneState(state);
     endTurn(newState);
     setState(newState);
     setSelectedCardId(null);
     setPhase('draw');
     setActionsPlayed(0);
+    setShowEndTurnDialog(false);
   }, [state]);
 
   if (!state) {
@@ -229,13 +238,21 @@ export default function GameBoard() {
           </button>
           <div className="text-[#555] text-xs tracking-wider">
             TURN {state.turn + 1} — {isPlayerTurn ? 'YOUR TURN' : 'OPPONENT TURN'} — PHASE: {phase.toUpperCase()}
+            {!isPlayerTurn && !inResponseWindow && (
+              <span className="text-[#a855f7] animate-pulse ml-2">[ THINKING... ]</span>
+            )}
           </div>
           <div className="w-5"></div>
         </div>
 
         {/* Opponent area */}
-        <div className="mb-4 p-2 border border-[#1a1a2e] rounded bg-[#0a0a0a]">
-          <PointTracker player={opponent} isOpponent />
+        <div className={`mb-4 p-2 border rounded bg-[#0a0a0a] ${!isPlayerTurn && !inResponseWindow ? 'border-[#a855f7]/50' : 'border-[#1a1a2e]'}`}>
+          <div className="flex justify-between items-center">
+            <PointTracker player={opponent} isOpponent />
+            <div className="text-[#555] text-xs font-mono">
+              HAND: {opponent.hand.length + opponent.rhetoricHand.length}
+            </div>
+          </div>
           <div className="mt-2">
             <PersistentSlots slots={opponent.persistentSlots} disabled />
           </div>
@@ -270,7 +287,7 @@ export default function GameBoard() {
         </div>
 
         {/* Player area */}
-        <div className="mt-4 p-2 border border-[#1a1a2e] rounded bg-[#0a0a0a]">
+        <div className={`mt-4 p-2 border rounded bg-[#0a0a0a] ${isPlayerTurn && !inResponseWindow ? 'border-[#00ff41]/50' : 'border-[#1a1a2e]'}`}>
           <PointTracker player={player} />
           <div className="mt-2">
             <PersistentSlots
@@ -321,6 +338,41 @@ export default function GameBoard() {
         </div>
       </div>
 
+      {/* Card detail modal */}
+      {showCardDetail && (
+        <CardDetail
+          card={showCardDetail}
+          onSelect={() => {
+            setSelectedCardId(showCardDetail.id);
+            setShowCardDetail(null);
+          }}
+          onClose={() => setShowCardDetail(null)}
+        />
+      )}
+
+      {/* End turn confirmation */}
+      {showEndTurnDialog && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-40 font-mono">
+          <div className="border-2 border-[#00ff41] bg-[#0a0a0a] p-6 rounded max-w-sm text-center">
+            <div className="text-[#00ff41] text-sm tracking-wider mb-4">END YOUR TURN?</div>
+            <div className="flex gap-3 justify-center">
+              <button
+                onClick={handleConfirmEndTurn}
+                className="px-6 py-2 border-2 border-[#00ff41] text-[#00ff41] rounded text-xs hover:bg-[#00ff41] hover:text-black transition-all"
+              >
+                CONFIRM
+              </button>
+              <button
+                onClick={() => setShowEndTurnDialog(false)}
+                className="px-6 py-2 border-2 border-[#555] text-[#555] rounded text-xs hover:bg-[#555] hover:text-black transition-all"
+              >
+                CANCEL
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Game log */}
       <div className="relative z-10 px-4 pb-2">
         <GameLog log={state.log} />
@@ -346,15 +398,16 @@ export default function GameBoard() {
 
       {/* Victory overlay */}
       {state.winner && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
-          <div className="text-center">
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+          <div className="border-2 border-[#00ff41] bg-[#0a0a0a] p-8 rounded text-center shadow-[0_0_40px_rgba(0,255,65,0.3)]">
             <Trophy className="w-16 h-16 text-[#00ff41] mx-auto mb-4" />
             <div className="text-3xl text-[#00ff41] font-bold tracking-widest mb-2">
               {state.winner === 'player' ? 'VICTORY' : state.winner === 'tie' ? 'DRAW' : 'DEFEAT'}
             </div>
+            <div className="text-[#555] text-xs mb-6">[ FINAL BOARD STATE VISIBLE BEHIND ]</div>
             <button
               onClick={() => navigate('/')}
-              className="mt-6 px-6 py-2 border border-[#00ff41] text-[#00ff41] rounded text-xs hover:bg-[#00ff41] hover:text-black transition-all"
+              className="px-6 py-2 border-2 border-[#00ff41] text-[#00ff41] rounded text-xs hover:bg-[#00ff41] hover:text-black transition-all"
             >
               RETURN TO MENU
             </button>

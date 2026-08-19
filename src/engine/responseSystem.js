@@ -97,9 +97,20 @@ export function closeResponseWindow(state) {
     source: null,
   };
 
-  // Resolve the card if not cancelled
+  // Resolve the card if not cancelled, or discard if cancelled
   if (!cancelled && activeCard) {
     resolveCard(state, activePlayerId, activeCard);
+  } else if (cancelled && activeCard) {
+    // Push cancelled card to the appropriate discard pile
+    const cat = activeCard.category;
+    if (cat === 'rhetoric') {
+      state.discardPiles.rhetoric.push(activeCard);
+    } else if (['terrain', 'theory_of_time', 'universals'].includes(cat)) {
+      state.discardPiles.metaphysics.push(activeCard);
+    } else if (['moral_reality', 'moral_grounding', 'moral_judgment'].includes(cat)) {
+      state.discardPiles.meta_ethics.push(activeCard);
+    }
+    logEvent(state, { type: 'card_discarded', cardId: activeCard.id, reason: 'cancelled' });
   }
 
   // Remove from pending resolutions
