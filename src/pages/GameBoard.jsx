@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Trophy } from 'lucide-react';
 
@@ -9,6 +9,7 @@ import { determinePlayMode, canPlayActionCard, getActionAllowance } from '@/engi
 import { playRhetoricResponse, passResponse } from '@/engine/responseSystem';
 import { executeNPCTurn, npcPlayNextAction, npcDecideRhetoric } from '@/logic/npcAI';
 import ResponseWindow from '@/components/game/ResponseWindow';
+import GameLog from '@/components/game/GameLog';
 
 import Hand from '@/components/game/Hand';
 import PersistentSlots from '@/components/game/PersistentSlots';
@@ -25,6 +26,7 @@ export default function GameBoard() {
   const [selectedCardId, setSelectedCardId] = useState(null);
   const [phase, setPhase] = useState('draw'); // draw | board_dev | action | response
   const [actionsPlayed, setActionsPlayed] = useState(0);
+  const wasInResponseWindow = useRef(false);
 
   // Initialize game on mount
   useEffect(() => {
@@ -47,7 +49,8 @@ export default function GameBoard() {
       knowledge: npcKnowledge[Math.floor(Math.random() * npcKnowledge.length)],
     };
 
-    const initialState = createInitialState(playerSelection, opponentSelection);
+    const difficulty = parseInt(sessionStorage.getItem('gameDifficulty') || '3');
+    const initialState = createInitialState(playerSelection, opponentSelection, difficulty);
     startTurn(initialState);
     setState(cloneState(initialState));
   }, []);
@@ -63,7 +66,7 @@ export default function GameBoard() {
         setState(newState);
         setPhase('draw');
         setActionsPlayed(0);
-      }, 1000);
+      }, Math.max(800, 2000 - ((state.difficulty || 3) * 200)));
       return () => clearTimeout(timer);
     }
   }, [state?.currentPlayer, state?.phase, state?.winner, state?.responseWindow?.active]);
@@ -77,7 +80,7 @@ export default function GameBoard() {
         const newState = cloneState(state);
         npcPlayNextAction(newState);
         setState(newState);
-      }, 1000);
+      }, Math.max(800, 2000 - ((state.difficulty || 3) * 200)));
       return () => clearTimeout(timer);
     }
   }, [state?.currentPlayer, state?.phase, state?.responseWindow?.active, state?.winner]);
@@ -97,9 +100,27 @@ export default function GameBoard() {
         passResponse(newState, 'opponent');
       }
       setState(newState);
-    }, 1500);
+    }, Math.max(700, 1800 - ((state.difficulty || 3) * 200)));
     return () => clearTimeout(timer);
   }, [state?.responseWindow?.active, state?.responseWindow?.respondingPlayerId]);
+
+  // Sync local phase when response window closes (e.g., after persistent/domain placement)
+  useEffect(() => {
+    if (!state) return;
+    if (state.responseWindow?.active) {
+      wasInResponseWindow.current = true;
+    } else if (wasInResponseWindow.current) {
+      wasInResponseWindow.current = false;
+      if (state.currentPlayer === 'player' && !state.winner) {
+        if (state.phase === 'action') {
+          setPhase('action');
+        } else if (state.phase === 'draw') {
+          setPhase('draw');
+          setActionsPlayed(0);
+        }
+      }
+    }
+  }, [state?.responseWindow?.active]);
 
   // Handle draw from a pile
   const handleDraw = useCallback((pileId) => {
@@ -123,7 +144,9 @@ export default function GameBoard() {
     placePersistent(newState, selectedCardId, slot);
     setState(newState);
     setSelectedCardId(null);
-    setPhase('action');
+    if (!newState.responseWindow?.active) {
+      setPhase('action');
+    }
   }, [state, phase, selectedCardId]);
 
   // Handle changing domain
@@ -134,8 +157,10 @@ export default function GameBoard() {
     changeDomain(newState, selectedCardId);
     setState(newState);
     setSelectedCardId(null);
-    setPhase('draw');
-    setActionsPlayed(0);
+    if (!newState.responseWindow?.active) {
+      setPhase('draw');
+      setActionsPlayed(0);
+    }
   }, [state, phase, selectedCardId]);
 
   // Handle playing an action card
@@ -296,6 +321,11 @@ export default function GameBoard() {
         </div>
       </div>
 
+      {/* Game log */}
+      <div className="relative z-10 px-4 pb-2">
+        <GameLog log={state.log} />
+      </div>
+
       {/* Response window for the player */}
       {inResponseWindow && state.responseWindow.respondingPlayerId === 'player' && (
         <ResponseWindow
@@ -320,7 +350,7 @@ export default function GameBoard() {
           <div className="text-center">
             <Trophy className="w-16 h-16 text-[#00ff41] mx-auto mb-4" />
             <div className="text-3xl text-[#00ff41] font-bold tracking-widest mb-2">
-              {state.winner === 'player' ? 'VICTORY' : 'DEFEAT'}
+              {state.winner === 'player' ? 'VICTORY' : state.winner === 'tie' ? 'DRAW' : 'DEFEAT'}
             </div>
             <button
               onClick={() => navigate('/')}

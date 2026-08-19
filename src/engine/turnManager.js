@@ -20,6 +20,9 @@ import { openResponseWindow } from './responseSystem';
 export function proceedWithTurn(state) {
   const player = state.players[state.currentPlayer];
 
+  // Check deck exhaustion (empty piles + no cards in hand)
+  if (checkDeckExhaustion(state)) return;
+
   // Check victory (after all resolutions — opponent had their turn to disrupt)
   if (checkVictory(player.points, player.victoryProfile)) {
     state.winner = state.currentPlayer;
@@ -37,6 +40,57 @@ export function proceedWithTurn(state) {
 
   state.phase = 'draw';
   logEvent(state, { type: 'turn_start', player: state.currentPlayer });
+}
+
+// Check if both draw piles are empty and both players have no cards.
+// If so, calculate who's closest to their victory profile.
+function checkDeckExhaustion(state) {
+  const metaphysicsEmpty = state.drawPiles.metaphysics.length === 0;
+  const metaEthicsEmpty = state.drawPiles.meta_ethics.length === 0;
+  const playerHandEmpty = state.players.player.hand.length === 0 && state.players.player.rhetoricHand.length === 0;
+  const opponentHandEmpty = state.players.opponent.hand.length === 0 && state.players.opponent.rhetoricHand.length === 0;
+
+  if (!(metaphysicsEmpty && metaEthicsEmpty && playerHandEmpty && opponentHandEmpty)) {
+    return false;
+  }
+
+  const playerDist = calculateDistanceToGoal(state.players.player);
+  const opponentDist = calculateDistanceToGoal(state.players.opponent);
+
+  if (playerDist < opponentDist) {
+    state.winner = 'player';
+  } else if (opponentDist < playerDist) {
+    state.winner = 'opponent';
+  } else {
+    const playerTotal = state.players.player.points.A + state.players.player.points.B + state.players.player.points.C;
+    const opponentTotal = state.players.opponent.points.A + state.players.opponent.points.B + state.players.opponent.points.C;
+    if (playerTotal > opponentTotal) {
+      state.winner = 'player';
+    } else if (opponentTotal > playerTotal) {
+      state.winner = 'opponent';
+    } else {
+      state.winner = 'tie';
+    }
+  }
+
+  state.phase = 'game_over';
+  logEvent(state, { type: 'deck_exhaustion', winner: state.winner });
+  return true;
+}
+
+// Calculate how far a player is from their victory profile.
+// Distance = points needed + excess points to remove.
+function calculateDistanceToGoal(player) {
+  const profile = player.victoryProfile;
+  if (!profile) return Infinity;
+  let distance = 0;
+  distance += Math.max(0, profile.A - player.points.A);
+  distance += Math.max(0, profile.B - player.points.B);
+  distance += Math.max(0, profile.C - player.points.C);
+  distance += Math.max(0, player.points.A - profile.A);
+  distance += Math.max(0, player.points.B - profile.B);
+  distance += Math.max(0, player.points.C - profile.C);
+  return distance;
 }
 
 // Start a player's turn.
@@ -114,6 +168,7 @@ export function placePersistent(state, cardId, slot) {
   player.hand.splice(cardIndex, 1);
 
   logEvent(state, { type: 'place_persistent', slot, cardId });
+  openResponseWindow(state, card, state.currentPlayer, 'board_dev');
   return true;
 }
 
@@ -129,8 +184,8 @@ export function changeDomain(state, cardId) {
   player.hand.splice(cardIndex, 1);
 
   logEvent(state, { type: 'domain_change', cardId });
-  // Changing domain ends the turn immediately
-  endTurn(state);
+  // Open response window; turn ends after window closes
+  openResponseWindow(state, card, state.currentPlayer, 'domain');
   return true;
 }
 

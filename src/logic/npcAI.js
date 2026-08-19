@@ -107,12 +107,18 @@ export function executeNPCTurn(state) {
   const didBoardDev = decideBoardDevelopment(state);
   if (didBoardDev && state.phase === 'game_over') return;
 
-  // If domain was changed, turn already ended
+  // If domain was changed (turn ended or response window opened for domain)
   if (state.currentPlayer !== 'opponent') return;
+
+  // Set up action phase
+  state.npcActionCount = 0;
+
+  // If a response window opened (persistent card placed), pause execution.
+  // The UI will call npcPlayNextAction when the window closes.
+  if (state.responseWindow?.active) return;
 
   // Phase 3: Action Phase (start)
   state.phase = 'action';
-  state.npcActionCount = 0;
   npcPlayNextAction(state);
 }
 
@@ -140,7 +146,7 @@ export function npcPlayNextAction(state) {
     const card = playableCards[Math.floor(Math.random() * playableCards.length)];
     triedCards.add(card.id);
 
-    if (Math.random() < 0.6) {
+    if (Math.random() < 0.3 + (state.difficulty * 0.12)) {
       const playMode = determinePlayMode(state, card);
       enqueueCard(state, state.currentPlayer, card, playMode.speed);
       const idx = player.hand.findIndex((c) => c.id === card.id);
@@ -166,8 +172,8 @@ export function npcDecideRhetoric(state) {
   const player = state.players.opponent;
   if (player.rhetoricHand.length === 0) return null;
 
-  // Simple heuristic: random chance to counter (no card effects defined yet)
-  if (Math.random() < 0.4) {
+  // Simple heuristic: counter chance scales with difficulty
+  if (Math.random() < 0.1 + (state.difficulty * 0.08)) {
     const card = player.rhetoricHand[0];
     return { cardId: card.id, action: 'counter' };
   }

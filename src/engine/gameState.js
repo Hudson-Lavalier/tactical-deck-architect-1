@@ -64,7 +64,7 @@ function createPlayerState(playerId, epistemologySelection, isPlayerOne) {
 }
 
 // Create the full initial game state
-export function createInitialState(playerSelection, opponentSelection) {
+export function createInitialState(playerSelection, opponentSelection, difficulty = 3) {
   const piles = buildDrawPiles();
 
   const player = createPlayerState('player', playerSelection, true);
@@ -106,6 +106,7 @@ export function createInitialState(playerSelection, opponentSelection) {
     roundCount: 0,        // full rounds completed (for terrain point generation)
     log: [],              // game event log
     winner: null,
+    difficulty,
     responseWindow: {
       active: false,
       activeCard: null,

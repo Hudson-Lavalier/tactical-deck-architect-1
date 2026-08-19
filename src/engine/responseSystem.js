@@ -17,11 +17,13 @@
 
 import { logEvent } from './gameState';
 import { resolveCard } from './queueSystem';
-import { proceedWithTurn } from './turnManager';
+import { proceedWithTurn, endTurn } from './turnManager';
 
 // Open a response window for a card that is becoming active
 export function openResponseWindow(state, card, activePlayerId, source = 'queue') {
   const respondingPlayerId = activePlayerId === 'player' ? 'opponent' : 'player';
+  const respondingPlayer = state.players[respondingPlayerId];
+
   state.responseWindow = {
     active: true,
     activeCard: card,
@@ -32,6 +34,14 @@ export function openResponseWindow(state, card, activePlayerId, source = 'queue'
     source,
   };
   state.phase = 'response';
+
+  // If responding player has no rhetoric cards, auto-close immediately
+  if (respondingPlayer.rhetoricHand.length === 0) {
+    logEvent(state, { type: 'response_window_skip', reason: 'no_rhetoric' });
+    closeResponseWindow(state);
+    return;
+  }
+
   logEvent(state, { type: 'response_window_open', cardId: card?.id, activePlayerId, source });
 }
 
@@ -105,8 +115,10 @@ export function closeResponseWindow(state) {
     // All resolutions complete
     if (source === 'queue') {
       proceedWithTurn(state);
+    } else if (source === 'domain') {
+      endTurn(state);
     } else {
-      // Return to action phase
+      // 'action' or 'board_dev' → return to action phase
       state.phase = 'action';
     }
   }
