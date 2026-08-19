@@ -4,9 +4,9 @@
 
 export const CARD_CATEGORIES = {
   // ── Metaphysics System ──
-  TERRAIN: {
-    id: 'terrain',
-    name: 'Fundamental Nature of Reality',
+  DOMAIN: {
+    id: 'domain',
+    name: 'Domain',
     system: 'Metaphysics',
     role: 'Establishes the shared playing field in the center of the board.',
     slot: 'domain',

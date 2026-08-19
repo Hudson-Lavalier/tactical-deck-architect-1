@@ -28,7 +28,7 @@ export function getResolutionSpeed(card, domain) {
     return RESOLUTION_SPEED.ADVANTAGED;
   }
 
-  // C-type on A/B terrain = neutral
+  // C-type on A/B domain = neutral
   if (card.alignment === 'C' && (domain.alignment === 'A' || domain.alignment === 'B')) {
     return RESOLUTION_SPEED.NEUTRAL;
   }
