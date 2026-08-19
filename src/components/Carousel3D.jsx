@@ -1,16 +1,12 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-// Carousel3D — cylindrical 3D carousel.
-// Fixes applied vs. the old version:
-//  - Only the rotating container transitions (transition-transform). Item wrappers
-//    never use transition-all, so width/height are never animated (no reflow stutter).
-//  - Side-item opacity transitions independently (transition-opacity only).
-//  - will-change: transform + backface-visibility: hidden for GPU acceleration.
-//  - Radius is capped so small item counts (e.g. 3 families) don't push side cards
-//    erratically far back.
-//  - Rotation target resolves from the last committed rotation, so rapid prev/next
-//    clicks never snap or jump mid-transition.
+// Carousel3D — coverflow-style 3D carousel.
+// Depth comes from rotateY tilt + scale + a small center-card pop only —
+// NEVER from a forward translateZ on side cards, which perspective-magnifies
+// them past their CSS box and causes clipping/blow-out. Side offset and scale
+// are derived from the passed itemWidth/itemHeight so cards always stay
+// inside the overflow-hidden frame at any viewport.
 export default function Carousel3D({
   items,
   renderItem,
@@ -18,37 +14,34 @@ export default function Carousel3D({
   onCenterChange,
   itemWidth = 320,
   itemHeight = 420,
-  sidePeek = 0.42,
 }) {
   const [centerIndex, setCenterIndex] = useState(0);
-  // committed rotation (degrees) — the source of truth for the transform.
+  // committed rotation "steps" (fractional index) — source of truth for the layout.
   const rotationRef = useRef(0);
   const [rotation, setRotation] = useState(0);
   const [dragOffset, setDragOffset] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const dragStartX = useRef(null);
+  const frameRef = useRef(null);
 
   const n = items.length;
   const wNum = typeof itemWidth === 'number' ? itemWidth : 320;
   const hNum = typeof itemHeight === 'number' ? itemHeight : 420;
   const dim = (v, fallback) => (typeof v === 'number' ? `${v}px` : v || fallback);
 
-  // Cylindrical radius. Cap it so small n doesn't push side cards too far back.
-  // For n<=3 use a flat-ish radius derived from card width; otherwise the geometric formula.
-  const radius =
-    n <= 3
-      ? Math.max(wNum * 0.55, 180)
-      : Math.min(wNum / (2 * Math.tan(Math.PI / n)) + 40, wNum * 2.4);
+  // Side-card offset derived from card width so it always fits within the frame's gutters.
+  const sideOffset = wNum * 0.56;
+  const sideScale = 0.8;
+  const centerPopZ = 40;
 
   const rotateTo = useCallback(
     (index) => {
       const normalized = ((index % n) + n) % n;
-      // Shortest-path delta from the CURRENT committed rotation's center.
-      const currentCenter = ((rotationRef.current / (360 / n)) % n + n) % n;
+      const currentCenter = ((rotationRef.current % n) + n) % n;
       let delta = normalized - currentCenter;
       if (delta > n / 2) delta -= n;
       if (delta < -n / 2) delta += n;
-      const next = rotationRef.current - delta * (360 / n);
+      const next = rotationRef.current + delta;
       rotationRef.current = next;
       setRotation(next);
       setCenterIndex(normalized);
@@ -65,18 +58,18 @@ export default function Carousel3D({
   const handlePrev = () => rotateTo(centerIndex - 1);
   const handleNext = () => rotateTo(centerIndex + 1);
 
-  const handleDragStart = (e) => {
-    dragStartX.current = e.clientX ?? e.touches?.[0]?.clientX ?? null;
+  const handlePointerDown = (e) => {
+    dragStartX.current = e.clientX;
     setIsDragging(true);
+    e.currentTarget.setPointerCapture?.(e.pointerId);
   };
-  const handleDragMove = (e) => {
+  const handlePointerMove = (e) => {
     if (dragStartX.current === null) return;
-    const x = e.clientX ?? e.touches?.[0]?.clientX ?? dragStartX.current;
-    setDragOffset(x - dragStartX.current);
+    setDragOffset(e.clientX - dragStartX.current);
   };
-  const handleDragEnd = (e) => {
+  const endDrag = (e) => {
     if (dragStartX.current === null) return;
-    const endX = e.clientX ?? e.changedTouches?.[0]?.clientX ?? dragStartX.current;
+    const endX = e.clientX ?? dragStartX.current;
     const diff = endX - dragStartX.current;
     if (Math.abs(diff) > 50) {
       if (diff > 0) handlePrev();
@@ -88,41 +81,41 @@ export default function Carousel3D({
   };
 
   if (n === 0) return null;
-  const angleStep = 360 / n;
-  const dragDeg = isDragging ? (dragOffset / wNum) * angleStep : 0;
+  // Fractional drag steps — how far along the "index" axis the drag has moved.
+  const dragSteps = isDragging ? -dragOffset / sideOffset : 0;
+  const effectiveRotation = rotation + dragSteps;
 
   return (
     <div className="relative w-full flex flex-col items-center select-none">
       <div
-        className="relative w-full overflow-hidden"
-        style={{ height: `${hNum + 48}px`, perspective: `${Math.max(radius * 2.6, 900)}px` }}
-        onMouseDown={handleDragStart}
-        onMouseMove={handleDragMove}
-        onMouseUp={handleDragEnd}
-        onMouseLeave={handleDragEnd}
-        onTouchStart={handleDragStart}
-        onTouchMove={handleDragMove}
-        onTouchEnd={handleDragEnd}
+        ref={frameRef}
+        className="relative w-full overflow-hidden touch-none"
+        style={{ height: `${hNum + 48}px`, perspective: '1400px' }}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={endDrag}
+        onPointerCancel={endDrag}
       >
-        {/* The rotating cylinder — single transition on transform only. */}
         <div
           className="absolute top-1/2 left-1/2"
           style={{
             transformStyle: 'preserve-3d',
-            transform: `translate(-50%, -50%) rotateY(${rotation + dragDeg}deg)`,
-            transition: isDragging ? 'none' : 'transform 0.6s cubic-bezier(0.22, 1, 0.36, 1)',
-            willChange: 'transform',
+            transform: `translate(-50%, -50%)`,
+            transition: isDragging ? 'none' : 'transform 0.5s cubic-bezier(0.22, 1, 0.36, 1)',
           }}
         >
           {items.map((item, i) => {
-            const angle = i * angleStep;
-            // distance from center in steps, shortest path
-            let d = i - centerIndex;
-            if (d > n / 2) d -= n;
-            if (d < -n / 2) d += n;
+            // shortest-path fractional distance from the current rotation
+            let d = i - effectiveRotation;
+            d = ((d + n / 2) % n + n) % n - n / 2;
             const absD = Math.abs(d);
-            const isCenter = d === 0;
-            const opacity = isCenter ? 1 : Math.max(0.16, 0.55 - absD * 0.2);
+            const isCenter = absD < 0.5;
+            const clampedD = Math.max(-2, Math.min(2, d));
+            const opacity = absD > 2.2 ? 0 : Math.max(0.18, 1 - absD * 0.42);
+            const scale = 1 - Math.min(absD, 1) * (1 - sideScale);
+            const tiltDeg = Math.max(-1, Math.min(1, clampedD)) * 25;
+            const translateX = clampedD * sideOffset;
+            const translateZ = isCenter ? centerPopZ : -Math.min(absD, 1) * 60;
 
             return (
               <div
@@ -136,16 +129,15 @@ export default function Carousel3D({
                   top: 0,
                   left: 0,
                   transformStyle: 'preserve-3d',
-                  transform: `rotateY(${angle}deg) translateZ(${radius}px)`,
-                  backfaceVisibility: 'hidden',
-                  // opacity transitions independently; width/height NEVER transition.
-                  transition: 'opacity 0.5s ease-out',
-                  opacity: absD > 2 ? 0 : opacity,
-                  zIndex: isCenter ? 10 : 5 - absD,
-                  pointerEvents: absD > 1 ? 'none' : 'auto',
+                  transform: `translateX(${translateX}px) translateZ(${translateZ}px) rotateY(${-tiltDeg}deg) scale(${scale})`,
+                  transition: isDragging ? 'none' : 'transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.5s ease-out',
+                  opacity,
+                  zIndex: isCenter ? 10 : Math.round(10 - absD * 3),
+                  pointerEvents: absD > 1.2 ? 'none' : 'auto',
                   cursor: 'pointer',
                 }}
                 onClick={() => {
+                  if (isDragging) return;
                   if (isCenter && onItemClick) onItemClick(item, i);
                   else rotateTo(i);
                 }}
