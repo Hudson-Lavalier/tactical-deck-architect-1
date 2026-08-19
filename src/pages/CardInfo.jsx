@@ -6,7 +6,7 @@ import CosmicBackground from '@/components/CosmicBackground';
 import GlassPanel from '@/components/GlassPanel';
 import { CARD_CATEGORIES } from '@/data/cardTypes';
 import { ALL_CARDS } from '@/data/cards';
-import Carousel3D from '@/components/Carousel3D';
+import Carousel2D from '@/components/Carousel2D';
 import RichText from '@/components/RichText';
 import { ALIGNMENT_COLORS } from '@/components/game/terminalTheme';
 
@@ -87,8 +87,8 @@ export default function CardInfo() {
             </GlassPanel>
           </div>
         ) : (
-          <div className="flex-1 flex items-center">
-            <Carousel3D
+          <div className="flex-1 flex items-center justify-center">
+            <Carousel2D
               key={activeCategory.id}
               items={cards}
               renderItem={(card, isCenter) => (
@@ -106,8 +106,10 @@ export default function CardInfo() {
 
 function computeDims() {
   const vh = typeof window !== 'undefined' ? window.innerHeight : 900;
-  const cardH = Math.min(580, Math.max(360, vh - 280));
-  const cardW = Math.round(cardH * 0.72);
+  const vw = typeof window !== 'undefined' ? window.innerWidth : 1280;
+  // ~55% of viewport height, clamped so the full card always fits with gutters.
+  const cardH = Math.min(Math.round(vh * 0.55), Math.max(340, vh - 320));
+  const cardW = Math.min(Math.round(cardH * 0.72), Math.round(vw * 0.42));
   return { cardW, cardH };
 }
 
