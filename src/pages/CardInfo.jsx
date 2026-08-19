@@ -106,9 +106,11 @@ export default function CardInfo() {
 
 function computeDims() {
   const vh = typeof window !== 'undefined' ? window.innerHeight : 900;
-  const cardH = Math.min(580, Math.max(360, vh - 280));
-  const cardW = Math.round(cardH * 0.72);
-  return { cardW, cardH };
+  const vw = typeof window !== 'undefined' ? window.innerWidth : 1200;
+  // Cap card to ~55% viewport height; constrain width so 3 cards always fit.
+  const cardH = Math.min(Math.round(vh * 0.55), 560);
+  const cardW = Math.min(Math.round(cardH * 0.72), Math.round((vw - 120) / 3));
+  return { cardW: Math.max(280, cardW), cardH: Math.max(320, cardH) };
 }
 
 // Card carousel item — glass frame with alignment-tinted depth.

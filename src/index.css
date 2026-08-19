@@ -133,7 +133,7 @@
 @layer components {
   /* Glassmorphism surface — translucent dark with hairline border + inner glow */
   .glass-panel {
-    background: linear-gradient(140deg, rgba(16, 12, 26, 0.72), rgba(8, 8, 16, 0.58));
+    background: linear-gradient(140deg, rgba(16, 12, 26, 0.92), rgba(8, 8, 16, 0.90));
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     border: 1px solid var(--cosmic-glass-border);
@@ -142,7 +142,7 @@
   }
 
   .glass-card {
-    background: linear-gradient(165deg, rgba(22, 16, 36, 0.82), rgba(10, 10, 18, 0.68));
+    background: linear-gradient(165deg, rgba(22, 16, 36, 0.94), rgba(10, 10, 18, 0.92));
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(168, 85, 247, 0.14);

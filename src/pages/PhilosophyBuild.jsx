@@ -125,30 +125,37 @@ export default function PhilosophyBuild() {
 
       {/* Drill-down overlay */}
       {activeFamily && (
-        <div className="fixed inset-0 cosmic-shell z-50 flex flex-col p-4 md:p-8 overflow-hidden">
+        <div className="fixed inset-0 cosmic-shell z-50 flex flex-col overflow-hidden">
           <CosmicBackground density={70} />
-          <div className="relative z-10 flex items-center gap-3 mb-6 max-w-6xl mx-auto w-full">
-            <button
-              onClick={() => setActiveFamilyId(null)}
-              className="flex items-center gap-2 text-term-dim hover:text-term-green transition-colors"
-            >
-              <ArrowLeft className="w-6 h-6" />
-              <span className="text-ui-md font-bold tracking-[0.15em]">BACK TO FAMILIES</span>
-            </button>
+
+          {/* Family name — top center */}
+          <div className="relative z-10 pt-6 md:pt-8 text-center">
             <h2
               className="text-ui-xl text-term-blue font-bold tracking-[0.2em]"
               style={{ textShadow: '0 0 16px rgba(0,255,255,0.4)' }}
             >
               {activeFamily.name.toUpperCase()}
             </h2>
-            <div className="text-term-faint text-ui-sm ml-auto">
-              {selection[activeFamily.id]
-                ? `[ SELECTED: ${EPISTEMOLOGIES[selection[activeFamily.id]].name.toUpperCase()} ]`
-                : '[ SELECT A PARADIGM ]'}
-            </div>
           </div>
 
-          <div className="relative z-10 flex-1 flex flex-col justify-center max-w-6xl mx-auto w-full">
+          {/* Back to Families — left, vertically centered */}
+          <button
+            onClick={() => setActiveFamilyId(null)}
+            className="absolute left-4 md:left-10 top-1/2 -translate-y-1/2 z-20 flex items-center gap-2 text-term-dim hover:text-term-green transition-colors"
+          >
+            <ArrowLeft className="w-6 h-6" />
+            <span className="text-ui-md font-bold tracking-[0.15em]">BACK TO FAMILIES</span>
+          </button>
+
+          {/* Selected indicator — right, vertically centered (parallel to back button) */}
+          <div className="absolute right-4 md:right-10 top-1/2 -translate-y-1/2 z-20 text-term-faint text-ui-sm text-right max-w-[24%]">
+            {selection[activeFamily.id]
+              ? `[ SELECTED: ${EPISTEMOLOGIES[selection[activeFamily.id]].name.toUpperCase()} ]`
+              : '[ SELECT A PARADIGM ]'}
+          </div>
+
+          {/* Carousel — center */}
+          <div className="relative z-10 flex-1 flex flex-col justify-center max-w-6xl mx-auto w-full px-4">
             <Carousel3D
               key={activeFamily.id}
               items={paradigmsInActiveFamily}
@@ -175,6 +182,6 @@ function computeDims() {
   const famH = Math.min(440, Math.max(320, vh - 340));
   const famW = Math.round(famH * 0.74);
   const parH = Math.min(540, Math.max(360, vh - 220));
-  const parW = Math.round(parH * 0.74);
+  const parW = Math.min(Math.round(parH * 0.74), 360);
   return { famW, famH, parW, parH };
 }
