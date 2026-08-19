@@ -6,6 +6,7 @@ import CosmicBackground from '@/components/CosmicBackground';
 import GlassPanel from '@/components/GlassPanel';
 import { CARD_CATEGORIES } from '@/data/cardTypes';
 import { ALL_CARDS } from '@/data/cards';
+import { CARD_OVERVIEWS } from '@/data/cardOverviews';
 import Carousel3D from '@/components/Carousel3D';
 import RichText from '@/components/RichText';
 import { ALIGNMENT_COLORS } from '@/components/game/terminalTheme';
@@ -18,6 +19,7 @@ export default function CardInfo() {
   const categories = Object.values(CARD_CATEGORIES);
   const activeCategory = categories.find((c) => c.id === activeCategoryId) || categories[0];
   const cards = ALL_CARDS[activeCategory?.id] || [];
+  const overview = CARD_OVERVIEWS[activeCategory?.id];
 
   const handleTabClick = useCallback((id) => setActiveCategoryId(id), []);
 
@@ -73,6 +75,14 @@ export default function CardInfo() {
         <div className="text-term-faint text-ui-sm tracking-[0.15em] mb-3 font-bold text-center">
           ── {activeCategory.name.toUpperCase()} — {activeCategory.system.toUpperCase()} SYSTEM ──
         </div>
+
+        {/* Category overview / summary (verbatim from the card-type document) */}
+        {overview && (
+          <div className="mb-3 glass-card cosmic-sheen p-3 max-h-[160px] overflow-y-auto">
+            <div className="text-term-faint text-ui-xs tracking-[0.15em] mb-2 font-bold">── OVERVIEW ──</div>
+            <RichText text={overview} />
+          </div>
+        )}
 
         {/* Cards carousel OR empty state */}
         {cards.length === 0 ? (
