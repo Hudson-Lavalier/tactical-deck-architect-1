@@ -311,7 +311,7 @@ export default function GameBoard() {
           {phase === 'main' && isPlayerTurn && !inResponseWindow && (
             <button
               onClick={handleEndTurn}
-              className="absolute right-3 top-1/2 -translate-y-1/2 px-4 py-2 rounded text-ui-sm glass-card cosmic-sheen transition-[transform,box-shadow] hover:scale-105"
+              className="absolute right-3 top-1/2 -translate-y-1/2 px-4 py-2 rounded text-ui-md font-bold glass-card cosmic-sheen transition-[transform,box-shadow] hover:scale-105"
               style={{ borderColor: '#00ff4140', color: '#00ff41' }}
             >
               END TURN

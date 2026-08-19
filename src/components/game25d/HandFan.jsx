@@ -40,7 +40,7 @@ export default function HandFan({ cards, onSelectCard, selectedCardId, disabled 
       })}
 
       {handCount === 0 && (
-        <div className="text-term-faint font-mono text-xs py-8 tracking-[0.15em]">[ HAND EMPTY ]</div>
+        <div className="text-term-text font-mono text-sm font-bold py-8 tracking-[0.15em]">[ HAND EMPTY ]</div>
       )}
     </div>
   );

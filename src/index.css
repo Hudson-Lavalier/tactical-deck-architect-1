@@ -60,9 +60,9 @@
     --term-bg-card: #0d0d12;
     --term-border: #1a1a2e;
     --term-border-hover: #333333;
-    --term-text: #e0e0e0;
-    --term-text-dim: #888888;
-    --term-text-faint: #555555;
+    --term-text: #ffffff;
+    --term-text-dim: #ffffff;
+    --term-text-faint: #d0d0d0;
     --term-purple: #a855f7;
     --term-green: #00ff41;
     --term-blue: #00ffff;

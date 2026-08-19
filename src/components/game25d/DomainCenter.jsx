@@ -16,7 +16,7 @@ export default function DomainCenter({ domain, modifiers, onDomainClick }) {
         />
       )}
 
-      <div className="text-term-dim font-mono text-[11px] tracking-[0.2em]">── SHARED DOMAIN ──</div>
+      <div className="text-term-text font-mono text-[14px] font-bold tracking-[0.2em]">── SHARED DOMAIN ──</div>
 
       <div className="flex items-center justify-center gap-2 flex-1 min-h-0">
         <div className="flex flex-col gap-1">
@@ -57,7 +57,7 @@ export default function DomainCenter({ domain, modifiers, onDomainClick }) {
       </div>
 
       {domain && (
-        <div className="text-term-dim font-mono text-[10px]">
+        <div className="text-term-text font-mono text-[12px] font-bold">
           ACTIVE:{' '}
           <span style={{ color: accent, textShadow: `0 0 8px ${accent}60` }}>
             {ALIGNMENT_COLORS[domain.alignment]?.name}

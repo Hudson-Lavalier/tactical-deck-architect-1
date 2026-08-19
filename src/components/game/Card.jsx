@@ -5,11 +5,11 @@ import { ALIGNMENT_COLORS, ALIGNMENT_GLOW, ALIGNMENT_TEXT } from './terminalThem
 // Glass frame with alignment-tinted depth + top sheen.
 // Size tiers scaled up to fill the viewport (desktop-first).
 const SIZES = {
-  small:  { box: 'w-20 h-28', name: 'text-[9px]',  body: 'text-[7px]',  cat: 'text-[6px]',  label: 'text-[8px]'  },
-  medium: { box: 'w-24 h-36', name: 'text-[10px]', body: 'text-[8px]',  cat: 'text-[7px]',  label: 'text-[9px]'  },
-  normal: { box: 'w-28 h-40', name: 'text-[11px]', body: 'text-[9px]',  cat: 'text-[7px]',  label: 'text-[10px]' },
-  large:  { box: 'w-32 h-48', name: 'text-[13px]', body: 'text-[10px]', cat: 'text-[8px]',  label: 'text-[11px]' },
-  xlarge: { box: 'w-60 h-full max-h-[18rem]', name: 'text-[18px]', body: 'text-[13px]', cat: 'text-[10px]', label: 'text-[14px]' },
+  small:  { box: 'w-20 h-28', name: 'text-[12px]', body: 'text-[9px]',  cat: 'text-[8px]',  label: 'text-[10px]' },
+  medium: { box: 'w-24 h-36', name: 'text-[13px]', body: 'text-[10px]', cat: 'text-[9px]',  label: 'text-[11px]' },
+  normal: { box: 'w-28 h-40', name: 'text-[15px]', body: 'text-[11px]', cat: 'text-[9px]',  label: 'text-[12px]' },
+  large:  { box: 'w-32 h-48', name: 'text-[17px]', body: 'text-[12px]', cat: 'text-[10px]', label: 'text-[13px]' },
+  xlarge: { box: 'w-60 h-full max-h-[18rem]', name: 'text-[22px]', body: 'text-[16px]', cat: 'text-[12px]', label: 'text-[16px]' },
 };
 
 export default function Card({ card, faceDown = false, size = 'normal', onClick, selected = false, disabled = false }) {
@@ -60,12 +60,12 @@ export default function Card({ card, faceDown = false, size = 'normal', onClick,
 
         <div className="border-t my-1 relative" style={{ borderColor: `${accent}20` }} />
 
-        <div className={`text-term-text ${s.body} leading-tight flex-1 overflow-hidden break-words`}>
+        <div className={`text-term-text ${s.body} font-semibold leading-tight flex-1 overflow-hidden break-words`}>
           {card.text || ''}
         </div>
 
         {card.category && (
-          <div className={`text-term-faint ${s.cat} mt-auto truncate`}>
+          <div className={`text-term-faint ${s.cat} font-bold mt-auto truncate`}>
             {card.category.replace(/_/g, ' ').toUpperCase()}
           </div>
         )}

@@ -10,7 +10,7 @@ export default function DrawDecks({ piles, onDraw, disabled }) {
 
   return (
     <div className="flex flex-col gap-2 shrink-0">
-      <div className="text-term-faint font-mono text-[9px] tracking-[0.2em] text-center">DRAW</div>
+      <div className="text-term-text font-mono text-[12px] font-bold tracking-[0.2em] text-center">DRAW</div>
       {decks.map((d) => (
         <div
           key={d.id}
@@ -23,12 +23,12 @@ export default function DrawDecks({ piles, onDraw, disabled }) {
             boxShadow: disabled ? 'none' : `0 0 16px ${d.color}25`,
           }}
         >
-          <div className="font-mono text-[8px] font-bold tracking-[0.1em] text-center leading-tight" style={{ color: d.color }}>
+          <div className="font-mono text-[10px] font-bold tracking-[0.1em] text-center leading-tight" style={{ color: d.color }}>
             {d.label}
           </div>
-          <div className="text-term-dim font-mono text-sm mt-2">{d.count}</div>
+          <div className="text-term-text font-mono text-base font-bold mt-2">{d.count}</div>
           {!disabled && (
-            <div className="text-term-faint font-mono text-[7px] mt-1 tracking-[0.15em]">[ DRAW ]</div>
+            <div className="text-term-text font-mono text-[9px] font-bold mt-1 tracking-[0.15em]">[ DRAW ]</div>
           )}
         </div>
       ))}

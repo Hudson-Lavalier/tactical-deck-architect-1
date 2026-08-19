@@ -8,7 +8,7 @@ export default function TopBar({ turn, isPlayerTurn, inResponseWindow, onBack })
       <button onClick={onBack} className="text-term-dim hover:text-term-green transition-colors">
         <ArrowLeft className="w-5 h-5" />
       </button>
-      <div className="text-term-faint text-ui-sm tracking-[0.15em] text-center">
+      <div className="text-term-text text-ui-md font-bold tracking-[0.15em] text-center">
         TURN {turn} — {isPlayerTurn ? 'YOUR TURN' : 'OPPONENT TURN'}
         {!isPlayerTurn && !inResponseWindow && (
           <span className="text-term-purple animate-pulse ml-2">[ THINKING... ]</span>

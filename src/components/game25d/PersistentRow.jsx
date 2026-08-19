@@ -13,7 +13,7 @@ export default function PersistentRow({ slots, onSlotClick }) {
     <div className="flex gap-3 justify-center">
       {Object.entries(slots).map(([slot, card]) => (
         <div key={slot} className="flex flex-col items-center gap-1">
-          <div className="text-term-faint font-mono text-[9px] tracking-[0.15em]">{SLOT_LABELS[slot]}</div>
+          <div className="text-term-text font-mono text-[12px] font-bold tracking-[0.15em]">{SLOT_LABELS[slot]}</div>
           {card ? (
             <Card card={card} size="medium" onClick={() => onSlotClick?.(slot, card)} />
           ) : (
@@ -21,7 +21,7 @@ export default function PersistentRow({ slots, onSlotClick }) {
               className="w-24 h-36 rounded glass-card flex items-center justify-center"
               style={{ borderColor: 'rgba(168,85,247,0.15)', borderStyle: 'dashed' }}
             >
-              <span className="text-term-faint font-mono text-[9px]">[ ]</span>
+              <span className="text-term-text font-mono text-[11px] font-bold">[ ]</span>
             </div>
           )}
         </div>

@@ -29,13 +29,13 @@ export default function HelpPanel({ phase, isPlayerTurn, boardDevUsed, actionsPl
       style={{ borderColor: `${accent}30` }}
     >
       <div className="flex items-center gap-3 min-w-0">
-        <span className="font-bold tracking-[0.2em] text-ui-sm shrink-0" style={{ color: accent }}>
+        <span className="font-bold tracking-[0.2em] text-ui-md font-bold shrink-0" style={{ color: accent }}>
           {info.label}
         </span>
-        <span className="text-term-dim text-ui-sm shrink-0">—</span>
-        <span className="text-term-text text-ui-sm truncate">{info.instruction}</span>
+        <span className="text-term-dim text-ui-md font-bold shrink-0">—</span>
+        <span className="text-term-text text-ui-md font-bold truncate">{info.instruction}</span>
       </div>
-      {remaining && <span className="text-term-faint text-ui-sm font-mono shrink-0 ml-2">{remaining}</span>}
+      {remaining && <span className="text-term-faint text-ui-md font-bold font-mono shrink-0 ml-2">{remaining}</span>}
     </div>
   );
 }

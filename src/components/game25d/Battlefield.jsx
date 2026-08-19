@@ -22,7 +22,7 @@ export default function Battlefield({
       <div className="absolute left-0 top-1/2 -translate-y-1/2 z-10">
         <DrawDecks piles={drawPiles} onDraw={onDraw} disabled={drawDisabled} />
       </div>
-      <QueueLane queuedCards={opponentQueue} isActive={!isPlayerTurn} accent="#888888" label="OPPONENT QUEUE" />
+      <QueueLane queuedCards={opponentQueue} isActive={!isPlayerTurn} accent="#888888" label="OPPONENT QUEUE" hidden />
       <DomainCenter domain={domain} modifiers={modifiers} onDomainClick={onDomainClick} />
       <QueueLane queuedCards={playerQueue} isActive={isPlayerTurn} accent="#00ff41" label="PLAYER QUEUE" />
     </div>
