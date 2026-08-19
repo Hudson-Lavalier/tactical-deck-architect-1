@@ -35,7 +35,7 @@ export default function PointsBar({ player, isOpponent = false, handCount }) {
               </span>
               <div className={`${barW} h-1.5 bg-term-purple/10 rounded overflow-hidden`}>
                 <div
-                  className="h-full transition-all duration-300"
+                  className="h-full transition-[width,box-shadow] duration-300"
                   style={{ width: `${pct}%`, background: info.glow, boxShadow: `0 0 6px ${info.glow}80` }}
                 />
               </div>
@@ -50,7 +50,7 @@ export default function PointsBar({ player, isOpponent = false, handCount }) {
           <span className="text-term-faint text-[10px] tracking-[0.15em] w-14">WEIGHTED</span>
           <div className={`${barW} h-2 bg-term-purple/10 rounded overflow-hidden`}>
             <div
-              className="h-full transition-all duration-300"
+              className="h-full transition-[width,box-shadow] duration-300"
               style={{ width: `${overallPct}%`, background: 'linear-gradient(90deg, #00ff41, #00ffff, #a855f7)', boxShadow: '0 0 8px rgba(168,85,247,0.4)' }}
             />
           </div>

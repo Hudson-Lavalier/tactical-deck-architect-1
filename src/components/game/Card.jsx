@@ -39,7 +39,7 @@ export default function Card({ card, faceDown = false, size = 'normal', onClick,
     <div
       onClick={onClick}
       disabled={disabled}
-      className={`${s.box} rounded glass-card cosmic-sheen relative overflow-hidden cursor-pointer transition-all duration-200 hover:scale-105 ${glowClass} ${selected ? 'ring-2 ring-offset-2 ring-offset-[#050308] scale-105' : ''} ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+      className={`${s.box} rounded glass-card cosmic-sheen relative overflow-hidden cursor-pointer transition-[transform,box-shadow] duration-200 hover:scale-105 ${glowClass} ${selected ? 'ring-2 ring-offset-2 ring-offset-[#050308] scale-105' : ''} ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
       style={{ borderColor: `${accent}40` }}
     >
       <div className="absolute inset-0 pointer-events-none opacity-[0.06]"

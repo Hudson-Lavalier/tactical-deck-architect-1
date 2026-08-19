@@ -4,7 +4,7 @@ import React, { useMemo } from 'react';
 // Layered radial nebula washes + a generated starfield + faint scanlines.
 // Fixed full-screen; all other content renders above it.
 // Stars are generated once via useMemo for performance.
-export default function CosmicBackground({ density = 70 }) {
+export default function CosmicBackground({ density = 15 }) {
   const stars = useMemo(() => {
     const arr = [];
     for (let i = 0; i < density; i++) {
@@ -35,14 +35,13 @@ export default function CosmicBackground({ density = 70 }) {
         {stars.map((s, i) => (
           <div
             key={i}
-            className="absolute rounded-full bg-white animate-cosmic-pulse"
+            className="absolute rounded-full bg-white"
             style={{
               left: `${s.left}%`,
               top: `${s.top}%`,
               width: `${s.size}px`,
               height: `${s.size}px`,
               opacity: s.opacity,
-              animationDelay: `${s.delay}s`,
             }}
           />
         ))}

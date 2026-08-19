@@ -55,7 +55,7 @@ export default function CardDetail({
 
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-40 font-mono" onClick={onClose}>
-      <div className="glass-panel cosmic-sheen p-6 max-w-md w-[90vw]" style={{ borderColor: `${accent}40`, boxShadow: `0 0 32px ${accent}20` }} onClick={(e) => e.stopPropagation()}>
+      <div className="glass-panel glass-blur cosmic-sheen p-6 max-w-md w-[90vw]" style={{ borderColor: `${accent}40`, boxShadow: `0 0 32px ${accent}20` }} onClick={(e) => e.stopPropagation()}>
         <div className="flex justify-center mb-4">
           <Card card={card} size="large" />
         </div>

@@ -208,7 +208,7 @@ export default function GameBoard() {
   if (!state) {
     return (
       <div className="min-h-screen cosmic-shell flex items-center justify-center text-term-green font-mono relative overflow-hidden">
-        <CosmicBackground density={50} />
+        <CosmicBackground density={15} />
         <div className="relative z-10 animate-pulse text-ui-lg tracking-[0.2em]">INITIALIZING...</div>
       </div>
     );
@@ -222,7 +222,7 @@ export default function GameBoard() {
 
   return (
     <div className="h-screen cosmic-shell text-term-text font-mono relative overflow-hidden">
-      <CosmicBackground density={45} />
+      <CosmicBackground density={15} />
 
       <BoardSurface accent={accent}>
         {/* topbar */}
@@ -252,7 +252,7 @@ export default function GameBoard() {
             gridArea: 'opp-points',
             borderColor: !isPlayerTurn && !inResponseWindow ? 'rgba(168,85,247,0.3)' : 'rgba(168,85,247,0.12)',
           }}
-          className="px-3 py-1.5 rounded-lg glass-card cosmic-sheen flex items-center justify-center transition-all"
+          className="px-3 py-1.5 rounded-lg glass-card cosmic-sheen flex items-center justify-center transition-[box-shadow,border-color]"
         >
           <PointsBar
             player={opponent}
@@ -305,13 +305,13 @@ export default function GameBoard() {
             gridArea: 'player-points',
             borderColor: isPlayerTurn && !inResponseWindow ? 'rgba(0,255,65,0.3)' : 'rgba(168,85,247,0.12)',
           }}
-          className="px-3 py-1.5 rounded-lg glass-card cosmic-sheen flex items-center justify-center relative transition-all"
+          className="px-3 py-1.5 rounded-lg glass-card cosmic-sheen flex items-center justify-center relative transition-[box-shadow,border-color]"
         >
           <PointsBar player={player} handCount={player.hand.length + player.rhetoricHand.length} />
           {phase === 'main' && isPlayerTurn && !inResponseWindow && (
             <button
               onClick={handleEndTurn}
-              className="absolute right-3 top-1/2 -translate-y-1/2 px-4 py-2 rounded text-ui-sm glass-card cosmic-sheen transition-all hover:scale-105"
+              className="absolute right-3 top-1/2 -translate-y-1/2 px-4 py-2 rounded text-ui-sm glass-card cosmic-sheen transition-[transform,box-shadow] hover:scale-105"
               style={{ borderColor: '#00ff4140', color: '#00ff41' }}
             >
               END TURN
@@ -341,7 +341,7 @@ export default function GameBoard() {
 
       {showEndTurnDialog && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-40 font-mono">
-          <div className="glass-panel cosmic-sheen p-6 max-w-sm text-center" style={{ borderColor: '#00ff4140' }}>
+          <div className="glass-panel glass-blur cosmic-sheen p-6 max-w-sm text-center" style={{ borderColor: '#00ff4140' }}>
             <div className="text-term-green text-ui-md tracking-[0.15em] mb-4">END YOUR TURN?</div>
             <div className="flex gap-3 justify-center">
               <button
@@ -385,7 +385,7 @@ export default function GameBoard() {
       {state.winner && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
           <div
-            className="glass-panel cosmic-sheen p-8 text-center"
+            className="glass-panel glass-blur cosmic-sheen p-8 text-center"
             style={{ borderColor: '#00ff4140', boxShadow: '0 0 48px rgba(0,255,65,0.25)' }}
           >
             <Trophy
