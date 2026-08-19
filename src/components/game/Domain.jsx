@@ -29,7 +29,7 @@ export default function Domain({ domain, modifiers, onDomainClick }) {
         {domain ?
         <Card card={domain} size="xlarge" onClick={onDomainClick} /> :
 
-        <div className="w-60 h-72 rounded glass-card flex items-center justify-center my-48"
+        <div className="w-60 h-72 rounded glass-card flex items-center justify-center py-64"
         style={{ borderColor: 'rgba(168,85,247,0.3)', borderStyle: 'dashed' }}>
           
             <div className="text-center">
