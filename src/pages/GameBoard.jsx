@@ -261,12 +261,12 @@ export default function GameBoard() {
           actionAllowance={getActionAllowance(state, 'player')}
         />
 
-        {/* Opponent strip — points + hand count */}
-        <div className="shrink-0 px-3 py-1.5 rounded glass-panel cosmic-sheen flex items-center justify-between transition-all"
+        {/* Opponent strip — centered points + hand count */}
+        <div className="shrink-0 px-3 py-2 rounded glass-panel cosmic-sheen flex items-center justify-center relative transition-all"
           style={{ borderColor: !isPlayerTurn && !inResponseWindow ? 'rgba(168,85,247,0.3)' : 'rgba(168,85,247,0.12)' }}
         >
           <PointTracker player={opponent} isOpponent />
-          <div className="text-term-faint text-ui-sm font-mono">
+          <div className="absolute right-3 top-1/2 -translate-y-1/2 text-term-faint text-ui-sm font-mono">
             HAND: {opponent.hand.length + opponent.rhetoricHand.length}
           </div>
         </div>
@@ -278,16 +278,8 @@ export default function GameBoard() {
             <PersistentSlots slots={opponent.persistentSlots} onSlotClick={handleInspectPlaced} />
           </div>
 
-          {/* Battlefield — DrawPiles | opponent queue | Domain | player queue */}
+          {/* Battlefield — opponent queue | Domain | player queue */}
           <div className="flex-1 flex items-center justify-center gap-6 min-h-0 overflow-hidden">
-            <DrawPiles
-              piles={{
-                metaphysics: state.drawPiles.metaphysics,
-                meta_ethics: state.drawPiles.meta_ethics,
-              }}
-              onDraw={handleDraw}
-              disabled={!isPlayerTurn || phase !== 'draw' || inResponseWindow}
-            />
             <Queue queuedCards={opponent.queue} isActive={!isPlayerTurn} className="flex-1 min-w-0 justify-center" />
             <Domain domain={state.domain} modifiers={state.domainModifiers} onDomainClick={handleInspectDomain} />
             <Queue queuedCards={player.queue} isActive={isPlayerTurn} className="flex-1 min-w-0 justify-center" />
@@ -299,32 +291,40 @@ export default function GameBoard() {
           </div>
         </div>
 
-        {/* Hand — sits above the points bar */}
-        <div className="shrink-0">
-          <Hand
-            cards={player.hand}
-            onSelectCard={handleSelectCard}
-            selectedCardId={selectedCardId}
-            disabled={!isPlayerTurn}
+        {/* Draw piles (far-left) + hand — above the points bar */}
+        <div className="shrink-0 flex items-end gap-4">
+          <DrawPiles
+            piles={{
+              metaphysics: state.drawPiles.metaphysics,
+              meta_ethics: state.drawPiles.meta_ethics,
+            }}
+            onDraw={handleDraw}
+            disabled={!isPlayerTurn || phase !== 'draw' || inResponseWindow}
           />
+          <div className="flex-1 flex justify-center pb-1">
+            <Hand
+              cards={player.hand}
+              onSelectCard={handleSelectCard}
+              selectedCardId={selectedCardId}
+              disabled={!isPlayerTurn}
+            />
+          </div>
         </div>
 
-        {/* Player points bar — compact (no draw piles) */}
-        <div className="shrink-0 px-3 py-1.5 rounded glass-panel cosmic-sheen flex items-center justify-between gap-3"
+        {/* Player points bar — centered victory standard */}
+        <div className="shrink-0 px-3 py-2 rounded glass-panel cosmic-sheen flex items-center justify-center relative"
           style={{ borderColor: isPlayerTurn && !inResponseWindow ? 'rgba(0,255,65,0.3)' : 'rgba(168,85,247,0.12)' }}
         >
           <PointTracker player={player} />
-          <div className="flex gap-2 shrink-0">
-            {phase === 'main' && isPlayerTurn && !inResponseWindow && (
-              <button
-                onClick={handleEndTurn}
-                className="px-4 py-2 rounded text-ui-sm glass-card cosmic-sheen transition-all hover:scale-105"
-                style={{ borderColor: '#00ff4140', color: '#00ff41' }}
-              >
-                END TURN
-              </button>
-            )}
-          </div>
+          {phase === 'main' && isPlayerTurn && !inResponseWindow && (
+            <button
+              onClick={handleEndTurn}
+              className="absolute right-3 top-1/2 -translate-y-1/2 px-4 py-2 rounded text-ui-sm glass-card cosmic-sheen transition-all hover:scale-105"
+              style={{ borderColor: '#00ff4140', color: '#00ff41' }}
+            >
+              END TURN
+            </button>
+          )}
         </div>
       </div>
 
