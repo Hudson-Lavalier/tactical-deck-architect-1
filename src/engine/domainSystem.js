@@ -1,4 +1,4 @@
-// Domain system — the shared playing field.
+// Domain (Terrain) system — the shared playing field.
 //
 // Per framework:
 //   - Establishes the shared playing field in the center of the board

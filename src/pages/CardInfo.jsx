@@ -24,16 +24,9 @@ export default function CardInfo() {
   // Viewport-capped card dimensions so the full card always fits on screen.
   const [dims, setDims] = useState(() => computeDims());
   useEffect(() => {
-    let raf = null;
-    const onResize = () => {
-      if (raf) cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(() => setDims(computeDims()));
-    };
-    window.addEventListener('resize', onResize, { passive: true });
-    return () => {
-      if (raf) cancelAnimationFrame(raf);
-      window.removeEventListener('resize', onResize);
-    };
+    const onResize = () => setDims(computeDims());
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
   }, []);
 
   return (
@@ -94,7 +87,7 @@ export default function CardInfo() {
             </GlassPanel>
           </div>
         ) : (
-          <div className="flex-1 flex items-center justify-center">
+          <div className="flex-1 flex items-center">
             <Carousel3D
               key={activeCategory.id}
               items={cards}
@@ -113,10 +106,8 @@ export default function CardInfo() {
 
 function computeDims() {
   const vh = typeof window !== 'undefined' ? window.innerHeight : 900;
-  const vw = typeof window !== 'undefined' ? window.innerWidth : 1280;
-  // ~55% of viewport height, clamped so the full card always fits with gutters.
-  const cardH = Math.min(Math.round(vh * 0.55), Math.max(340, vh - 320));
-  const cardW = Math.min(Math.round(cardH * 0.72), Math.round(vw * 0.42));
+  const cardH = Math.min(580, Math.max(360, vh - 280));
+  const cardW = Math.round(cardH * 0.72);
   return { cardW, cardH };
 }
 

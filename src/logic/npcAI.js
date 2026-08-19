@@ -33,10 +33,10 @@ function pickDrawPile(state) {
     return Math.random() < 0.5 ? DRAW_PILES.METAPHYSICS : DRAW_PILES.META_ETHICS;
   }
 
-  // Metaphysics pile: Domain (A/B/C), Theory of Time, Universals
+  // Metaphysics pile: Terrain (A/B/C), Theory of Time, Universals
   // Meta-Ethics pile: Moral Reality, Moral Grounding, Moral Judgment
   // Simple heuristic: if needing more points, draw from Meta-Ethics (action cards)
-  // If needing board control, draw from Metaphysics (domain/time)
+  // If needing board control, draw from Metaphysics (terrain/time)
   const hasDomain = state.domain !== null;
   const hasAllPersistents = Object.values(player.persistentSlots).every((s) => s !== null);
 
@@ -80,11 +80,11 @@ function decideBoardDevelopment(state) {
     }
   }
 
-  // Maybe change domain if we have a domain card
+  // Maybe change domain if we have a terrain card
   if (!state.domain || Math.random() < 0.2) {
-    const domainCard = player.hand.find((c) => c && c.category === 'domain');
-    if (domainCard && Math.random() < 0.5) {
-      changeDomain(state, domainCard.id);
+    const terrainCard = player.hand.find((c) => c && c.category === 'terrain');
+    if (terrainCard && Math.random() < 0.5) {
+      changeDomain(state, terrainCard.id);
       return true; // changing domain ends turn
     }
   }

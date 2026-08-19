@@ -1,157 +1,118 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-// Carousel3D — true cylindrical 3D carousel. Cards sit on a drum
-// (rotateY(angle) translateZ(radius)) and the whole drum rotates as one.
-// Perspective magnifies whatever is pushed toward the camera, so the
-// front card's transform includes a compensating scale(boxScale) —
-// the CSS box itself stays at the true requested itemWidth/itemHeight
-// (never shrunk), only the rendered transform is scaled down so the
-// magnified result lands back at the requested size. Back-of-drum cards
-// stay dimly visible (never opacity 0) as they rotate around. Click uses
-// a ref-based drag guard (not state) so a quick tap is never dropped by
-// a stale render closure.
+// Carousel3D — reusable 3D cylindrical carousel.
+// Items rotate around a vertical axis (rotateY + translateZ).
+// Navigation: prev/next buttons, drag, or click side items.
+// Scroll wheel is intentionally NOT wired — it hijacks page scroll.
+// Rotation always takes the SHORTEST path to the target item.
+// itemWidth/itemHeight accept numbers (px) OR CSS strings (e.g. "62vh")
+// so parents can pass viewport-capped dimensions that always fit on screen.
 export default function Carousel3D({
   items,
   renderItem,
   onItemClick,
   onCenterChange,
-  itemWidth = 320,
-  itemHeight = 420,
+  itemWidth = 220,
+  itemHeight = 300,
+  radius: customRadius,
 }) {
   const [centerIndex, setCenterIndex] = useState(0);
-  const rotationRef = useRef(0); // committed rotation, degrees
   const [rotation, setRotation] = useState(0);
-  const [dragOffset, setDragOffset] = useState(0);
-  const [isDragging, setIsDragging] = useState(false);
   const dragStartX = useRef(null);
-  const dragMovedRef = useRef(false);
 
   const n = items.length;
-  const wNum = typeof itemWidth === 'number' ? itemWidth : 320;
-  const hNum = typeof itemHeight === 'number' ? itemHeight : 420;
+  const angleStep = 360 / n;
+  // Numeric fallback for radius math when CSS strings are passed
+  const wNum = typeof itemWidth === 'number' ? itemWidth : 380;
+  const hNum = typeof itemHeight === 'number' ? itemHeight : 500;
+  const radius = customRadius || Math.max(wNum / (2 * Math.tan(Math.PI / n)) + 50, 180);
+
   const dim = (v, fallback) => (typeof v === 'number' ? `${v}px` : v || fallback);
-
-  const P = 1200; // fixed perspective depth (px)
-  const angleStep = n > 0 ? 360 / n : 0;
-
-  // Cylindrical radius — wide enough that adjacent card planes don't
-  // intersect, capped so it never approaches P (which would blow up scale).
-  const rawRadius =
-    n <= 1 ? 0 : n <= 3 ? wNum * 0.9 : (wNum / 2 / Math.tan(Math.PI / n)) * 1.35 + wNum * 0.3;
-  const radius = Math.min(rawRadius, P * 0.45);
-
-  // Inverse-magnification scale factor: perspective magnifies a plane
-  // pushed forward by `radius` by P/(P-radius); applying scale(boxScale)
-  // in the same transform cancels that out so the front card renders at
-  // exactly its true itemWidth/itemHeight.
-  const boxScale = radius > 0 ? (P - radius) / P : 1;
 
   const rotateTo = useCallback(
     (index) => {
       const normalized = ((index % n) + n) % n;
-      // centerIndex (state) is the source of truth — never recompute it from
-      // rotationRef.current / angleStep, which is wrong for negative rotations.
-      let delta = normalized - centerIndex;
-      if (delta > n / 2) delta -= n;
-      if (delta < -n / 2) delta += n;
-      const next = rotationRef.current - delta * angleStep;
-      rotationRef.current = next;
-      setRotation(next);
+      const targetBase = -normalized * angleStep;
+      setRotation((prev) => {
+        const delta = targetBase - prev;
+        const k = Math.round(-delta / 360);
+        return targetBase + k * 360;
+      });
       setCenterIndex(normalized);
-      if (onCenterChange) onCenterChange(items[normalized], normalized);
     },
-    [n, angleStep, items, onCenterChange, centerIndex]
+    [n, angleStep]
   );
+
+  useEffect(() => {
+    if (onCenterChange && n > 0) {
+      onCenterChange(items[centerIndex], centerIndex);
+    }
+  }, [centerIndex]); // eslint-disable-line
 
   const handlePrev = () => rotateTo(centerIndex - 1);
   const handleNext = () => rotateTo(centerIndex + 1);
 
-  const handlePointerDown = (e) => {
-    dragStartX.current = e.clientX;
-    dragMovedRef.current = false;
-    setIsDragging(true);
-    e.currentTarget.setPointerCapture?.(e.pointerId);
+  const handleDragStart = (e) => {
+    dragStartX.current = e.clientX ?? e.touches?.[0]?.clientX ?? null;
   };
-  const handlePointerMove = (e) => {
+
+  const handleDragEnd = (e) => {
     if (dragStartX.current === null) return;
-    const offset = e.clientX - dragStartX.current;
-    if (Math.abs(offset) > 6) dragMovedRef.current = true;
-    setDragOffset(offset);
-  };
-  const endDrag = (e) => {
-    if (dragStartX.current === null) return;
-    const endX = e.clientX ?? dragStartX.current;
+    const endX = e.clientX ?? e.changedTouches?.[0]?.clientX ?? dragStartX.current;
     const diff = endX - dragStartX.current;
-    if (Math.abs(diff) > 50) {
+    if (Math.abs(diff) > 40) {
       if (diff > 0) handlePrev();
       else handleNext();
     }
     dragStartX.current = null;
-    setDragOffset(0);
-    setIsDragging(false);
   };
 
   if (n === 0) return null;
-  const dragDeg = isDragging ? (dragOffset / wNum) * angleStep : 0;
-  const effectiveRotation = rotation + dragDeg;
+
+  const containerHeight = typeof itemHeight === 'number' ? `${itemHeight + 80}px` : `calc(${itemHeight} + 80px)`;
 
   return (
     <div className="relative w-full flex flex-col items-center select-none">
       <div
-        className="relative w-full touch-none"
-        style={{ height: `${hNum + 48}px`, perspective: `${P}px` }}
-        onPointerDown={handlePointerDown}
-        onPointerMove={handlePointerMove}
-        onPointerUp={endDrag}
-        onPointerCancel={endDrag}
+        className="relative w-full overflow-hidden cursor-grab active:cursor-grabbing"
+        style={{ perspective: '1600px', height: containerHeight }}
+        onMouseDown={handleDragStart}
+        onMouseUp={handleDragEnd}
+        onMouseLeave={handleDragEnd}
+        onTouchStart={handleDragStart}
+        onTouchEnd={handleDragEnd}
       >
         <div
-          className="absolute top-1/2 left-1/2"
+          className="absolute top-1/2 left-1/2 transition-transform duration-700 ease-out"
           style={{
             transformStyle: 'preserve-3d',
-            transform: `translate(-50%, -50%) rotateY(${effectiveRotation}deg)`,
-            transition: isDragging ? 'none' : 'transform 0.6s cubic-bezier(0.22, 1, 0.36, 1)',
-            willChange: 'transform',
+            transform: `translate(-50%, -50%) rotateY(${rotation}deg)`,
           }}
         >
           {items.map((item, i) => {
-            const cardAngle = i * angleStep;
-            // total angle relative to camera, normalized to (-180, 180]
-            let totalDeg = ((cardAngle + effectiveRotation) % 360 + 360) % 360;
-            if (totalDeg > 180) totalDeg -= 360;
-            const cosVal = Math.cos((totalDeg * Math.PI) / 180);
+            const angle = i * angleStep;
             const isCenter = i === centerIndex;
-            const absTotal = Math.abs(totalDeg);
-            // Cull back-of-drum cards: fully hidden beyond ~100° so they can't
-            // overlap the front. Visible cards fade smoothly toward the sides.
-            const isVisible = absTotal <= 100;
-            const opacity = isVisible ? 0.18 + 0.82 * ((cosVal + 1) / 2) : 0;
+            let offset = Math.abs(i - centerIndex);
+            if (offset > n / 2) offset = n - offset;
+            const opacity = Math.max(0.22, 1 - offset * 0.32);
 
             return (
               <div
                 key={item.id || i}
-                className="absolute"
+                className="absolute top-0 left-0 transition-all duration-700"
                 style={{
+                  transform: `rotateY(${angle}deg) translateZ(${radius}px)`,
                   width: dim(itemWidth, `${wNum}px`),
                   height: dim(itemHeight, `${hNum}px`),
                   marginLeft: `-${wNum / 2}px`,
                   marginTop: `-${hNum / 2}px`,
-                  top: 0,
-                  left: 0,
-                  transformStyle: 'preserve-3d',
-                  transform: `rotateY(${cardAngle}deg) translateZ(${radius}px) scale(${boxScale})`,
-                  transition: 'opacity 0.5s ease-out',
                   opacity,
-                  zIndex: Math.round(1000 + cosVal * 100),
-                  pointerEvents: isVisible ? 'auto' : 'none',
+                  pointerEvents: 'auto',
                   cursor: 'pointer',
+                  zIndex: isCenter ? 10 : 1,
                 }}
                 onClick={() => {
-                  if (dragMovedRef.current) {
-                    dragMovedRef.current = false;
-                    return;
-                  }
                   if (isCenter && onItemClick) onItemClick(item, i);
                   else rotateTo(i);
                 }}
@@ -164,7 +125,7 @@ export default function Carousel3D({
       </div>
 
       {/* Navigation */}
-      <div className="flex items-center gap-8 mt-2">
+      <div className="flex items-center gap-8 mt-1">
         <button
           onClick={handlePrev}
           className="text-term-dim hover:text-term-green transition-colors"

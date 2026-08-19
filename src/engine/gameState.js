@@ -94,7 +94,7 @@ export function createInitialState(playerSelection, opponentSelection, difficult
     turn: 0,              // global turn counter
     currentPlayer: 'player', // 'player' | 'opponent'
     phase: 'setup',       // 'setup' | 'draw' | 'board_dev' | 'action' | 'response' | 'end'
-    domain: null,         // active domain card
+    domain: null,         // active terrain card
     domainModifiers: {
       player: [],         // effects to the right of domain
       opponent: [],       // effects to the left of domain
@@ -113,7 +113,7 @@ export function createInitialState(playerSelection, opponentSelection, difficult
       player,
       opponent,
     },
-    roundCount: 0,        // full rounds completed (for domain point generation)
+    roundCount: 0,        // full rounds completed (for terrain point generation)
     log: [],              // game event log
     winner: null,
     difficulty,

@@ -63,16 +63,9 @@ export default function PhilosophyBuild() {
   // Viewport-capped carousel sizing
   const [dims, setDims] = useState(() => computeDims());
   useEffect(() => {
-    let raf = null;
-    const onResize = () => {
-      if (raf) cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(() => setDims(computeDims()));
-    };
-    window.addEventListener('resize', onResize, { passive: true });
-    return () => {
-      if (raf) cancelAnimationFrame(raf);
-      window.removeEventListener('resize', onResize);
-    };
+    const onResize = () => setDims(computeDims());
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
   }, []);
 
   return (
@@ -132,37 +125,30 @@ export default function PhilosophyBuild() {
 
       {/* Drill-down overlay */}
       {activeFamily && (
-        <div className="fixed inset-0 cosmic-shell z-50 flex flex-col overflow-hidden">
+        <div className="fixed inset-0 cosmic-shell z-50 flex flex-col p-4 md:p-8 overflow-hidden">
           <CosmicBackground density={70} />
-          {/* Three-zone header: back (left 25%) · title (center) · status (right 25%) */}
-          <div className="relative z-10 grid grid-cols-[1fr_2fr_1fr] items-center px-6 py-5 w-full">
-            <div className="flex justify-center">
-              <button
-                onClick={() => setActiveFamilyId(null)}
-                className="flex items-center gap-2 text-term-dim hover:text-term-green transition-colors"
-              >
-                <ArrowLeft className="w-5 h-5" />
-                <span className="text-ui-md font-bold tracking-[0.15em]">BACK TO FAMILIES</span>
-              </button>
-            </div>
-            <div className="text-center">
-              <h2
-                className="text-ui-xl text-term-blue font-bold tracking-[0.2em]"
-                style={{ textShadow: '0 0 16px rgba(0,255,255,0.4)' }}
-              >
-                {activeFamily.name.toUpperCase()}
-              </h2>
-            </div>
-            <div className="flex justify-center">
-              <div className="text-term-faint text-ui-sm font-bold tracking-[0.1em]">
-                {selection[activeFamily.id]
-                  ? `[ SELECTED: ${EPISTEMOLOGIES[selection[activeFamily.id]].name.toUpperCase()} ]`
-                  : '[ SELECT A PARADIGM ]'}
-              </div>
+          <div className="relative z-10 flex items-center gap-3 mb-6 max-w-6xl mx-auto w-full">
+            <button
+              onClick={() => setActiveFamilyId(null)}
+              className="flex items-center gap-2 text-term-dim hover:text-term-green transition-colors"
+            >
+              <ArrowLeft className="w-6 h-6" />
+              <span className="text-ui-md font-bold tracking-[0.15em]">BACK TO FAMILIES</span>
+            </button>
+            <h2
+              className="text-ui-xl text-term-blue font-bold tracking-[0.2em]"
+              style={{ textShadow: '0 0 16px rgba(0,255,255,0.4)' }}
+            >
+              {activeFamily.name.toUpperCase()}
+            </h2>
+            <div className="text-term-faint text-ui-sm ml-auto">
+              {selection[activeFamily.id]
+                ? `[ SELECTED: ${EPISTEMOLOGIES[selection[activeFamily.id]].name.toUpperCase()} ]`
+                : '[ SELECT A PARADIGM ]'}
             </div>
           </div>
 
-          <div className="relative z-10 flex-1 flex flex-col justify-center w-full">
+          <div className="relative z-10 flex-1 flex flex-col justify-center max-w-6xl mx-auto w-full">
             <Carousel3D
               key={activeFamily.id}
               items={paradigmsInActiveFamily}
@@ -186,10 +172,9 @@ export default function PhilosophyBuild() {
 
 function computeDims() {
   const vh = typeof window !== 'undefined' ? window.innerHeight : 900;
-  const vw = typeof window !== 'undefined' ? window.innerWidth : 1280;
-  const famH = Math.min(Math.round(vh * 0.42), Math.max(300, vh - 380));
-  const famW = Math.min(Math.round(famH * 0.86), Math.round(vw * 0.34));
-  const parH = Math.min(Math.round(vh * 0.55), Math.max(340, vh - 240));
-  const parW = Math.min(Math.round(parH * 0.74), Math.round(vw * 0.4));
+  const famH = Math.min(440, Math.max(320, vh - 340));
+  const famW = Math.round(famH * 0.74);
+  const parH = Math.min(540, Math.max(360, vh - 220));
+  const parW = Math.round(parH * 0.74);
   return { famW, famH, parW, parH };
 }
