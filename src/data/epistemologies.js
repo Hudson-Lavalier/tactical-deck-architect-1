@@ -1,158 +1,228 @@
 // Epistemology system — character selection.
 // 3 families, each with 3 paradigms.
 //
-// Abilities are transcribed ONLY from the user's documentation where concrete
-// drafts exist. Paradigms whose abilities are still in the drafting-question
-// phase (Structure of Justification) are marked PENDING_USER_DEFINITION with
-// no invented effects.
-//
-// Source: "EPISTEMOLOGY CHARACTER ABILITY WORKSHEET" and follow-up drafts.
+// ALL text is transcribed VERBATIM from the user's Epistemology Guide document.
+// No effects, names, or mechanics have been invented.
+// Original text backup: docs/sheets/EpistemologyGuide_OriginalText.txt
+// Tracking sheet: docs/cards/epistemologies.md
 
 export const EPISTEMOLOGY_FAMILIES = {
   ORIENTATION: {
     id: 'orientation',
     name: 'Orientation of Inquiry',
-    description:
-      'Governs drawing mechanics, hand management, and doubles the point-manipulation effects of matching Action cards.',
-    territory: 'Card Access & Offense',
   },
   STRUCTURE: {
     id: 'structure',
     name: 'Structure of Justification',
-    description:
-      'Governs how the board is protected, how structures are maintained, and provides defenses against Rhetoric or removal.',
-    territory: 'Sustain & Defense',
   },
   KNOWLEDGE: {
     id: 'knowledge',
-    name: 'Knowledge Standards',
-    description:
-      'Governs point protection, point correction, terrain/rule overrides, and interactions with Theory of Time.',
-    territory: 'Points & Victory',
+    name: 'Knowledge Standard',
   },
 };
 
 export const EPISTEMOLOGIES = {
-  // ── Orientation of Inquiry ──────────────────────────────────
+  // ── Grounding (Alignment A) ─────────────────────────────────
+
   empiricism: {
     id: 'empiricism',
     family: 'orientation',
     name: 'Empiricism',
     alignment: 'A',
-    abilityName: 'Empirical Data',
-    abilityType: 'activated',
-    cooldown: 'every_other_personal_turn',
-    effect:
-      'Every other personal turn, during your draw step, you may choose one main draw pile and examine its top three cards. Add one of those cards to your hand and shuffle the other two back into the pile. This replaces your normal draw for the turn.',
-    mainStrength: 'Best exact-card selection',
-    mainLimitation: 'Locked to one chosen pile',
-  },
-  rationalism: {
-    id: 'rationalism',
-    family: 'orientation',
-    name: 'Rationalism',
-    alignment: 'B',
-    abilityName: 'Rational Deliberation',
-    abilityType: 'activated',
-    cooldown: 'every_other_personal_turn',
-    effect:
-      'Every other personal turn, during your draw step, examine the top card of both main draw piles. Choose one and add it to your hand. You may either leave the other card on top of its pile or place it in that pile\u2019s discard area. This replaces your normal draw for the turn.',
-    mainStrength: 'Best domain planning and deck control',
-    mainLimitation: 'Only sees one card from each pile',
-  },
-  pragmatism: {
-    id: 'pragmatism',
-    family: 'orientation',
-    name: 'Pragmatism',
-    alignment: 'C',
-    abilityName: 'Practical Adjustment',
-    abilityType: 'activated',
-    cooldown: 'every_other_personal_turn',
-    effect:
-      'Every other personal turn, before a draw occurs, secretly choose A, B, or C and select yourself or your opponent. The next time the selected player draws from a main pile, reveal cards from that pile until a card of the chosen type is revealed. That player draws the revealed card. Shuffle the other revealed cards back into the pile. If the selected player does not draw before the beginning of your next turn, the effect expires. Using this ability begins its cooldown even if no draw occurs.',
-    mainStrength: 'Best alignment control and interference',
-    mainLimitation: 'Does not choose the exact card',
+    category: 'Orientation of Inquiry',
+    text: `Whenever Terrain changes, choose one:
+
+Randomly reveal 2 Action cards from the opponent's hand.
+
+Reveal 1 Rhetoric card from the opponent's hand.
+
+Orientation Bonus: Grounding Action cards that would steal, remove, or change 1 point instead affect 2 points.`,
   },
 
-  // ── Structure of Justification ──────────────────────────────
-  // These paradigms exist in the documentation only as drafting questions.
-  // No concrete effects have been defined by the user yet.
   foundationalism: {
     id: 'foundationalism',
     family: 'structure',
     name: 'Foundationalism',
     alignment: 'A',
-    abilityName: null,
-    abilityType: null,
-    effect: null,
-    pendingUserDefinition: true,
-    designDirection:
-      'Protect through one central anchor. Establishes a specific card/slot as the Foundation; other defensive benefits depend on that Foundation remaining active.',
-  },
-  coherentism: {
-    id: 'coherentism',
-    family: 'structure',
-    name: 'Coherentism',
-    alignment: 'B',
-    abilityName: null,
-    abilityType: null,
-    effect: null,
-    pendingUserDefinition: true,
-    designDirection:
-      'Protect through mutual support. No single card is privileged; cards become stronger or harder to remove when they form a connected structure.',
-  },
-  infinitism: {
-    id: 'infinitism',
-    family: 'structure',
-    name: 'Infinitism',
-    alignment: 'C',
-    abilityName: null,
-    abilityType: null,
-    effect: null,
-    pendingUserDefinition: true,
-    designDirection:
-      'Protect through continuation. When one card resolves, leaves play, or is interrupted, another card or effect may continue the chain.',
+    category: 'Structure of Justification',
+    text: `Sustain, every other personal turn:
+
+Choose a card to be foundational.
+
+Foundational Terrain counters its first removal or change attempt.
+
+Foundational Moral Grounding does the same.
+
+A foundational single-use card enters a special Foundation slot and may be reused every other turn.
+
+After a foundational single-use card is used, it enters recharge until it becomes available to use again.
+
+If a foundational single-use card loses its foundational status while it is recharging, it is immediately discarded.
+
+If a foundational single-use card loses its foundational status while it is queued to go into effect, it is immediately discarded.
+
+The Foundation may be changed every other turn.
+
+A newly selected Foundation does not activate until your next turn.
+
+A card in the Foundation slot does not count toward the normal hand limit.
+
+Defense, always live:
+
+While a Foundation exists, cards matching the Foundation's type receive a shared +1 Rhetoric Shield.
+
+Once triggered, the shield is consumed.
+
+It does not return until the Foundation is changed.`,
   },
 
-  // ── Knowledge Standards ─────────────────────────────────────
   infallibilism: {
     id: 'infallibilism',
     family: 'knowledge',
     name: 'Infallibilism',
     alignment: 'A',
-    abilityName: 'Certainty of Alignment',
-    abilityType: 'passive',
-    cooldown: null,
-    effect:
-      'While a terrain is active, your points matching that terrain\u2019s type cannot be removed, stolen, or converted by an opponent.',
-    mainStrength: 'Certainty through environmental alignment',
-    mainLimitation: 'Protection changes when terrain changes',
+    category: 'Knowledge Standard',
+    text: `Infallibilism is active only while you maintain:
+
+At least 9 cards total in hand.
+
+At least 5 of those cards are Grounding.
+
+While those conditions are satisfied:
+
+Your Grounding points cannot be removed, stolen, or converted by an opponent.
+
+If either condition stops being satisfied, the Knowledge Standard effect immediately becomes inactive.
+
+If both conditions are satisfied again, the effect immediately reactivates, even during another player's turn.
+
+Theory of Time:
+
+While Infallibilism is active:
+
+If the active Terrain is Grounding and your Theory of Time is Grounding, that Theory of Time cannot be discarded, even by its own effect.
+
+Your opponent cannot change it unless the Terrain also changes.`,
   },
+
+  // ── System (Alignment B) ────────────────────────────────────
+
+  rationalism: {
+    id: 'rationalism',
+    family: 'orientation',
+    name: 'Rationalism',
+    alignment: 'B',
+    category: 'Orientation of Inquiry',
+    text: `Whenever the Domain changes to a System Domain, draw 1 card for free.
+
+That card may be played immediately, even if it is not your turn. This immediate play does not count against your normal card-play allowance.
+
+Orientation Bonus: System Action cards that would steal, remove, or change 1 point instead affect 2 points.`,
+  },
+
+  coherentism: {
+    id: 'coherentism',
+    family: 'structure',
+    name: 'Coherentism',
+    alignment: 'B',
+    category: 'Structure of Justification',
+    text: `Sustain, every other personal turn:
+
+If the active Terrain, your Moral Grounding, and a single-use card you play all share the same type, immediately draw another card.
+
+If the drawn card also matches that type, draw again.
+
+This can continue up to 3 times.
+
+Defense, always live:
+
+As long as your entire hand matches the current Terrain, your Moral Grounding cannot be changed by anything.
+
+Its effects cannot be cancelled.
+
+The protection ends immediately when your hand no longer completely matches the Terrain.`,
+  },
+
   fallibilism: {
     id: 'fallibilism',
     family: 'knowledge',
     name: 'Fallibilism',
     alignment: 'B',
-    abilityName: 'Error Recovery',
-    abilityType: 'activated',
-    cooldown: 'every_other_personal_turn',
-    effect:
-      'Once every other personal turn, when an opponent would remove or convert one of your points, you may convert that point into either remaining type instead.',
-    mainStrength: 'Survival through correction',
-    mainLimitation: 'Limited to once every other turn',
+    category: 'Knowledge Standard',
+    text: `When one of your points would be lost, it may instead be transferred into another category.
+
+If an opponent changes one of your points into another type, you may choose the remaining third type instead.
+
+Theory of Time:
+
+Whenever Terrain changes, you may immediately change your Theory of Time, even if it is not your turn.`,
   },
+
+  // ── Adaptation (Alignment C) ────────────────────────────────
+
+  pragmatism: {
+    id: 'pragmatism',
+    family: 'orientation',
+    name: 'Pragmatism',
+    alignment: 'C',
+    category: 'Orientation of Inquiry',
+    text: `Paradigm Shift:
+
+If 2 or more of your persistent non-Action cards are removed or changed during the same round, you may immediately replace the affected cards.
+
+Relevant slots are Moral Grounding, Moral Reality, and Theory of Time.
+
+Use valid replacements from your hand first.
+
+If you do not have the necessary replacements, draw 1 Metaphysics card and 1 Meta-Ethics card.
+
+Any drawn card that validly fills an affected slot may be placed immediately.
+
+Orientation Bonus: Adaptation Action cards that would steal, remove, or change 1 point instead affect 2 points.`,
+  },
+
+  infinitism: {
+    id: 'infinitism',
+    family: 'structure',
+    name: 'Infinitism',
+    alignment: 'C',
+    category: 'Structure of Justification',
+    text: `Sustain, every other personal turn:
+
+Single-use cards generate free guaranteed replacement draws.
+
+The type is determined by the first single-use card played.
+
+The number of free draws equals the number of single-use cards played of that type.
+
+If you play a Terrain card, the ability can instead guarantee a Terrain draw.
+
+If you play a Moral Grounding card, the ability can instead guarantee a Moral Grounding draw.
+
+Normal card-play limits still apply.
+
+Defense, always live:
+
+If a defensive or cancellation card is used and discarded, then during the opponent's next turn, if they repeat the same exact attack/effect you blocked last turn, you may use that same discarded defensive card again.`,
+  },
+
   contextualism: {
     id: 'contextualism',
     family: 'knowledge',
     name: 'Contextualism',
     alignment: 'C',
-    abilityName: 'Shared Context',
-    abilityType: 'passive',
-    cooldown: null,
-    effect:
-      'While both players control Moral Grounding cards of the same type, neither player may remove, steal, or convert points of that type.',
-    mainStrength: 'Rules determined by shared conditions',
-    mainLimitation: 'Requires both players to share Moral Grounding type',
+    category: 'Knowledge Standard',
+    text: `If your opponent's Moral Grounding is the same type as yours, they cannot reduce that point category by any means while that shared context remains.
+
+Theory of Time:
+
+Whenever your opponent places or changes a Theory of Time card, you may immediately either:
+
+Change your own Theory of Time to one from your hand of the same type, or
+
+Copy the exact Theory of Time your opponent just placed.
+
+The decision happens immediately after their Theory of Time is placed or changed.`,
   },
 };
 

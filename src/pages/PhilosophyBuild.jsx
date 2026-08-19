@@ -107,7 +107,6 @@ function FamilySection({ family, paradigms, selectedId, onSelect }) {
     <div>
       <div className="mb-3">
         <h2 className="text-lg text-[#00ffff] font-bold tracking-wider">{family.name}</h2>
-        <p className="text-[#666] text-xs mt-1">{family.description}</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -146,24 +145,12 @@ function ParadigmCard({ paradigm, selected, onSelect }) {
         {selected && <Check className="w-4 h-4 text-[#00ff41]" />}
       </div>
 
-      {paradigm.pendingUserDefinition ? (
-        <div className="text-[#664] text-[10px] italic">
-          [ AWAITING DEFINITION ]
-          <div className="text-[#555] mt-1 not-italic">{paradigm.designDirection}</div>
-        </div>
-      ) : (
-        <>
-          <div className="text-[#aaa] text-[10px] font-bold mb-1">
-            {paradigm.abilityName}
-          </div>
-          <div className="text-[#888] text-[10px] leading-relaxed">
-            {paradigm.effect}
-          </div>
-          {paradigm.cooldown && (
-            <div className="text-[#555] text-[9px] mt-2">CD: {paradigm.cooldown.replace(/_/g, ' ')}</div>
-          )}
-        </>
-      )}
+      <div className="text-[#aaa] text-[10px] font-bold mb-1">
+        {paradigm.category}
+      </div>
+      <div className="text-[#888] text-[10px] leading-relaxed whitespace-pre-line">
+        {paradigm.text}
+      </div>
     </div>
   );
 }
