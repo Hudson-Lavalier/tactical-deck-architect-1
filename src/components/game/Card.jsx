@@ -9,7 +9,7 @@ const SIZES = {
   medium: { box: 'w-24 h-36', name: 'text-[10px]', body: 'text-[8px]',  cat: 'text-[7px]',  label: 'text-[9px]'  },
   normal: { box: 'w-28 h-40', name: 'text-[11px]', body: 'text-[9px]',  cat: 'text-[7px]',  label: 'text-[10px]' },
   large:  { box: 'w-32 h-48', name: 'text-[13px]', body: 'text-[10px]', cat: 'text-[8px]',  label: 'text-[11px]' },
-  xlarge: { box: 'w-60 h-72', name: 'text-[18px]', body: 'text-[13px]', cat: 'text-[10px]', label: 'text-[14px]' },
+  xlarge: { box: 'w-60 h-full max-h-[18rem]', name: 'text-[18px]', body: 'text-[13px]', cat: 'text-[10px]', label: 'text-[14px]' },
 };
 
 export default function Card({ card, faceDown = false, size = 'normal', onClick, selected = false, disabled = false }) {
