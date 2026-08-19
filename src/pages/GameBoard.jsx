@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Trophy } from 'lucide-react';
 
+import CosmicBackground from '@/components/CosmicBackground';
 import { createInitialState, cloneState } from '@/engine/gameState';
 import { drawCard, endTurn, startTurn, placePersistent, changeDomain } from '@/engine/turnManager';
 import { enqueueCard } from '@/engine/queueSystem';
@@ -20,19 +21,17 @@ import DrawPiles from '@/components/game/DrawPiles';
 import PointTracker from '@/components/game/PointTracker';
 import { EPISTEMOLOGIES } from '@/data/epistemologies';
 
-// GameBoard — the main game screen.
-// Single-player vs hardcoded NPC (multiplayer canceled per user directive).
+// GameBoard — main game screen. Single-player vs hardcoded NPC.
 export default function GameBoard() {
   const navigate = useNavigate();
   const [state, setState] = useState(null);
   const [selectedCardId, setSelectedCardId] = useState(null);
-  const [phase, setPhase] = useState('draw'); // draw | board_dev | action | response
+  const [phase, setPhase] = useState('draw');
   const [actionsPlayed, setActionsPlayed] = useState(0);
   const wasInResponseWindow = useRef(false);
   const [showCardDetail, setShowCardDetail] = useState(null);
   const [showEndTurnDialog, setShowEndTurnDialog] = useState(false);
 
-  // Initialize game on mount
   useEffect(() => {
     const stored = sessionStorage.getItem('selectedBuild');
     let playerSelection;
@@ -40,11 +39,9 @@ export default function GameBoard() {
       const build = JSON.parse(stored);
       playerSelection = { paradigms: build.paradigms.map((p) => p.id) };
     } else {
-      // Default selection if none stored
       playerSelection = { paradigms: ['empiricism', 'foundationalism', 'infallibilism'] };
     }
 
-    // NPC gets a random selection (any 3 from any family)
     const allParadigmIds = Object.keys(EPISTEMOLOGIES);
     const npcParadigms = [];
     for (let i = 0; i < 3; i++) {
@@ -58,7 +55,6 @@ export default function GameBoard() {
     setState(cloneState(initialState));
   }, []);
 
-  // NPC turn: draw, board dev, start actions
   useEffect(() => {
     if (!state || state.winner) return;
     if (state.responseWindow?.active) return;
@@ -74,7 +70,6 @@ export default function GameBoard() {
     }
   }, [state?.currentPlayer, state?.phase, state?.winner, state?.responseWindow?.active]);
 
-  // NPC action continuation: play next action after response window closes
   useEffect(() => {
     if (!state || state.winner) return;
     if (state.responseWindow?.active) return;
@@ -88,7 +83,6 @@ export default function GameBoard() {
     }
   }, [state?.currentPlayer, state?.phase, state?.responseWindow?.active, state?.winner]);
 
-  // NPC response: decide whether to counter during response window
   useEffect(() => {
     if (!state || state.winner) return;
     if (!state.responseWindow?.active) return;
@@ -107,7 +101,6 @@ export default function GameBoard() {
     return () => clearTimeout(timer);
   }, [state?.responseWindow?.active, state?.responseWindow?.respondingPlayerId]);
 
-  // Sync local phase when response window closes (e.g., after persistent/domain placement)
   useEffect(() => {
     if (!state) return;
     if (state.responseWindow?.active) {
@@ -125,7 +118,6 @@ export default function GameBoard() {
     }
   }, [state?.responseWindow?.active]);
 
-  // Handle draw from a pile
   const handleDraw = useCallback((pileId) => {
     if (!state || state.currentPlayer !== 'player' || phase !== 'draw') return;
     const newState = cloneState(state);
@@ -134,12 +126,10 @@ export default function GameBoard() {
     setPhase('board_dev');
   }, [state, phase]);
 
-  // Handle selecting a card from hand
   const handleSelectCard = useCallback((card) => {
     setShowCardDetail(card);
   }, []);
 
-  // Handle placing a persistent card
   const handlePlacePersistent = useCallback((slot) => {
     if (!state || state.currentPlayer !== 'player' || phase !== 'board_dev') return;
     if (!selectedCardId) return;
@@ -152,7 +142,6 @@ export default function GameBoard() {
     }
   }, [state, phase, selectedCardId]);
 
-  // Handle changing domain
   const handleChangeDomain = useCallback(() => {
     if (!state || state.currentPlayer !== 'player' || phase !== 'board_dev') return;
     if (!selectedCardId) return;
@@ -166,7 +155,6 @@ export default function GameBoard() {
     }
   }, [state, phase, selectedCardId]);
 
-  // Handle playing an action card
   const handlePlayAction = useCallback(() => {
     if (!state || state.currentPlayer !== 'player' || phase !== 'action' || state.responseWindow?.active) return;
     if (!selectedCardId) return;
@@ -183,7 +171,6 @@ export default function GameBoard() {
     const playMode = determinePlayMode(newState, card);
     enqueueCard(newState, 'player', card, playMode.speed);
 
-    // Remove from hand
     const idx = newState.players.player.hand.findIndex((c) => c.id === card.id);
     if (idx !== -1) newState.players.player.hand.splice(idx, 1);
 
@@ -192,7 +179,6 @@ export default function GameBoard() {
     setActionsPlayed(actionsPlayed + 1);
   }, [state, phase, selectedCardId, actionsPlayed]);
 
-  // Handle ending turn
   const handleEndTurn = useCallback(() => {
     if (!state || state.currentPlayer !== 'player') return;
     setShowEndTurnDialog(true);
@@ -211,8 +197,9 @@ export default function GameBoard() {
 
   if (!state) {
     return (
-      <div className="min-h-screen bg-term-bg flex items-center justify-center text-term-green font-mono">
-        <div className="animate-pulse text-ui-lg">INITIALIZING...</div>
+      <div className="min-h-screen cosmic-shell flex items-center justify-center text-term-green font-mono relative overflow-hidden">
+        <CosmicBackground density={50} />
+        <div className="relative z-10 animate-pulse text-ui-lg tracking-[0.2em]">INITIALIZING...</div>
       </div>
     );
   }
@@ -224,19 +211,16 @@ export default function GameBoard() {
   const inResponseWindow = state.responseWindow?.active;
 
   return (
-    <div className="min-h-screen bg-[#000000] text-[#e0e0e0] font-mono relative overflow-hidden">
-      {/* Scan line overlay */}
-      <div className="absolute inset-0 pointer-events-none opacity-5"
-        style={{ backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,255,65,0.1) 2px, rgba(0,255,65,0.1) 4px)' }}
-      />
+    <div className="min-h-screen cosmic-shell text-term-text font-mono relative overflow-hidden">
+      <CosmicBackground density={45} />
 
       <div className="relative z-10 p-2 md:p-4 min-h-screen flex flex-col">
         {/* Top bar */}
         <div className="flex justify-between items-center mb-2">
-          <button onClick={() => navigate('/')} className="text-[#888] hover:text-[#00ff41] transition-colors">
+          <button onClick={() => navigate('/')} className="text-term-dim hover:text-term-green transition-colors">
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <div className="text-term-faint text-ui-sm tracking-wider">
+          <div className="text-term-faint text-ui-sm tracking-[0.15em]">
             TURN {state.turn + 1} — {isPlayerTurn ? 'YOUR TURN' : 'OPPONENT TURN'} — PHASE: {phase.toUpperCase()}
             {!isPlayerTurn && !inResponseWindow && (
               <span className="text-term-purple animate-pulse ml-2">[ THINKING... ]</span>
@@ -246,7 +230,9 @@ export default function GameBoard() {
         </div>
 
         {/* Opponent area */}
-        <div className={`mb-4 p-3 border-2 rounded bg-term-panel ${!isPlayerTurn && !inResponseWindow ? 'border-term-purple/50' : 'border-term-border'}`}>
+        <div className={`mb-3 p-3 rounded glass-panel cosmic-sheen transition-all ${!isPlayerTurn && !inResponseWindow ? '' : 'opacity-90'}`}
+          style={{ borderColor: !isPlayerTurn && !inResponseWindow ? 'rgba(168,85,247,0.3)' : 'rgba(168,85,247,0.12)' }}
+        >
           <div className="flex justify-between items-center">
             <PointTracker player={opponent} isOpponent />
             <div className="text-term-faint text-ui-sm font-mono">
@@ -259,8 +245,7 @@ export default function GameBoard() {
         </div>
 
         {/* Main board area */}
-        <div className="flex-1 flex gap-4 items-center justify-center">
-          {/* Draw piles (far left) */}
+        <div className="flex-1 flex gap-4 items-center justify-center min-h-0">
           <DrawPiles
             piles={{
               metaphysics: state.drawPiles.metaphysics,
@@ -270,24 +255,17 @@ export default function GameBoard() {
             disabled={!isPlayerTurn || phase !== 'draw'}
           />
 
-          {/* Center: domain + queues */}
-          <div className="flex flex-col items-center gap-4">
-            {/* Opponent queue (behind domain, from opponent perspective) */}
+          <div className="flex flex-col items-center gap-3">
             <Queue queuedCards={opponent.queue} isActive={!isPlayerTurn} />
-
-            {/* Domain */}
-            <Domain
-              domain={state.domain}
-              modifiers={state.domainModifiers}
-            />
-
-            {/* Player queue */}
+            <Domain domain={state.domain} modifiers={state.domainModifiers} />
             <Queue queuedCards={player.queue} isActive={isPlayerTurn} />
           </div>
         </div>
 
         {/* Player area */}
-        <div className={`mt-4 p-3 border-2 rounded bg-term-panel ${isPlayerTurn && !inResponseWindow ? 'border-term-green/50' : 'border-term-border'}`}>
+        <div className="mt-3 p-3 rounded glass-panel cosmic-sheen"
+          style={{ borderColor: isPlayerTurn && !inResponseWindow ? 'rgba(0,255,65,0.3)' : 'rgba(168,85,247,0.12)' }}
+        >
           <PointTracker player={player} />
           <div className="mt-2">
             <PersistentSlots
@@ -297,12 +275,12 @@ export default function GameBoard() {
             />
           </div>
 
-          {/* Action buttons */}
           <div className="mt-3 flex gap-2 justify-center">
             {!inResponseWindow && phase === 'board_dev' && selectedCard && selectedCard.category === 'terrain' && (
               <button
                 onClick={handleChangeDomain}
-                className="px-4 py-2 border-2 border-term-purple text-term-purple rounded text-ui-sm hover:bg-term-purple hover:text-term-bg transition-all"
+                className="px-4 py-2 rounded text-ui-sm glass-card cosmic-sheen transition-all hover:scale-105"
+                style={{ borderColor: '#a855f740', color: '#a855f7' }}
               >
                 CHANGE DOMAIN
               </button>
@@ -311,7 +289,8 @@ export default function GameBoard() {
               <button
                 onClick={handlePlayAction}
                 disabled={actionsPlayed >= getActionAllowance(state, 'player')}
-                className="px-4 py-2 border-2 border-term-blue text-term-blue rounded text-ui-sm hover:bg-term-blue hover:text-term-bg transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                className="px-4 py-2 rounded text-ui-sm glass-card cosmic-sheen transition-all hover:scale-105 disabled:opacity-40 disabled:cursor-not-allowed"
+                style={{ borderColor: '#00ffff40', color: '#00ffff' }}
               >
                 PLAY ACTION [{actionsPlayed}/{getActionAllowance(state, 'player')}]
               </button>
@@ -319,14 +298,14 @@ export default function GameBoard() {
             {!inResponseWindow && phase !== 'draw' && (
               <button
                 onClick={handleEndTurn}
-                className="px-4 py-2 border-2 border-term-green text-term-green rounded text-ui-sm hover:bg-term-green hover:text-term-bg transition-all"
+                className="px-4 py-2 rounded text-ui-sm glass-card cosmic-sheen transition-all hover:scale-105"
+                style={{ borderColor: '#00ff4140', color: '#00ff41' }}
               >
                 END TURN
               </button>
             )}
           </div>
 
-          {/* Hand */}
           <div className="mt-3">
             <Hand
               cards={player.hand}
@@ -338,7 +317,6 @@ export default function GameBoard() {
         </div>
       </div>
 
-      {/* Card detail modal */}
       {showCardDetail && (
         <CardDetail
           card={showCardDetail}
@@ -350,21 +328,22 @@ export default function GameBoard() {
         />
       )}
 
-      {/* End turn confirmation */}
       {showEndTurnDialog && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-40 font-mono">
-          <div className="border-2 border-term-green bg-term-panel p-6 rounded max-w-sm text-center">
-            <div className="text-term-green text-ui-md tracking-wider mb-4">END YOUR TURN?</div>
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-40 font-mono">
+          <div className="glass-panel cosmic-sheen p-6 max-w-sm text-center" style={{ borderColor: '#00ff4140' }}>
+            <div className="text-term-green text-ui-md tracking-[0.15em] mb-4">END YOUR TURN?</div>
             <div className="flex gap-3 justify-center">
               <button
                 onClick={handleConfirmEndTurn}
-                className="px-6 py-2 border-2 border-term-green text-term-green rounded text-ui-sm hover:bg-term-green hover:text-term-bg transition-all"
+                className="px-6 py-2 rounded text-ui-sm glass-card cosmic-sheen transition-all hover:scale-105"
+                style={{ borderColor: '#00ff4140', color: '#00ff41' }}
               >
                 CONFIRM
               </button>
               <button
                 onClick={() => setShowEndTurnDialog(false)}
-                className="px-6 py-2 border-2 border-term-border-hover text-term-faint rounded text-ui-sm hover:bg-term-border-hover hover:text-term-bg transition-all"
+                className="px-6 py-2 rounded text-ui-sm glass-card transition-all hover:scale-105"
+                style={{ borderColor: '#33333340', color: '#888888' }}
               >
                 CANCEL
               </button>
@@ -373,10 +352,8 @@ export default function GameBoard() {
         </div>
       )}
 
-      {/* Game log — fixed right-side collapsible panel */}
       <GameLog log={state.log} />
 
-      {/* Response window for the player */}
       {inResponseWindow && state.responseWindow.respondingPlayerId === 'player' && (
         <ResponseWindow
           activeCard={state.responseWindow.activeCard}
@@ -394,18 +371,18 @@ export default function GameBoard() {
         />
       )}
 
-      {/* Victory overlay */}
       {state.winner && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-          <div className="border-2 border-term-green bg-term-panel p-8 rounded text-center shadow-[0_0_40px_rgba(0,255,65,0.3)]">
-            <Trophy className="w-16 h-16 text-term-green mx-auto mb-4" />
-            <div className="text-ui-xl text-term-green font-bold tracking-widest mb-2">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="glass-panel cosmic-sheen p-8 text-center" style={{ borderColor: '#00ff4140', boxShadow: '0 0 48px rgba(0,255,65,0.25)' }}>
+            <Trophy className="w-16 h-16 text-term-green mx-auto mb-4" style={{ filter: 'drop-shadow(0 0 12px rgba(0,255,65,0.5))' }} />
+            <div className="text-ui-xl text-term-green font-bold tracking-[0.2em] mb-2">
               {state.winner === 'player' ? 'VICTORY' : state.winner === 'tie' ? 'DRAW' : 'DEFEAT'}
             </div>
             <div className="text-term-faint text-ui-xs mb-6">[ FINAL BOARD STATE VISIBLE BEHIND ]</div>
             <button
               onClick={() => navigate('/')}
-              className="px-6 py-2 border-2 border-term-green text-term-green rounded text-ui-sm hover:bg-term-green hover:text-term-bg transition-all"
+              className="px-6 py-2 rounded text-ui-sm glass-card cosmic-sheen transition-all hover:scale-105"
+              style={{ borderColor: '#00ff4140', color: '#00ff41' }}
             >
               RETURN TO MENU
             </button>

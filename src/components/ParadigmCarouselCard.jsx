@@ -3,58 +3,54 @@ import { Check } from 'lucide-react';
 import RichText from '@/components/RichText';
 import { ALIGNMENT_COLORS } from '@/components/game/terminalTheme';
 
-// ParadigmCarouselCard — a paradigm card for the 3D carousel.
-// Shows the paradigm name, type, category, selection indicator, and full scrollable text.
-// isSelected = true when this paradigm is the one chosen for its family.
+// ParadigmCarouselCard — glass paradigm card for the drill-down carousel.
 export default function ParadigmCarouselCard({ paradigm, isCenter, isSelected, onClick }) {
   if (!paradigm) return null;
   const alignmentInfo = ALIGNMENT_COLORS[paradigm.alignment];
+  const accent = alignmentInfo.glow;
 
   return (
     <div
       onClick={isCenter ? onClick : undefined}
-      className={`w-full h-full p-6 border-2 rounded flex flex-col transition-all duration-300 ${
-        isSelected
-          ? 'border-term-green shadow-[0_0_30px_rgba(0,255,65,0.3)] bg-term-card'
-          : 'border-term-border bg-term-card'
-      } ${isCenter ? 'cursor-pointer hover:border-term-border-hover' : ''}`}
+      className={`w-full h-full p-5 rounded glass-card cosmic-sheen flex flex-col transition-all duration-300 relative overflow-hidden ${
+        isCenter ? 'cursor-pointer' : ''
+      }`}
+      style={{
+        borderColor: isSelected ? `${accent}60` : isCenter ? `${accent}25` : 'rgba(168,85,247,0.12)',
+        boxShadow: isSelected ? `0 0 28px ${accent}30, inset 0 1px 0 rgba(255,255,255,0.04)` : 'inset 0 1px 0 rgba(255,255,255,0.03)',
+      }}
     >
       {/* Header */}
-      <div className="flex justify-between items-start mb-3">
+      <div className="flex justify-between items-start mb-2 relative">
         <div>
-          <div className="font-bold text-ui-xl" style={{ color: alignmentInfo.glow }}>
+          <div className="font-bold text-ui-lg leading-tight" style={{ color: accent, textShadow: `0 0 10px ${accent}40` }}>
             {paradigm.name}
           </div>
-          <div className="text-term-faint text-ui-sm mt-1">{paradigm.category}</div>
+          <div className="text-term-faint text-ui-sm mt-0.5">{paradigm.category}</div>
         </div>
         {isSelected && (
-          <div className="flex items-center gap-2 shrink-0">
-            <span className="text-term-green text-ui-sm font-bold tracking-wider">SELECTED</span>
-            <Check className="w-6 h-6 text-term-green" />
+          <div className="flex items-center gap-1.5 shrink-0">
+            <span className="text-term-green text-ui-xs font-bold tracking-[0.15em]">SELECTED</span>
+            <Check className="w-5 h-5 text-term-green" />
           </div>
         )}
       </div>
 
-      {/* Type indicator */}
-      <div className="mb-3 pb-3 border-b border-term-border">
-        <span className="font-bold text-ui-md" style={{ color: alignmentInfo.glow }}>
-          {alignmentInfo.name}
-        </span>
+      <div className="mb-2 pb-2 border-b relative" style={{ borderColor: `${accent}20` }}>
+        <span className="font-bold text-ui-md" style={{ color: accent }}>{alignmentInfo.name}</span>
       </div>
 
-      {/* Full text — scrollable */}
-      <div className="flex-1 overflow-y-auto pr-1 min-h-0">
+      <div className="flex-1 overflow-y-auto pr-1 min-h-0 relative">
         <RichText text={paradigm.text} alignment={paradigm.alignment} />
       </div>
 
-      {/* Click hint */}
       {isCenter && !isSelected && (
-        <div className="text-center text-term-green text-ui-sm mt-3 pt-3 border-t border-term-border font-bold tracking-wider">
+        <div className="text-center text-term-green text-ui-sm mt-2 pt-2 border-t border-term-green/15 font-bold tracking-[0.15em] relative">
           [ CLICK TO SELECT ]
         </div>
       )}
       {isCenter && isSelected && (
-        <div className="text-center text-term-faint text-ui-sm mt-3 pt-3 border-t border-term-border font-bold tracking-wider">
+        <div className="text-center text-term-faint text-ui-sm mt-2 pt-2 border-t border-term-purple/15 font-bold tracking-[0.15em] relative">
           [ SELECTED — CLICK ANOTHER TO REPLACE ]
         </div>
       )}

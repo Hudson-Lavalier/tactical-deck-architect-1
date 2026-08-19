@@ -2,12 +2,10 @@ import React from 'react';
 import Card from './Card';
 import { HAND_LIMIT } from '@/data/gameConstants';
 
-// Hand component — player's hand at the bottom center.
-// Cards fan out, hovering highlights and moves card up slightly.
-// Only visible to the player.
+// Hand — player's hand, fanned. Cosmic cards.
 export default function Hand({ cards, onSelectCard, selectedCardId, disabled }) {
   const handCount = cards.length;
-  const fanAngle = Math.min(handCount * 3, 25); // fan spread
+  const fanAngle = Math.min(handCount * 3, 25);
   const maxVisible = HAND_LIMIT;
 
   return (
@@ -41,7 +39,7 @@ export default function Hand({ cards, onSelectCard, selectedCardId, disabled }) 
       })}
 
       {handCount === 0 && (
-        <div className="text-[#444] font-mono text-xs py-8">
+        <div className="text-term-faint font-mono text-xs py-8 tracking-[0.15em]">
           [ HAND EMPTY ]
         </div>
       )}

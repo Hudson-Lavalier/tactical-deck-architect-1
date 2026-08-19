@@ -2,11 +2,12 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 
+import CosmicBackground from '@/components/CosmicBackground';
+import GlassPanel from '@/components/GlassPanel';
 import {
   EPISTEMOLOGY_FAMILIES,
   EPISTEMOLOGIES,
   getParadigmsByFamily,
-  getAlignmentsFromSelection,
 } from '@/data/epistemologies';
 import Carousel3D from '@/components/Carousel3D';
 import FamilyCarouselCard from '@/components/FamilyCarouselCard';
@@ -14,20 +15,14 @@ import ParadigmCarouselCard from '@/components/ParadigmCarouselCard';
 import BuildInfoPanel from '@/components/BuildInfoPanel';
 import { saveBuild, updateBuild, getBuildById } from '@/lib/buildStorage';
 
-// Philosophy Build — drill-down carousel with one-paradigm-per-family selection.
-// Main view: family carousel. Click a family → full-screen overlay with that
-// family's paradigms. Pick one (replaces any existing choice for that family).
-// Overlay stays open until the player backs out manually.
-// Victory profile + build name/confirm live at the bottom.
+// Philosophy Build — drill-down carousel, one-paradigm-per-family.
 export default function PhilosophyBuild() {
   const navigate = useNavigate();
-  // selection keyed by family id: { orientation, structure, knowledge }
   const [selection, setSelection] = useState({});
   const [buildName, setBuildName] = useState('');
   const [editId, setEditId] = useState(null);
-  const [activeFamilyId, setActiveFamilyId] = useState(null); // drill-down overlay
+  const [activeFamilyId, setActiveFamilyId] = useState(null);
 
-  // Check for edit mode (?edit=id)
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const id = params.get('edit');
@@ -37,9 +32,7 @@ export default function PhilosophyBuild() {
         setEditId(id);
         setBuildName(build.name);
         const sel = {};
-        build.paradigms.forEach((p) => {
-          sel[p.family] = p.id;
-        });
+        build.paradigms.forEach((p) => { sel[p.family] = p.id; });
         setSelection(sel);
       }
     }
@@ -62,25 +55,32 @@ export default function PhilosophyBuild() {
       const p = EPISTEMOLOGIES[selection[f.id]];
       return { id: p.id, family: p.family, name: p.name, alignment: p.alignment };
     });
-    if (editId) {
-      updateBuild(editId, { name: buildName.trim(), paradigms });
-    } else {
-      saveBuild({ name: buildName.trim(), paradigms });
-    }
+    if (editId) updateBuild(editId, { name: buildName.trim(), paradigms });
+    else saveBuild({ name: buildName.trim(), paradigms });
     navigate('/profile');
   }, [selection, buildName, editId, navigate, allSelected, families]);
 
+  // Viewport-capped carousel sizing
+  const [dims, setDims] = useState(() => computeDims());
+  useEffect(() => {
+    const onResize = () => setDims(computeDims());
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+
   return (
-    <div className="min-h-screen bg-term-bg text-term-text font-mono p-4 md:p-8">
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen cosmic-shell text-term-text font-mono p-4 md:p-8 relative overflow-hidden">
+      <CosmicBackground density={60} />
+
+      <div className="relative z-10 max-w-6xl mx-auto">
         {/* Header */}
         <div className="flex items-center gap-3 mb-6">
           <button onClick={() => navigate('/')} className="text-term-dim hover:text-term-green transition-colors">
             <ArrowLeft className="w-6 h-6" />
           </button>
           <h1
-            className="text-ui-xl text-term-purple font-bold tracking-widest"
-            style={{ textShadow: '0 0 10px rgba(168,85,247,0.4)' }}
+            className="text-ui-xl text-term-purple font-bold tracking-[0.2em]"
+            style={{ textShadow: '0 0 16px rgba(168,85,247,0.4)' }}
           >
             PHILOSOPHY BUILD
           </h1>
@@ -89,14 +89,13 @@ export default function PhilosophyBuild() {
           </div>
         </div>
 
-        {/* Instructions */}
-        <div className="text-term-dim text-ui-md mb-8 text-center">
+        <div className="text-term-dim text-ui-md mb-8 text-center tracking-wide">
           Click a family to browse its paradigms. Select one from each family.
         </div>
 
         {/* Family Carousel */}
-        <div className="mb-10">
-          <div className="text-term-faint text-ui-sm tracking-wider mb-3 font-bold text-center">
+        <div className="mb-8">
+          <div className="text-term-faint text-ui-sm tracking-[0.15em] mb-3 font-bold text-center">
             ── PARADIGM FAMILIES ──
           </div>
           <Carousel3D
@@ -110,12 +109,11 @@ export default function PhilosophyBuild() {
               />
             )}
             onItemClick={(family) => setActiveFamilyId(family.id)}
-            itemWidth={340}
-            itemHeight={460}
+            itemWidth={dims.famW}
+            itemHeight={dims.famH}
           />
         </div>
 
-        {/* Bottom: Victory profile + selected paradigms + build name/confirm */}
         <BuildInfoPanel
           selectedIds={selectedIds}
           buildName={buildName}
@@ -125,21 +123,21 @@ export default function PhilosophyBuild() {
         />
       </div>
 
-      {/* Drill-down overlay — paradigm carousel for the active family */}
+      {/* Drill-down overlay */}
       {activeFamily && (
-        <div className="fixed inset-0 bg-term-bg z-50 flex flex-col p-4 md:p-8">
-          {/* Overlay header */}
-          <div className="flex items-center gap-3 mb-6 max-w-6xl mx-auto w-full">
+        <div className="fixed inset-0 cosmic-shell z-50 flex flex-col p-4 md:p-8 overflow-hidden">
+          <CosmicBackground density={70} />
+          <div className="relative z-10 flex items-center gap-3 mb-6 max-w-6xl mx-auto w-full">
             <button
               onClick={() => setActiveFamilyId(null)}
               className="flex items-center gap-2 text-term-dim hover:text-term-green transition-colors"
             >
               <ArrowLeft className="w-6 h-6" />
-              <span className="text-ui-md font-bold tracking-wider">BACK TO FAMILIES</span>
+              <span className="text-ui-md font-bold tracking-[0.15em]">BACK TO FAMILIES</span>
             </button>
             <h2
-              className="text-ui-xl text-term-blue font-bold tracking-widest"
-              style={{ textShadow: '0 0 10px rgba(0,255,255,0.4)' }}
+              className="text-ui-xl text-term-blue font-bold tracking-[0.2em]"
+              style={{ textShadow: '0 0 16px rgba(0,255,255,0.4)' }}
             >
               {activeFamily.name.toUpperCase()}
             </h2>
@@ -150,8 +148,7 @@ export default function PhilosophyBuild() {
             </div>
           </div>
 
-          {/* Paradigm carousel — large */}
-          <div className="flex-1 flex flex-col justify-center max-w-6xl mx-auto w-full">
+          <div className="relative z-10 flex-1 flex flex-col justify-center max-w-6xl mx-auto w-full">
             <Carousel3D
               key={activeFamily.id}
               items={paradigmsInActiveFamily}
@@ -163,12 +160,21 @@ export default function PhilosophyBuild() {
                   onClick={() => handleParadigmClick(paradigm)}
                 />
               )}
-              itemWidth={420}
-              itemHeight={560}
+              itemWidth={dims.parW}
+              itemHeight={dims.parH}
             />
           </div>
         </div>
       )}
     </div>
   );
+}
+
+function computeDims() {
+  const vh = typeof window !== 'undefined' ? window.innerHeight : 900;
+  const famH = Math.min(440, Math.max(320, vh - 340));
+  const famW = Math.round(famH * 0.74);
+  const parH = Math.min(540, Math.max(360, vh - 220));
+  const parW = Math.round(parH * 0.74);
+  return { famW, famH, parW, parH };
 }

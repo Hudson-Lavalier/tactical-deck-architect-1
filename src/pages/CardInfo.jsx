@@ -1,16 +1,16 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 
+import CosmicBackground from '@/components/CosmicBackground';
+import GlassPanel from '@/components/GlassPanel';
 import { CARD_CATEGORIES } from '@/data/cardTypes';
 import { ALL_CARDS } from '@/data/cards';
 import Carousel3D from '@/components/Carousel3D';
 import RichText from '@/components/RichText';
 import { ALIGNMENT_COLORS } from '@/components/game/terminalTheme';
 
-// Card Info — large full-width carousel.
-// Simple horizontal category tabs at top; cards in the selected category
-// render in a big 3D carousel that fills most of the screen.
+// Card Info — large carousel with viewport-capped card sizing.
 export default function CardInfo() {
   const navigate = useNavigate();
   const [activeCategoryId, setActiveCategoryId] = useState(null);
@@ -19,105 +19,135 @@ export default function CardInfo() {
   const activeCategory = categories.find((c) => c.id === activeCategoryId) || categories[0];
   const cards = ALL_CARDS[activeCategory?.id] || [];
 
-  const handleTabClick = useCallback((id) => {
-    setActiveCategoryId(id);
+  const handleTabClick = useCallback((id) => setActiveCategoryId(id), []);
+
+  // Viewport-capped card dimensions so the full card always fits on screen.
+  const [dims, setDims] = useState(() => computeDims());
+  useEffect(() => {
+    const onResize = () => setDims(computeDims());
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
   }, []);
 
   return (
-    <div className="min-h-screen bg-term-bg text-term-text font-mono p-4 md:p-6 flex flex-col">
-      {/* Header */}
-      <div className="flex items-center gap-3 mb-4">
-        <button onClick={() => navigate('/')} className="text-term-dim hover:text-term-green transition-colors">
-          <ArrowLeft className="w-6 h-6" />
-        </button>
-        <h1
-          className="text-ui-xl text-term-blue font-bold tracking-widest"
-          style={{ textShadow: '0 0 10px rgba(0,255,255,0.4)' }}
-        >
-          CARD INFO
-        </h1>
-      </div>
+    <div className="min-h-screen cosmic-shell text-term-text font-mono p-4 md:p-6 flex flex-col relative overflow-hidden">
+      <CosmicBackground density={60} />
 
-      {/* Category tabs */}
-      <div className="flex flex-wrap justify-center gap-2 mb-6">
-        {categories.map((cat) => {
-          const count = (ALL_CARDS[cat.id] || []).length;
-          const isActive = cat.id === activeCategory.id;
-          return (
-            <button
-              key={cat.id}
-              onClick={() => handleTabClick(cat.id)}
-              className={`px-5 py-2.5 border-2 rounded text-ui-md font-bold tracking-wider transition-all ${
-                isActive
-                  ? 'border-term-blue text-term-blue bg-term-blue/10'
-                  : 'border-term-border text-term-faint hover:border-term-border-hover hover:text-term-dim'
-              }`}
-            >
-              {cat.name.toUpperCase()}
-              <span className="ml-2 text-ui-xs opacity-70">[{count}]</span>
-            </button>
-          );
-        })}
-      </div>
+      <div className="relative z-10 flex flex-col flex-1">
+        {/* Header */}
+        <div className="flex items-center gap-3 mb-4">
+          <button onClick={() => navigate('/')} className="text-term-dim hover:text-term-green transition-colors">
+            <ArrowLeft className="w-6 h-6" />
+          </button>
+          <h1
+            className="text-ui-xl text-term-blue font-bold tracking-[0.2em]"
+            style={{ textShadow: '0 0 16px rgba(0,255,255,0.4)' }}
+          >
+            CARD INFO
+          </h1>
+        </div>
 
-      {/* Active category label */}
-      <div className="text-term-faint text-ui-sm tracking-wider mb-4 font-bold text-center">
-        ── {activeCategory.name.toUpperCase()} — {activeCategory.system.toUpperCase()} SYSTEM ──
-      </div>
+        {/* Category tabs — compact glass pill bar */}
+        <div className="flex flex-wrap justify-center gap-2 mb-4">
+          {categories.map((cat) => {
+            const count = (ALL_CARDS[cat.id] || []).length;
+            const isActive = cat.id === activeCategory.id;
+            return (
+              <button
+                key={cat.id}
+                onClick={() => handleTabClick(cat.id)}
+                className={`px-4 py-2 rounded text-ui-sm font-bold tracking-[0.1em] transition-all ${
+                  isActive
+                    ? 'text-term-blue bg-term-blue/10 border border-term-blue/40'
+                    : 'text-term-faint border border-transparent hover:text-term-dim glass-card'
+                }`}
+              >
+                {cat.name.toUpperCase()}
+                <span className="ml-1.5 text-ui-xs opacity-60">[{count}]</span>
+              </button>
+            );
+          })}
+        </div>
 
-      {/* Cards carousel OR empty state */}
-      {cards.length === 0 ? (
-        <div className="flex-1 flex items-center justify-center">
-          <div className="border-2 border-term-border rounded bg-term-panel p-12 text-center max-w-xl">
-            <div className="text-term-faint text-ui-lg italic mb-3">
-              [ AWAITING USER DEFINITION — NO CARDS INVENTED ]
-            </div>
-            <div className="text-term-dim text-ui-md">
-              Cards will appear here as they are defined per the master doc.
-            </div>
+        {/* Active category label */}
+        <div className="text-term-faint text-ui-sm tracking-[0.15em] mb-3 font-bold text-center">
+          ── {activeCategory.name.toUpperCase()} — {activeCategory.system.toUpperCase()} SYSTEM ──
+        </div>
+
+        {/* Cards carousel OR empty state */}
+        {cards.length === 0 ? (
+          <div className="flex-1 flex items-center justify-center">
+            <GlassPanel className="p-12 text-center max-w-xl">
+              <div className="text-term-faint text-ui-lg italic mb-3">
+                [ AWAITING USER DEFINITION — NO CARDS INVENTED ]
+              </div>
+              <div className="text-term-dim text-ui-md">
+                Cards will appear here as they are defined per the master doc.
+              </div>
+            </GlassPanel>
           </div>
-        </div>
-      ) : (
-        <div className="flex-1 flex items-center">
-          <Carousel3D
-            key={activeCategory.id}
-            items={cards}
-            renderItem={(card, isCenter) => (
-              <CardCarouselCard card={card} isCenter={isCenter} />
-            )}
-            itemWidth={480}
-            itemHeight={640}
-          />
-        </div>
-      )}
+        ) : (
+          <div className="flex-1 flex items-center">
+            <Carousel3D
+              key={activeCategory.id}
+              items={cards}
+              renderItem={(card, isCenter) => (
+                <CardCarouselCard card={card} isCenter={isCenter} />
+              )}
+              itemWidth={dims.cardW}
+              itemHeight={dims.cardH}
+            />
+          </div>
+        )}
+      </div>
     </div>
   );
 }
 
-// Card carousel item — shows full card text with highlighted headers.
+function computeDims() {
+  const vh = typeof window !== 'undefined' ? window.innerHeight : 900;
+  const cardH = Math.min(580, Math.max(360, vh - 280));
+  const cardW = Math.round(cardH * 0.72);
+  return { cardW, cardH };
+}
+
+// Card carousel item — glass frame with alignment-tinted depth.
 function CardCarouselCard({ card, isCenter }) {
   const alignmentInfo = card.alignment ? ALIGNMENT_COLORS[card.alignment] : null;
+  const accent = alignmentInfo?.glow || '#a855f7';
+
   return (
-    <div className="w-full h-full p-6 border-2 border-term-border rounded bg-term-card flex flex-col">
+    <div
+      className="w-full h-full p-5 rounded glass-card cosmic-sheen flex flex-col relative overflow-hidden"
+      style={{
+        borderColor: `${accent}30`,
+        boxShadow: isCenter ? `0 0 28px ${accent}1a, inset 0 1px 0 rgba(255,255,255,0.04)` : 'inset 0 1px 0 rgba(255,255,255,0.03)',
+      }}
+    >
       {/* Header */}
-      <div className="flex justify-between items-start mb-3">
+      <div className="flex justify-between items-start mb-2 relative">
         <div>
-          <div className="font-bold text-ui-xl" style={{ color: alignmentInfo?.glow || '#e0e0e0' }}>
+          <div className="font-bold text-ui-lg leading-tight" style={{ color: accent, textShadow: `0 0 10px ${accent}40` }}>
             {card.name || 'UNNAMED'}
           </div>
           {alignmentInfo && (
-            <div className="text-ui-sm font-bold mt-1" style={{ color: alignmentInfo.glow }}>
+            <div className="text-ui-sm font-bold mt-0.5" style={{ color: accent }}>
               {alignmentInfo.name}
             </div>
           )}
         </div>
+        {card.subcategory && (
+          <div className="text-term-faint text-ui-xs text-right shrink-0">
+            {card.subcategory}
+          </div>
+        )}
       </div>
 
       {/* Divider */}
-      <div className="border-t border-term-border my-3" />
+      <div className="border-t my-2 relative" style={{ borderColor: `${accent}20` }} />
 
-      {/* Card text */}
-      <div className="flex-1 overflow-y-auto pr-1 min-h-0">
+      {/* Card text — scrollable, hidden scrollbar */}
+      <div className="flex-1 overflow-y-auto pr-1 min-h-0 relative">
         {card.text ? (
           <RichText text={card.text} alignment={card.alignment} />
         ) : (
@@ -127,7 +157,7 @@ function CardCarouselCard({ card, isCenter }) {
 
       {/* Category footer */}
       {card.category && (
-        <div className="text-term-faint text-ui-sm mt-3 pt-3 border-t border-term-border">
+        <div className="text-term-faint text-ui-xs mt-2 pt-2 border-t relative" style={{ borderColor: `${accent}15` }}>
           {card.category.replace(/_/g, ' ').toUpperCase()}
         </div>
       )}

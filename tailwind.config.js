@@ -73,7 +73,10 @@ module.exports = {
   				'term-faint': 'var(--term-text-faint)',
   				'term-purple': 'var(--term-purple)',
   				'term-green': 'var(--term-green)',
-  				'term-blue': 'var(--term-blue)'
+  				'term-blue': 'var(--term-blue)',
+  				'cosmic-deep': 'var(--cosmic-deep)',
+  				'cosmic-nebula-purple': 'var(--cosmic-nebula-purple)',
+  				'cosmic-nebula-blue': 'var(--cosmic-nebula-blue)'
   				},
   		fontFamily: {
   				heading: ['var(--font-heading)'],
@@ -90,25 +93,27 @@ module.exports = {
   			},
   		keyframes: {
   			'accordion-down': {
-  				from: {
-  					height: '0'
-  				},
-  				to: {
-  					height: 'var(--radix-accordion-content-height)'
-  				}
+  				from: { height: '0' },
+  				to: { height: 'var(--radix-accordion-content-height)' }
   			},
   			'accordion-up': {
-  				from: {
-  					height: 'var(--radix-accordion-content-height)'
-  				},
-  				to: {
-  					height: '0'
-  				}
+  				from: { height: 'var(--radix-accordion-content-height)' },
+  				to: { height: '0' }
+  			},
+  			'cosmic-float': {
+  				'0%, 100%': { transform: 'translateY(0px)' },
+  				'50%': { transform: 'translateY(-6px)' }
+  			},
+  			'cosmic-pulse': {
+  				'0%, 100%': { opacity: '0.5' },
+  				'50%': { opacity: '0.9' }
   			}
   		},
   		animation: {
   			'accordion-down': 'accordion-down 0.2s ease-out',
-  			'accordion-up': 'accordion-up 0.2s ease-out'
+  			'accordion-up': 'accordion-up 0.2s ease-out',
+  			'cosmic-float': 'cosmic-float 8s ease-in-out infinite',
+  			'cosmic-pulse': 'cosmic-pulse 4s ease-in-out infinite'
   		}
   	}
   },

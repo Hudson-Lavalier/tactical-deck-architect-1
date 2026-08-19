@@ -27,28 +27,27 @@ const EVENT_LABELS = {
   deck_exhaustion: 'DECK EXHAUSTION',
 };
 
-// GameLog — collapsible hovering panel on the right side.
-// Toggle button is always visible on the right edge.
-// Panel slides out when expanded.
+// GameLog — collapsible glass panel on the right side.
 export default function GameLog({ log }) {
   const [open, setOpen] = useState(false);
 
   return (
     <>
-      {/* Toggle button — always visible on right edge */}
       <button
         onClick={() => setOpen(!open)}
-        className="fixed right-0 top-1/2 -translate-y-1/2 z-30 px-2 py-6 bg-term-panel border-l-2 border-y-2 border-term-border rounded-l-lg hover:border-term-green transition-colors"
+        className="fixed right-0 top-1/2 -translate-y-1/2 z-30 px-2 py-6 glass-panel rounded-l-lg hover:border-term-green/40 transition-colors"
+        style={{ borderRadius: '8px 0 0 8px' }}
         title="Game Log"
       >
         <ScrollText className={`w-5 h-5 ${open ? 'text-term-green' : 'text-term-dim'}`} />
       </button>
 
-      {/* Slide-out panel */}
       {open && (
-        <div className="fixed right-0 top-0 bottom-0 w-80 max-w-[85vw] z-30 bg-term-panel border-l-2 border-term-border flex flex-col shadow-2xl">
-          <div className="flex justify-between items-center p-3 border-b border-term-border">
-            <span className="text-term-dim text-ui-sm tracking-wider font-bold font-mono">GAME LOG</span>
+        <div className="fixed right-0 top-0 bottom-0 w-80 max-w-[85vw] z-30 glass-panel flex flex-col"
+          style={{ borderRadius: '16px 0 0 16px', borderRight: 'none' }}
+        >
+          <div className="flex justify-between items-center p-3 border-b border-term-purple/15">
+            <span className="text-term-dim text-ui-sm tracking-[0.15em] font-bold font-mono">GAME LOG</span>
             <button onClick={() => setOpen(false)} className="text-term-dim hover:text-term-green transition-colors">
               <X className="w-4 h-4" />
             </button>

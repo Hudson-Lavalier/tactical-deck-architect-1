@@ -28,7 +28,7 @@
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
-    --radius: 0.5rem;
+    --radius: 0.625rem;
     --font-heading: ui-sans-serif, system-ui, sans-serif;
     --font-body: ui-sans-serif, system-ui, sans-serif;
     --font-display: ui-sans-serif, system-ui, sans-serif;
@@ -66,6 +66,14 @@
     --term-purple: #a855f7;
     --term-green: #00ff41;
     --term-blue: #00ffff;
+
+    /* ── Cosmic Terminal ── */
+    --cosmic-deep: #050308;
+    --cosmic-nebula-purple: #1a0b2e;
+    --cosmic-nebula-blue: #0a1628;
+    --cosmic-glass: rgba(13, 13, 20, 0.62);
+    --cosmic-glass-border: rgba(168, 85, 247, 0.16);
+    --cosmic-glass-highlight: rgba(255, 255, 255, 0.04);
   }
 
   .dark {
@@ -104,14 +112,59 @@
   }
 }
 
-
-
 @layer base {
   * {
     @apply border-border outline-ring/50;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  *::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
   }
 
   body {
     @apply bg-background text-foreground font-body;
+  }
+}
+
+@layer components {
+  /* Glassmorphism surface — translucent dark with hairline border + inner glow */
+  .glass-panel {
+    background: linear-gradient(140deg, rgba(16, 12, 26, 0.72), rgba(8, 8, 16, 0.58));
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--cosmic-glass-border);
+    box-shadow: inset 0 1px 0 var(--cosmic-glass-highlight), 0 12px 44px rgba(0, 0, 0, 0.5);
+    border-radius: var(--radius);
+  }
+
+  .glass-card {
+    background: linear-gradient(165deg, rgba(22, 16, 36, 0.82), rgba(10, 10, 18, 0.68));
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(168, 85, 247, 0.14);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.035);
+    border-radius: var(--radius);
+  }
+
+  /* Subtle top sheen for depth — apply on a relative container */
+  .cosmic-sheen::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, transparent 35%);
+    pointer-events: none;
+  }
+
+  /* Cosmic page shell — deep space gradient base */
+  .cosmic-shell {
+    background:
+      radial-gradient(ellipse 80% 60% at 20% 0%, rgba(26, 11, 46, 0.55), transparent 60%),
+      radial-gradient(ellipse 70% 50% at 85% 100%, rgba(10, 22, 40, 0.5), transparent 55%),
+      var(--cosmic-deep);
   }
 }

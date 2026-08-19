@@ -1,12 +1,13 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-// Carousel3D — a reusable 3D cylindrical carousel.
+// Carousel3D — reusable 3D cylindrical carousel.
 // Items rotate around a vertical axis (rotateY + translateZ).
-// The centered item faces the viewer; side items are angled and dimmed.
 // Navigation: prev/next buttons, drag, or click side items.
 // Scroll wheel is intentionally NOT wired — it hijacks page scroll.
 // Rotation always takes the SHORTEST path to the target item.
+// itemWidth/itemHeight accept numbers (px) OR CSS strings (e.g. "62vh")
+// so parents can pass viewport-capped dimensions that always fit on screen.
 export default function Carousel3D({
   items,
   renderItem,
@@ -22,15 +23,18 @@ export default function Carousel3D({
 
   const n = items.length;
   const angleStep = 360 / n;
-  const radius = customRadius || Math.max(itemWidth / (2 * Math.tan(Math.PI / n)) + 50, 180);
+  // Numeric fallback for radius math when CSS strings are passed
+  const wNum = typeof itemWidth === 'number' ? itemWidth : 380;
+  const hNum = typeof itemHeight === 'number' ? itemHeight : 500;
+  const radius = customRadius || Math.max(wNum / (2 * Math.tan(Math.PI / n)) + 50, 180);
+
+  const dim = (v, fallback) => (typeof v === 'number' ? `${v}px` : v || fallback);
 
   const rotateTo = useCallback(
     (index) => {
       const normalized = ((index % n) + n) % n;
       const targetBase = -normalized * angleStep;
       setRotation((prev) => {
-        // Pick the equivalent rotation (targetBase + k*360) closest to prev
-        // so the CSS transition animates the shortest angular path.
         const delta = targetBase - prev;
         const k = Math.round(-delta / 360);
         return targetBase + k * 360;
@@ -40,7 +44,6 @@ export default function Carousel3D({
     [n, angleStep]
   );
 
-  // Notify parent when center changes
   useEffect(() => {
     if (onCenterChange && n > 0) {
       onCenterChange(items[centerIndex], centerIndex);
@@ -67,11 +70,13 @@ export default function Carousel3D({
 
   if (n === 0) return null;
 
+  const containerHeight = typeof itemHeight === 'number' ? `${itemHeight + 80}px` : `calc(${itemHeight} + 80px)`;
+
   return (
     <div className="relative w-full flex flex-col items-center select-none">
       <div
         className="relative w-full overflow-hidden cursor-grab active:cursor-grabbing"
-        style={{ perspective: '1600px', height: `${itemHeight + 100}px` }}
+        style={{ perspective: '1600px', height: containerHeight }}
         onMouseDown={handleDragStart}
         onMouseUp={handleDragEnd}
         onMouseLeave={handleDragEnd}
@@ -90,7 +95,7 @@ export default function Carousel3D({
             const isCenter = i === centerIndex;
             let offset = Math.abs(i - centerIndex);
             if (offset > n / 2) offset = n - offset;
-            const opacity = Math.max(0.25, 1 - offset * 0.35);
+            const opacity = Math.max(0.22, 1 - offset * 0.32);
 
             return (
               <div
@@ -98,10 +103,10 @@ export default function Carousel3D({
                 className="absolute top-0 left-0 transition-all duration-700"
                 style={{
                   transform: `rotateY(${angle}deg) translateZ(${radius}px)`,
-                  width: `${itemWidth}px`,
-                  height: `${itemHeight}px`,
-                  marginLeft: `-${itemWidth / 2}px`,
-                  marginTop: `-${itemHeight / 2}px`,
+                  width: dim(itemWidth, `${wNum}px`),
+                  height: dim(itemHeight, `${hNum}px`),
+                  marginLeft: `-${wNum / 2}px`,
+                  marginTop: `-${hNum / 2}px`,
                   opacity,
                   pointerEvents: 'auto',
                   cursor: 'pointer',
@@ -120,12 +125,12 @@ export default function Carousel3D({
       </div>
 
       {/* Navigation */}
-      <div className="flex items-center gap-8 mt-2">
+      <div className="flex items-center gap-8 mt-1">
         <button
           onClick={handlePrev}
           className="text-term-dim hover:text-term-green transition-colors"
         >
-          <ChevronLeft className="w-9 h-9" />
+          <ChevronLeft className="w-8 h-8" />
         </button>
         <div className="text-term-faint text-ui-sm tracking-wider font-mono">
           {centerIndex + 1} / {n}
@@ -134,7 +139,7 @@ export default function Carousel3D({
           onClick={handleNext}
           className="text-term-dim hover:text-term-green transition-colors"
         >
-          <ChevronRight className="w-9 h-9" />
+          <ChevronRight className="w-8 h-8" />
         </button>
       </div>
     </div>
