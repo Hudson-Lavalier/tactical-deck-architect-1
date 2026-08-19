@@ -19,7 +19,7 @@ export default function Domain({ domain, modifiers, onDomainClick }) {
         ── SHARED DOMAIN ──
       </div>
 
-      <div className="flex items-center gap-2 flex-1 min-h-0">
+      <div className="flex items-center justify-center gap-2 flex-1 min-h-0">
         <div className="flex flex-col gap-1">
           {modifiers?.opponent?.map((mod, i) => (
             <Card key={mod.id || i} card={mod} size="large" />

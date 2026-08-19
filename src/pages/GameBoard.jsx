@@ -297,19 +297,21 @@ export default function GameBoard() {
         {/* ── battlefield ── DrawPiles | opponent queue | Domain | player queue ── */}
         <div
           style={{ gridArea: 'battlefield' }}
-          className="flex items-center justify-center gap-6 min-h-0 overflow-hidden"
+          className="relative flex items-center justify-center gap-6 min-h-0 overflow-hidden"
         >
-          <DrawPiles
-            piles={{
-              metaphysics: state.drawPiles.metaphysics,
-              meta_ethics: state.drawPiles.meta_ethics,
-            }}
-            onDraw={handleDraw}
-            disabled={!isPlayerTurn || phase !== 'draw' || inResponseWindow}
-          />
-          <Queue queuedCards={opponent.queue} isActive={!isPlayerTurn} className="flex-1 min-w-0 justify-center" />
+          <div className="absolute left-0 top-1/2 -translate-y-1/2 z-10">
+            <DrawPiles
+              piles={{
+                metaphysics: state.drawPiles.metaphysics,
+                meta_ethics: state.drawPiles.meta_ethics,
+              }}
+              onDraw={handleDraw}
+              disabled={!isPlayerTurn || phase !== 'draw' || inResponseWindow}
+            />
+          </div>
+          <Queue queuedCards={opponent.queue} isActive={!isPlayerTurn} className="justify-center" />
           <Domain domain={state.domain} modifiers={state.domainModifiers} onDomainClick={handleInspectDomain} />
-          <Queue queuedCards={player.queue} isActive={isPlayerTurn} className="flex-1 min-w-0 justify-center" />
+          <Queue queuedCards={player.queue} isActive={isPlayerTurn} className="justify-center" />
         </div>
 
         {/* ── player-persistent ── */}
