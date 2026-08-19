@@ -59,11 +59,21 @@ function createPlayerState(playerId, epistemologySelection, isPlayerOne) {
     // Points
     points: { A: 0, B: 0, C: 0 },
     pointLimit: POINT_LIMIT,
+    // Point protection / designation state
+    pointShields: [],            // [{ type, used }] — nullify first matching removal
+    distinctMoralPoints: { A: 0, B: 0, C: 0 }, // immune points (Distinct Moral Properties)
+    victoryReduction: { A: 0, B: 0, C: 0 },    // reduces victory requirement (Real Moral Facts)
+    pointPoolLock: { A: false, B: false, C: false }, // cannot gain/alter (Irreducible Morality)
+    disabledSlots: [],           // persistent slots disabled by effects
     // Rhetoric hand
     rhetoricHand: [],
     // Turn tracking
     personalTurnCount: 0,
     rhetoricDrawCounter: 0,
+    // Per-ability usage tracking (once-per-turn, every-other-turn, cooldowns)
+    abilityUsage: {},
+    // Cards played this full round, by type (for Theory of Time allowance)
+    cardsPlayedThisRound: { A: 0, B: 0, C: 0, other: 0 },
     // Epistemology ability cooldowns
     abilityCooldowns: {
       orientation: 0, // turns until available
@@ -95,6 +105,9 @@ export function createInitialState(playerSelection, opponentSelection, difficult
     currentPlayer: 'player', // 'player' | 'opponent'
     phase: 'setup',       // 'setup' | 'draw' | 'board_dev' | 'action' | 'response' | 'end'
     domain: null,         // active domain card
+    domainPlacedBy: null, // who placed the current domain ('player' | 'opponent')
+    domainDuration: 0,    // full rounds since the domain was last changed (Growing-Block)
+    domainLock: null,     // { type, playerId } — prevents domain changes
     domainModifiers: {
       player: [],         // effects to the right of domain
       opponent: [],       // effects to the left of domain

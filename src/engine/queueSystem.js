@@ -19,6 +19,8 @@
 import { QUEUE_LIMIT, RESOLUTION_SPEED } from '../data/gameConstants';
 import { logEvent } from './gameState';
 import { openResponseWindow } from './responseSystem';
+import { dispatchResolve } from './effects/dispatcher';
+import { emit, emitBefore } from './effects/eventBus';
 
 // Determine resolution speed for a card given the active domain
 export function getResolutionSpeed(card, domain) {
@@ -63,7 +65,15 @@ export function getStartingRow(speed) {
 export function enqueueCard(state, playerId, card, speed) {
   const player = state.players[playerId];
 
+  // before:card_played — cancelable (e.g. The Physical Mind's Anti-Immaterial Field)
+  const before = emitBefore(state, 'card_played', { playerId, card, speed });
+  if (before.cancelled) {
+    logEvent(state, { type: 'card_play_blocked', playerId, cardId: card?.id, by: before.cancelledBy });
+    return false;
+  }
+
   if (speed === RESOLUTION_SPEED.ADVANTAGED) {
+    emit(state, 'card_played', { playerId, card, speed });
     openResponseWindow(state, card, playerId, 'action');
     return true;
   }
@@ -81,6 +91,7 @@ export function enqueueCard(state, playerId, card, speed) {
     turnsRemaining: row,
   });
 
+  emit(state, 'card_queued', { playerId, card, row, speed });
   logEvent(state, { type: 'enqueue', playerId, cardId: card.id, row });
   return true;
 }
@@ -119,30 +130,9 @@ export function collectResolvableCards(state, playerId) {
   }
 }
 
-// Resolve a single card's effect
-// This is the hook where card-specific effects will execute.
-// Until the user defines card effects, this is a no-op placeholder
-// that logs the resolution.
-export function resolveCard(state, playerId, card) {
+// Resolve a single card's effect — dispatch to the card's per-card effect file.
+export function resolveCard(state, playerId, card, targets = {}) {
   if (!card) return;
-
   logEvent(state, { type: 'card_resolved', playerId, cardId: card.id, cardName: card.name });
-
-  // ═══════════════════════════════════════════════════════════════
-  // Card effect execution goes here.
-  // Each card's `effect` object (user-defined) will be interpreted
-  // by the effect engine. No effects are invented — this is the
-  // dispatch point that will call user-defined effect handlers.
-  // ═══════════════════════════════════════════════════════════════
-  executeEffect(state, playerId, card);
-}
-
-// Effect execution dispatcher — placeholder.
-// Will route to specific effect handlers based on card.effect.type
-// once the user defines card effects.
-function executeEffect(state, playerId, card) {
-  if (!card.effect) return;
-
-  // This is where the user's card effect definitions will be processed.
-  // The structure is in place; the content awaits user definition.
+  dispatchResolve(state, playerId, card, targets);
 }

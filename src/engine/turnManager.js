@@ -10,9 +10,11 @@
 import { DRAW_PILES, RHETORIC_DRAW_INTERVAL } from '../data/gameConstants';
 import { logEvent } from './gameState';
 import { advanceQueue, collectResolvableCards } from './queueSystem';
-import { generateDomainPoints } from './domainSystem';
 import { checkVictory } from '../data/victoryProfiles';
 import { openResponseWindow } from './responseSystem';
+import { dispatchPlace, dispatchRemove, dispatchRoundEnd, dispatchDomainChangeAttempt } from './effects/dispatcher';
+import { emit } from './effects/eventBus';
+import { resetTurnUsage, clearDomainLock } from './effects/primitives';
 
 // Proceed with the turn after all queue resolutions are complete.
 // Called by startTurn (when no cards to resolve) or by closeResponseWindow
@@ -109,6 +111,12 @@ export function startTurn(state) {
   player.personalTurnCount++;
   state.phase = 'draw';
 
+  // Reset once-per-turn ability usage for this player
+  resetTurnUsage(state, state.currentPlayer);
+
+  // Emit turn_start so domain/persistent effects can react (Black Hole, Bridge).
+  emit(state, 'turn_start', { playerId: state.currentPlayer });
+
   // Advance queue (cards come back to this player)
   advanceQueue(state, state.currentPlayer);
 
@@ -163,35 +171,58 @@ export function peekPile(state, pileId, count = 1) {
   return state.drawPiles[pileId].slice(0, count);
 }
 
-// Board development: place a persistent card in a slot
+// Board development: place a persistent card in a slot.
+// If the slot is occupied, the old card is removed (its onRemove fires).
 export function placePersistent(state, cardId, slot) {
   const player = state.players[state.currentPlayer];
   const cardIndex = player.hand.findIndex((c) => c.id === cardId);
   if (cardIndex === -1) return false;
 
   const card = player.hand[cardIndex];
+  // Remove the existing card in this slot first (if any)
+  const existing = player.persistentSlots[slot];
+  if (existing) dispatchRemove(state, state.currentPlayer, existing);
+
   player.persistentSlots[slot] = card;
   player.hand.splice(cardIndex, 1);
 
   logEvent(state, { type: 'place_persistent', slot, cardId });
-  openResponseWindow(state, card, state.currentPlayer, 'board_dev');
+  // The card's onPlace fires when the response window closes uncancelled.
+  openResponseWindow(state, card, state.currentPlayer, 'board_dev', { slot });
   return true;
 }
 
-// Board development: change the domain
+// Board development: change the domain.
 // Per framework: placing/changing domain immediately ends the turn.
 export function changeDomain(state, cardId) {
   const player = state.players[state.currentPlayer];
   const cardIndex = player.hand.findIndex((c) => c.id === cardId);
   if (cardIndex === -1) return false;
 
+  // Dispatch the change attempt so active effects (Physical Barrier, Absolute
+  // Unity, Twofold Reality, Ontological Independence) can cancel it via the
+  // before:domain_change_attempted event. If cancelled, abort.
   const card = player.hand[cardIndex];
+  const allowed = dispatchDomainChangeAttempt(state, state.currentPlayer, card);
+  if (!allowed) {
+    logEvent(state, { type: 'domain_change_blocked', reason: 'effect_cancelled' });
+    return false;
+  }
+
+  const oldDomain = state.domain;
+  const oldDomainPlacedBy = state.domainPlacedBy;
+  if (oldDomain) dispatchRemove(state, oldDomainPlacedBy, oldDomain);
+
   state.domain = card;
+  state.domainPlacedBy = state.currentPlayer;
+  state.domainDuration = 0;
+  clearDomainLock(state);
   player.hand.splice(cardIndex, 1);
 
   logEvent(state, { type: 'domain_change', cardId });
-  // Open response window; turn ends after window closes
-  openResponseWindow(state, card, state.currentPlayer, 'domain');
+  // The domain's onPlace fires when the response window closes uncancelled.
+  // Pass the old domain so we can revert if cancelled.
+  openResponseWindow(state, card, state.currentPlayer, 'domain', { oldDomain, oldDomainPlacedBy });
   return true;
 }
 
@@ -213,7 +244,10 @@ export function endTurn(state) {
   // Full round check (both players completed a turn)
   if (state.currentPlayer === 'player') {
     state.roundCount++;
-    generateDomainPoints(state);
+    state.domainDuration++;
+    // Domain generates points per its own rules (dispatchRoundEnd → onRoundEnd).
+    dispatchRoundEnd(state);
+    emit(state, 'round_end', { round: state.roundCount });
   }
 
   // Start the next player's turn (advances queue, resolves, checks victory)

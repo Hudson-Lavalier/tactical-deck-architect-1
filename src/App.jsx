@@ -13,6 +13,7 @@ import CardInfo from './pages/CardInfo';
 import Settings from './pages/Settings';
 import GameBoard from './pages/GameBoard';
 import Profile from './pages/Profile';
+import TestMode from './pages/TestMode';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -47,6 +48,7 @@ const AuthenticatedApp = () => {
       <Route path="/cards" element={<CardInfo />} />
       <Route path="/settings" element={<Settings />} />
       <Route path="/profile" element={<Profile />} />
+      <Route path="/test" element={<TestMode />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Terminal, Play, Settings, BookOpen, Layers, User, X } from 'lucide-react';
+import { Terminal, Play, Settings, BookOpen, Layers, User, X, FlaskConical } from 'lucide-react';
 
 import CosmicBackground from '@/components/CosmicBackground';
 import GlassPanel from '@/components/GlassPanel';
@@ -82,6 +82,7 @@ export default function Home() {
           <MenuButton to="/build" icon={Layers} label="PHILOSOPHY BUILD" color="#a855f7" />
           <MenuButton to="/cards" icon={BookOpen} label="CARD INFO" color="#c084fc" />
           <MenuButton to="/profile" icon={User} label="PLAYER PROFILE" color="#00ff41" />
+          <MenuButton to="/test" icon={FlaskConical} label="TEST MODE" color="#c084fc" />
           <MenuButton to="/settings" icon={Settings} label="SETTINGS" color="#888888" />
         </div>
 

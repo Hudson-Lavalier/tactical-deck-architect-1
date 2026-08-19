@@ -5,6 +5,7 @@
 
 import { getResolutionSpeed, getStartingRow } from './queueSystem';
 import { getDomainAlignment } from './domainSystem';
+import { getAllowance } from './effects/primitives';
 
 // Determine how a card should be played given the current domain
 export function determinePlayMode(state, card) {
@@ -38,20 +39,9 @@ export function canPlayActionCard(state, playerId, card) {
   return true;
 }
 
-// Get the number of action cards a player can play this turn
-// Base: 1 per turn. Theory of Time may allow more.
-// This is a placeholder — actual allowances depend on user-defined
-// Theory of Time card effects.
+// Get the number of action cards a player can play this turn.
+// Base: 1 per turn. Theory of Time persistent cards may modify this via their
+// getAllowanceModifier handler (Presentism extra play, Growing-Block accumulation, etc.).
 export function getActionAllowance(state, playerId) {
-  const player = state.players[playerId];
-  let base = 1;
-
-  // Theory of Time persistent card may modify this
-  // (effect will be applied once user defines Theory of Time cards)
-  const theoryOfTime = player.persistentSlots.left;
-  if (theoryOfTime && theoryOfTime.effect) {
-    // Placeholder: Theory of Time effect handling goes here
-  }
-
-  return base;
+  return getAllowance(state, playerId);
 }

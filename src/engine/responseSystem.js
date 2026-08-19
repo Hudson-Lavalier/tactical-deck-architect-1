@@ -18,9 +18,13 @@
 import { logEvent } from './gameState';
 import { resolveCard } from './queueSystem';
 import { proceedWithTurn, endTurn } from './turnManager';
+import { dispatchPlace, dispatchRemove } from './effects/dispatcher';
+import { emit, emitBefore } from './effects/eventBus';
+import { discardCard } from './effects/primitives';
 
-// Open a response window for a card that is becoming active
-export function openResponseWindow(state, card, activePlayerId, source = 'queue') {
+// Open a response window for a card that is becoming active.
+// `extra` carries source-specific context (e.g. slot for board_dev, oldDomain for domain).
+export function openResponseWindow(state, card, activePlayerId, source = 'queue', extra = {}) {
   const respondingPlayerId = activePlayerId === 'player' ? 'opponent' : 'player';
   const respondingPlayer = state.players[respondingPlayerId];
 
@@ -32,6 +36,7 @@ export function openResponseWindow(state, card, activePlayerId, source = 'queue'
     chain: [],
     cancelled: false,
     source,
+    ...extra,
   };
   state.phase = 'response';
 
@@ -82,35 +87,28 @@ export function passResponse(state, playerId) {
   return true;
 }
 
-// Close the response window and resolve the card (if not cancelled)
+// Close the response window and resolve/place/revert the card.
 export function closeResponseWindow(state) {
   const window = state.responseWindow;
-  const { activeCard, activePlayerId, cancelled, source } = window;
+  const { activeCard, activePlayerId, cancelled, source, slot, oldDomain, oldDomainPlacedBy } = window;
 
-  state.responseWindow = {
-    active: false,
-    activeCard: null,
-    activePlayerId: null,
-    respondingPlayerId: null,
-    chain: [],
-    cancelled: false,
-    source: null,
-  };
-
-  // Resolve the card if not cancelled, or discard if cancelled
-  if (!cancelled && activeCard) {
-    resolveCard(state, activePlayerId, activeCard);
-  } else if (cancelled && activeCard) {
-    // Push cancelled card to the appropriate discard pile
-    const cat = activeCard.category;
-    if (cat === 'rhetoric') {
-      state.discardPiles.rhetoric.push(activeCard);
-    } else if (['domain', 'theory_of_time', 'universals'].includes(cat)) {
-      state.discardPiles.metaphysics.push(activeCard);
-    } else if (['moral_reality', 'moral_grounding', 'moral_judgment'].includes(cat)) {
-      state.discardPiles.meta_ethics.push(activeCard);
+  if (cancelled && activeCard) {
+    // Protective effects (e.g. Objective Authority) may override the cancellation
+    // via a before:event_cancelled handler returning { cancel: true }.
+    const before = emitBefore(state, 'effect_cancelled', { card: activeCard, playerId: activePlayerId, source });
+    if (before.cancelled) {
+      // Cancellation overridden — resolve/place normally.
+      clearWindow(state);
+      handleResolve(state, source, activeCard, activePlayerId, slot);
+    } else {
+      clearWindow(state);
+      handleCancel(state, source, activeCard, activePlayerId, slot, oldDomain, oldDomainPlacedBy);
     }
-    logEvent(state, { type: 'card_discarded', cardId: activeCard.id, reason: 'cancelled' });
+  } else if (activeCard) {
+    clearWindow(state);
+    handleResolve(state, source, activeCard, activePlayerId, slot);
+  } else {
+    clearWindow(state);
   }
 
   // Remove from pending resolutions
@@ -133,4 +131,51 @@ export function closeResponseWindow(state) {
       state.phase = 'action';
     }
   }
+}
+
+// Clear the response window state.
+function clearWindow(state) {
+  state.responseWindow = {
+    active: false,
+    activeCard: null,
+    activePlayerId: null,
+    respondingPlayerId: null,
+    chain: [],
+    cancelled: false,
+    source: null,
+  };
+}
+
+// Card resolved successfully — dispatch its effect/placement.
+function handleResolve(state, source, card, playerId, slot) {
+  if (source === 'board_dev') {
+    dispatchPlace(state, playerId, card, slot);
+  } else if (source === 'domain') {
+    dispatchPlace(state, playerId, card, 'domain');
+  } else {
+    // 'queue' or 'action' — resolve as a one-time-use action card
+    resolveCard(state, playerId, card);
+  }
+}
+
+// Card was cancelled — discard it and revert any board state.
+function handleCancel(state, source, card, playerId, slot, oldDomain, oldDomainPlacedBy) {
+  if (source === 'board_dev' && slot) {
+    // Remove the card from the persistent slot it was placed into
+    const player = state.players[playerId];
+    if (player.persistentSlots[slot]?.id === card.id) {
+      player.persistentSlots[slot] = null;
+    }
+  } else if (source === 'domain') {
+    // Revert the domain to what was active before the attempted change
+    if (oldDomain) {
+      state.domain = oldDomain;
+      state.domainPlacedBy = oldDomainPlacedBy;
+    } else {
+      state.domain = null;
+      state.domainPlacedBy = null;
+    }
+  }
+  discardCard(state, card);
+  logEvent(state, { type: 'card_discarded', cardId: card.id, reason: 'cancelled' });
 }
