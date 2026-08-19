@@ -6,6 +6,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 // The centered item faces the viewer; side items are angled and dimmed.
 // Navigation: prev/next buttons, drag, or click side items.
 // Scroll wheel is intentionally NOT wired — it hijacks page scroll.
+// Rotation always takes the SHORTEST path to the target item.
 export default function Carousel3D({
   items,
   renderItem,
@@ -16,16 +17,28 @@ export default function Carousel3D({
   radius: customRadius,
 }) {
   const [centerIndex, setCenterIndex] = useState(0);
+  const [rotation, setRotation] = useState(0);
   const dragStartX = useRef(null);
 
   const n = items.length;
   const angleStep = 360 / n;
   const radius = customRadius || Math.max(itemWidth / (2 * Math.tan(Math.PI / n)) + 50, 180);
 
-  const rotateTo = useCallback((index) => {
-    const normalized = ((index % n) + n) % n;
-    setCenterIndex(normalized);
-  }, [n]);
+  const rotateTo = useCallback(
+    (index) => {
+      const normalized = ((index % n) + n) % n;
+      const targetBase = -normalized * angleStep;
+      setRotation((prev) => {
+        // Pick the equivalent rotation (targetBase + k*360) closest to prev
+        // so the CSS transition animates the shortest angular path.
+        const delta = targetBase - prev;
+        const k = Math.round(-delta / 360);
+        return targetBase + k * 360;
+      });
+      setCenterIndex(normalized);
+    },
+    [n, angleStep]
+  );
 
   // Notify parent when center changes
   useEffect(() => {
@@ -69,7 +82,7 @@ export default function Carousel3D({
           className="absolute top-1/2 left-1/2 transition-transform duration-700 ease-out"
           style={{
             transformStyle: 'preserve-3d',
-            transform: `translate(-50%, -50%) rotateY(${-centerIndex * angleStep}deg)`,
+            transform: `translate(-50%, -50%) rotateY(${rotation}deg)`,
           }}
         >
           {items.map((item, i) => {
