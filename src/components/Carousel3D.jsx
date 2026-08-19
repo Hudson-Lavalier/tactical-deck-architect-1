@@ -50,8 +50,9 @@ export default function Carousel3D({
   const rotateTo = useCallback(
     (index) => {
       const normalized = ((index % n) + n) % n;
-      const currentCenter = ((rotationRef.current / angleStep) % n + n) % n;
-      let delta = normalized - currentCenter;
+      // centerIndex (state) is the source of truth — never recompute it from
+      // rotationRef.current / angleStep, which is wrong for negative rotations.
+      let delta = normalized - centerIndex;
       if (delta > n / 2) delta -= n;
       if (delta < -n / 2) delta += n;
       const next = rotationRef.current - delta * angleStep;
@@ -60,7 +61,7 @@ export default function Carousel3D({
       setCenterIndex(normalized);
       if (onCenterChange) onCenterChange(items[normalized], normalized);
     },
-    [n, angleStep, items, onCenterChange]
+    [n, angleStep, items, onCenterChange, centerIndex]
   );
 
   const handlePrev = () => rotateTo(centerIndex - 1);
@@ -121,8 +122,11 @@ export default function Carousel3D({
             if (totalDeg > 180) totalDeg -= 360;
             const cosVal = Math.cos((totalDeg * Math.PI) / 180);
             const isCenter = i === centerIndex;
-            // Never fully hidden — dims smoothly to a visible floor at the back.
-            const opacity = 0.18 + 0.82 * ((cosVal + 1) / 2);
+            const absTotal = Math.abs(totalDeg);
+            // Cull back-of-drum cards: fully hidden beyond ~100° so they can't
+            // overlap the front. Visible cards fade smoothly toward the sides.
+            const isVisible = absTotal <= 100;
+            const opacity = isVisible ? 0.18 + 0.82 * ((cosVal + 1) / 2) : 0;
 
             return (
               <div
@@ -140,6 +144,7 @@ export default function Carousel3D({
                   transition: 'opacity 0.5s ease-out',
                   opacity,
                   zIndex: Math.round(1000 + cosVal * 100),
+                  pointerEvents: isVisible ? 'auto' : 'none',
                   cursor: 'pointer',
                 }}
                 onClick={() => {
