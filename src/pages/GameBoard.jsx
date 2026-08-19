@@ -23,6 +23,18 @@ import PointTracker from '@/components/game/PointTracker';
 import { EPISTEMOLOGIES } from '@/data/epistemologies';
 
 // GameBoard — main game screen. Single-player vs hardcoded NPC.
+//
+// Layout: a single CSS grid of independent named regions. Each child owns
+// exactly one grid area, so centering/alignment inside a region can never
+// displace a sibling — the root cause of the previous overlap/push bugs.
+// Rows are auto-sized except the battlefield, which absorbs leftover height.
+const GRID = {
+  gridTemplateColumns: '1fr',
+  gridTemplateRows: 'auto auto auto auto 1fr auto auto auto',
+  gridTemplateAreas:
+    '"topbar" "help" "opp-points" "opp-persistent" "battlefield" "player-persistent" "hand" "player-points"',
+};
+
 export default function GameBoard() {
   const navigate = useNavigate();
   const [state, setState] = useState(null);
@@ -168,7 +180,7 @@ export default function GameBoard() {
     setState(newState);
     setSelectedCardId(null);
     setShowCardDetail(null);
-    if (!success) return; // blocked by an effect — stay in board_dev
+    if (!success) return; // blocked by an effect — stay in main
     setBoardDevUsed(true);
     // If the response window auto-closed (no rhetoric), the engine already
     // ended the turn — sync local phase to the opponent's draw phase.
@@ -178,7 +190,7 @@ export default function GameBoard() {
       setBoardDevUsed(false);
     }
     // If a response window is active, the engine ends the turn when it closes.
-  }, [state, phase, selectedCardId, boardDevUsed]);
+  }, [state, phase, selectedCardId, boardDevUsed, actionsPlayed]);
 
   const handlePlayAction = useCallback((cardArg) => {
     if (!state || state.currentPlayer !== 'player' || phase !== 'main' || state.responseWindow?.active) return;
@@ -237,33 +249,39 @@ export default function GameBoard() {
     <div className="h-screen cosmic-shell text-term-text font-mono relative overflow-hidden">
       <CosmicBackground density={45} />
 
-      <div className="relative z-10 h-full p-2 md:p-3 flex flex-col gap-2">
-        {/* Top bar */}
-        <div className="flex justify-between items-center shrink-0">
+      <div className="relative z-10 h-full p-2 md:p-3 grid gap-2" style={GRID}>
+        {/* ── topbar ── */}
+        <div style={{ gridArea: 'topbar' }} className="flex justify-between items-center">
           <button onClick={() => navigate('/')} className="text-term-dim hover:text-term-green transition-colors">
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <div className="text-term-faint text-ui-sm tracking-[0.15em]">
+          <div className="text-term-faint text-ui-sm tracking-[0.15em] text-center">
             TURN {state.turn + 1} — {isPlayerTurn ? 'YOUR TURN' : 'OPPONENT TURN'}
             {!isPlayerTurn && !inResponseWindow && (
               <span className="text-term-purple animate-pulse ml-2">[ THINKING... ]</span>
             )}
           </div>
-          <div className="w-5"></div>
+          <div className="w-5" />
         </div>
 
-        {/* Persistent help panel */}
-        <HelpPanel
-          phase={inResponseWindow ? 'response' : phase}
-          isPlayerTurn={isPlayerTurn}
-          boardDevUsed={boardDevUsed}
-          actionsPlayed={actionsPlayed}
-          actionAllowance={getActionAllowance(state, 'player')}
-        />
+        {/* ── help ── */}
+        <div style={{ gridArea: 'help' }}>
+          <HelpPanel
+            phase={inResponseWindow ? 'response' : phase}
+            isPlayerTurn={isPlayerTurn}
+            boardDevUsed={boardDevUsed}
+            actionsPlayed={actionsPlayed}
+            actionAllowance={getActionAllowance(state, 'player')}
+          />
+        </div>
 
-        {/* Opponent strip — centered points + hand count */}
-        <div className="shrink-0 px-3 py-2 rounded glass-panel cosmic-sheen flex items-center justify-center relative transition-all"
-          style={{ borderColor: !isPlayerTurn && !inResponseWindow ? 'rgba(168,85,247,0.3)' : 'rgba(168,85,247,0.12)' }}
+        {/* ── opp-points ── centered tracker; HAND count pinned right ── */}
+        <div
+          style={{
+            gridArea: 'opp-points',
+            borderColor: !isPlayerTurn && !inResponseWindow ? 'rgba(168,85,247,0.3)' : 'rgba(168,85,247,0.12)',
+          }}
+          className="px-3 py-2 rounded glass-panel cosmic-sheen flex items-center justify-center relative transition-all"
         >
           <PointTracker player={opponent} isOpponent />
           <div className="absolute right-3 top-1/2 -translate-y-1/2 text-term-faint text-ui-sm font-mono">
@@ -271,38 +289,16 @@ export default function GameBoard() {
           </div>
         </div>
 
-        {/* Central zone: persistent rows bracketing the battlefield (fills remaining height) */}
-        <div className="flex-1 flex flex-col min-h-0 gap-2">
-          {/* Opponent persistent slots — dedicated battlefield row */}
-          <div className="shrink-0">
-            <PersistentSlots slots={opponent.persistentSlots} onSlotClick={handleInspectPlaced} />
-          </div>
-
-          {/* Battlefield — opponent queue | Domain | player queue */}
-          <div className="flex-1 flex items-center justify-center gap-6 min-h-0 overflow-hidden">
-            <Queue queuedCards={opponent.queue} isActive={!isPlayerTurn} className="flex-1 min-w-0 justify-center" />
-            <Domain domain={state.domain} modifiers={state.domainModifiers} onDomainClick={handleInspectDomain} />
-            <Queue queuedCards={player.queue} isActive={isPlayerTurn} className="flex-1 min-w-0 justify-center" />
-          </div>
-
-          {/* Player persistent slots — dedicated battlefield row */}
-          <div className="shrink-0">
-            <PersistentSlots slots={player.persistentSlots} onSlotClick={handleInspectPlaced} />
-          </div>
+        {/* ── opp-persistent ── */}
+        <div style={{ gridArea: 'opp-persistent' }} className="flex justify-center items-center">
+          <PersistentSlots slots={opponent.persistentSlots} onSlotClick={handleInspectPlaced} />
         </div>
 
-        {/* Hand — its own centered row */}
-        <div className="shrink-0 flex justify-center">
-          <Hand
-            cards={player.hand}
-            onSelectCard={handleSelectCard}
-            selectedCardId={selectedCardId}
-            disabled={!isPlayerTurn}
-          />
-        </div>
-
-        {/* Draw piles — own element, far-left, above the points bar */}
-        <div className="shrink-0 flex justify-start">
+        {/* ── battlefield ── DrawPiles | opponent queue | Domain | player queue ── */}
+        <div
+          style={{ gridArea: 'battlefield' }}
+          className="flex items-center justify-center gap-6 min-h-0 overflow-hidden"
+        >
           <DrawPiles
             piles={{
               metaphysics: state.drawPiles.metaphysics,
@@ -311,11 +307,33 @@ export default function GameBoard() {
             onDraw={handleDraw}
             disabled={!isPlayerTurn || phase !== 'draw' || inResponseWindow}
           />
+          <Queue queuedCards={opponent.queue} isActive={!isPlayerTurn} className="flex-1 min-w-0 justify-center" />
+          <Domain domain={state.domain} modifiers={state.domainModifiers} onDomainClick={handleInspectDomain} />
+          <Queue queuedCards={player.queue} isActive={isPlayerTurn} className="flex-1 min-w-0 justify-center" />
         </div>
 
-        {/* Player points bar — centered victory standard */}
-        <div className="shrink-0 px-3 py-2 rounded glass-panel cosmic-sheen flex items-center justify-center relative"
-          style={{ borderColor: isPlayerTurn && !inResponseWindow ? 'rgba(0,255,65,0.3)' : 'rgba(168,85,247,0.12)' }}
+        {/* ── player-persistent ── */}
+        <div style={{ gridArea: 'player-persistent' }} className="flex justify-center items-center">
+          <PersistentSlots slots={player.persistentSlots} onSlotClick={handleInspectPlaced} />
+        </div>
+
+        {/* ── hand ── */}
+        <div style={{ gridArea: 'hand' }} className="flex justify-center items-center">
+          <Hand
+            cards={player.hand}
+            onSelectCard={handleSelectCard}
+            selectedCardId={selectedCardId}
+            disabled={!isPlayerTurn}
+          />
+        </div>
+
+        {/* ── player-points ── centered tracker; End Turn pinned right ── */}
+        <div
+          style={{
+            gridArea: 'player-points',
+            borderColor: isPlayerTurn && !inResponseWindow ? 'rgba(0,255,65,0.3)' : 'rgba(168,85,247,0.12)',
+          }}
+          className="px-3 py-2 rounded glass-panel cosmic-sheen flex items-center justify-center relative"
         >
           <PointTracker player={player} />
           {phase === 'main' && isPlayerTurn && !inResponseWindow && (
