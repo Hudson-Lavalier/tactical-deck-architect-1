@@ -106,6 +106,17 @@ export function createInitialState(playerSelection, opponentSelection) {
     roundCount: 0,        // full rounds completed (for terrain point generation)
     log: [],              // game event log
     winner: null,
+    responseWindow: {
+      active: false,
+      activeCard: null,
+      activePlayerId: null,
+      respondingPlayerId: null,
+      chain: [],
+      cancelled: false,
+      source: null,       // 'queue' | 'action'
+    },
+    pendingResolutions: [], // cards waiting to resolve through response windows
+    npcActionCount: 0,    // NPC actions played this turn
   };
 }
 

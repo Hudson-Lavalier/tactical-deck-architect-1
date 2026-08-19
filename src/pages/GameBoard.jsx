@@ -6,7 +6,9 @@ import { createInitialState, cloneState } from '@/engine/gameState';
 import { drawCard, endTurn, startTurn, placePersistent, changeDomain } from '@/engine/turnManager';
 import { enqueueCard } from '@/engine/queueSystem';
 import { determinePlayMode, canPlayActionCard, getActionAllowance } from '@/engine/resolutionEngine';
-import { executeNPCTurn } from '@/logic/npcAI';
+import { playRhetoricResponse, passResponse } from '@/engine/responseSystem';
+import { executeNPCTurn, npcPlayNextAction, npcDecideRhetoric } from '@/logic/npcAI';
+import ResponseWindow from '@/components/game/ResponseWindow';
 
 import Hand from '@/components/game/Hand';
 import PersistentSlots from '@/components/game/PersistentSlots';
@@ -50,10 +52,11 @@ export default function GameBoard() {
     setState(cloneState(initialState));
   }, []);
 
-  // NPC turn handling
+  // NPC turn: draw, board dev, start actions
   useEffect(() => {
     if (!state || state.winner) return;
-    if (state.currentPlayer === 'opponent') {
+    if (state.responseWindow?.active) return;
+    if (state.currentPlayer === 'opponent' && state.phase === 'draw') {
       const timer = setTimeout(() => {
         const newState = cloneState(state);
         executeNPCTurn(newState);
@@ -63,7 +66,40 @@ export default function GameBoard() {
       }, 1000);
       return () => clearTimeout(timer);
     }
-  }, [state?.currentPlayer, state?.winner]);
+  }, [state?.currentPlayer, state?.phase, state?.winner, state?.responseWindow?.active]);
+
+  // NPC action continuation: play next action after response window closes
+  useEffect(() => {
+    if (!state || state.winner) return;
+    if (state.responseWindow?.active) return;
+    if (state.currentPlayer === 'opponent' && state.phase === 'action') {
+      const timer = setTimeout(() => {
+        const newState = cloneState(state);
+        npcPlayNextAction(newState);
+        setState(newState);
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [state?.currentPlayer, state?.phase, state?.responseWindow?.active, state?.winner]);
+
+  // NPC response: decide whether to counter during response window
+  useEffect(() => {
+    if (!state || state.winner) return;
+    if (!state.responseWindow?.active) return;
+    if (state.responseWindow.respondingPlayerId !== 'opponent') return;
+
+    const timer = setTimeout(() => {
+      const newState = cloneState(state);
+      const decision = npcDecideRhetoric(newState);
+      if (decision) {
+        playRhetoricResponse(newState, 'opponent', decision.cardId, decision.action);
+      } else {
+        passResponse(newState, 'opponent');
+      }
+      setState(newState);
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, [state?.responseWindow?.active, state?.responseWindow?.respondingPlayerId]);
 
   // Handle draw from a pile
   const handleDraw = useCallback((pileId) => {
@@ -104,7 +140,7 @@ export default function GameBoard() {
 
   // Handle playing an action card
   const handlePlayAction = useCallback(() => {
-    if (!state || state.currentPlayer !== 'player' || phase !== 'action') return;
+    if (!state || state.currentPlayer !== 'player' || phase !== 'action' || state.responseWindow?.active) return;
     if (!selectedCardId) return;
 
     const player = state.players.player;
@@ -151,6 +187,7 @@ export default function GameBoard() {
   const opponent = state.players.opponent;
   const isPlayerTurn = state.currentPlayer === 'player';
   const selectedCard = player.hand.find((c) => c.id === selectedCardId);
+  const inResponseWindow = state.responseWindow?.active;
 
   return (
     <div className="min-h-screen bg-[#000000] text-[#e0e0e0] font-mono relative overflow-hidden">
@@ -220,7 +257,7 @@ export default function GameBoard() {
 
           {/* Action buttons */}
           <div className="mt-3 flex gap-2 justify-center">
-            {phase === 'board_dev' && selectedCard && selectedCard.category === 'terrain' && (
+            {!inResponseWindow && phase === 'board_dev' && selectedCard && selectedCard.category === 'terrain' && (
               <button
                 onClick={handleChangeDomain}
                 className="px-4 py-2 border border-[#a855f7] text-[#a855f7] rounded text-xs hover:bg-[#a855f7] hover:text-black transition-all"
@@ -228,7 +265,7 @@ export default function GameBoard() {
                 CHANGE DOMAIN
               </button>
             )}
-            {phase === 'action' && selectedCard && selectedCard.category === 'moral_judgment' && (
+            {!inResponseWindow && phase === 'action' && selectedCard && selectedCard.category === 'moral_judgment' && (
               <button
                 onClick={handlePlayAction}
                 disabled={actionsPlayed >= getActionAllowance(state, 'player')}
@@ -237,7 +274,7 @@ export default function GameBoard() {
                 PLAY ACTION [{actionsPlayed}/{getActionAllowance(state, 'player')}]
               </button>
             )}
-            {phase !== 'draw' && (
+            {!inResponseWindow && phase !== 'draw' && (
               <button
                 onClick={handleEndTurn}
                 className="px-4 py-2 border border-[#00ff41] text-[#00ff41] rounded text-xs hover:bg-[#00ff41] hover:text-black transition-all"
@@ -258,6 +295,24 @@ export default function GameBoard() {
           </div>
         </div>
       </div>
+
+      {/* Response window for the player */}
+      {inResponseWindow && state.responseWindow.respondingPlayerId === 'player' && (
+        <ResponseWindow
+          activeCard={state.responseWindow.activeCard}
+          rhetoricCards={player.rhetoricHand}
+          onCounter={(cardId, action) => {
+            const newState = cloneState(state);
+            playRhetoricResponse(newState, 'player', cardId, action);
+            setState(newState);
+          }}
+          onPass={() => {
+            const newState = cloneState(state);
+            passResponse(newState, 'player');
+            setState(newState);
+          }}
+        />
+      )}
 
       {/* Victory overlay */}
       {state.winner && (

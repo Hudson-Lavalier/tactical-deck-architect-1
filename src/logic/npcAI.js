@@ -92,34 +92,12 @@ function decideBoardDevelopment(state) {
   return false; // no board development
 }
 
-// Decide action phase plays
-function decideActions(state) {
-  const player = state.players[state.currentPlayer];
-  const allowance = getActionAllowance(state, state.currentPlayer);
-  let actionsPlayed = 0;
+// decideActions is replaced by npcPlayNextAction (step-by-step action phase).
 
-  // Find playable action cards
-  const actionCards = player.hand.filter((c) =>
-    c && c.category === 'moral_judgment'
-  );
-
-  for (const card of actionCards) {
-    if (actionsPlayed >= allowance) break;
-    if (!canPlayActionCard(state, state.currentPlayer, card)) continue;
-
-    // Random chance to play (adds variability)
-    if (Math.random() < 0.6) {
-      const playMode = determinePlayMode(state, card);
-      enqueueCard(state, state.currentPlayer, card, playMode.speed);
-      // Remove from hand
-      const idx = player.hand.findIndex((c) => c.id === card.id);
-      if (idx !== -1) player.hand.splice(idx, 1);
-      actionsPlayed++;
-    }
-  }
-}
-
-// Main NPC turn execution
+// Main NPC turn execution.
+// Draws, does board development, and starts the action phase.
+// The action phase is step-by-step: npcPlayNextAction plays actions one at a time.
+// If a response window opens (advantaged card), execution pauses until the window closes.
 export function executeNPCTurn(state) {
   // Phase 1: Draw
   const pileId = pickDrawPile(state);
@@ -132,9 +110,67 @@ export function executeNPCTurn(state) {
   // If domain was changed, turn already ended
   if (state.currentPlayer !== 'opponent') return;
 
-  // Phase 3: Action Phase
-  decideActions(state);
+  // Phase 3: Action Phase (start)
+  state.phase = 'action';
+  state.npcActionCount = 0;
+  npcPlayNextAction(state);
+}
 
-  // Phase 4: End turn
+// Play the next NPC action or end turn.
+// Called by executeNPCTurn (to start the action phase) and by the UI
+// (after a response window closes, to continue the action phase).
+export function npcPlayNextAction(state) {
+  if (state.currentPlayer !== 'opponent') return;
+  if (state.responseWindow?.active) return;
+
+  const player = state.players[state.currentPlayer];
+  const allowance = getActionAllowance(state, state.currentPlayer);
+
+  // Try to play actions up to the allowance
+  const triedCards = new Set();
+
+  while (state.npcActionCount < allowance) {
+    const actionCards = player.hand.filter((c) =>
+      c && c.category === 'moral_judgment' && !triedCards.has(c.id)
+    );
+    const playableCards = actionCards.filter((c) => canPlayActionCard(state, state.currentPlayer, c));
+
+    if (playableCards.length === 0) break;
+
+    const card = playableCards[Math.floor(Math.random() * playableCards.length)];
+    triedCards.add(card.id);
+
+    if (Math.random() < 0.6) {
+      const playMode = determinePlayMode(state, card);
+      enqueueCard(state, state.currentPlayer, card, playMode.speed);
+      const idx = player.hand.findIndex((c) => c.id === card.id);
+      if (idx !== -1) player.hand.splice(idx, 1);
+      state.npcActionCount++;
+
+      // If a response window opened (advantaged card), pause execution
+      if (state.responseWindow?.active) return;
+    }
+  }
+
+  // No more actions or allowance reached, end turn
+  state.npcActionCount = 0;
   endTurn(state);
+}
+
+// NPC reactive rhetoric decision.
+// Decides whether to counter the active card during a response window.
+export function npcDecideRhetoric(state) {
+  if (!state.responseWindow?.active) return null;
+  if (state.responseWindow.respondingPlayerId !== 'opponent') return null;
+
+  const player = state.players.opponent;
+  if (player.rhetoricHand.length === 0) return null;
+
+  // Simple heuristic: random chance to counter (no card effects defined yet)
+  if (Math.random() < 0.4) {
+    const card = player.rhetoricHand[0];
+    return { cardId: card.id, action: 'counter' };
+  }
+
+  return null; // Pass
 }

@@ -9,22 +9,16 @@
 
 import { DRAW_PILES, RHETORIC_DRAW_INTERVAL } from '../data/gameConstants';
 import { logEvent } from './gameState';
-import { advanceQueue, resolveQueuedCards } from './queueSystem';
+import { advanceQueue, collectResolvableCards } from './queueSystem';
 import { generateDomainPoints } from './domainSystem';
 import { checkVictory } from '../data/victoryProfiles';
+import { openResponseWindow } from './responseSystem';
 
-// Start a player's turn.
-// Queue advancement and resolution happen HERE (when it comes back to this player),
-// not at the end of the previous player's turn.
-// Victory is checked AFTER resolution — the opponent had their full turn to disrupt.
-export function startTurn(state) {
+// Proceed with the turn after all queue resolutions are complete.
+// Called by startTurn (when no cards to resolve) or by closeResponseWindow
+// (after the last response window closes).
+export function proceedWithTurn(state) {
   const player = state.players[state.currentPlayer];
-  player.personalTurnCount++;
-  state.phase = 'draw';
-
-  // Advance queue and resolve (cards come back to this player)
-  advanceQueue(state, state.currentPlayer);
-  resolveQueuedCards(state, state.currentPlayer);
 
   // Check victory (after all resolutions — opponent had their turn to disrupt)
   if (checkVictory(player.points, player.victoryProfile)) {
@@ -41,7 +35,34 @@ export function startTurn(state) {
     drawRhetoricCard(state);
   }
 
+  state.phase = 'draw';
   logEvent(state, { type: 'turn_start', player: state.currentPlayer });
+}
+
+// Start a player's turn.
+// Queue advancement happens HERE (when it comes back to this player).
+// Cards that are ready to resolve are collected and processed through
+// response windows (one at a time). When all are resolved, proceedWithTurn
+// is called (victory check, rhetoric draw).
+export function startTurn(state) {
+  const player = state.players[state.currentPlayer];
+  player.personalTurnCount++;
+  state.phase = 'draw';
+
+  // Advance queue (cards come back to this player)
+  advanceQueue(state, state.currentPlayer);
+
+  // Collect cards that are ready to resolve (row <= 0)
+  collectResolvableCards(state, state.currentPlayer);
+
+  // If there are pending resolutions, open response window for the first
+  if (state.pendingResolutions.length > 0) {
+    const first = state.pendingResolutions[0];
+    openResponseWindow(state, first.card, first.playerId, 'queue');
+  } else {
+    // No cards to resolve, proceed with turn
+    proceedWithTurn(state);
+  }
 }
 
 // Draw a card from the specified pile

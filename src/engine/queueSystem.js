@@ -18,6 +18,7 @@
 
 import { QUEUE_LIMIT, RESOLUTION_SPEED } from '../data/gameConstants';
 import { logEvent } from './gameState';
+import { openResponseWindow } from './responseSystem';
 
 // Determine resolution speed for a card given the active domain
 export function getResolutionSpeed(card, domain) {
@@ -56,19 +57,20 @@ export function getStartingRow(speed) {
   }
 }
 
-// Add a card to the queue
+// Add a card to the queue.
+// Advantaged cards open a response window instead of resolving immediately.
+// The card resolves when the window closes (if not cancelled).
 export function enqueueCard(state, playerId, card, speed) {
   const player = state.players[playerId];
+
+  if (speed === RESOLUTION_SPEED.ADVANTAGED) {
+    openResponseWindow(state, card, playerId, 'action');
+    return true;
+  }
 
   if (player.queue.length >= player.queueLimit) {
     logEvent(state, { type: 'queue_full', playerId });
     return false;
-  }
-
-  if (speed === RESOLUTION_SPEED.ADVANTAGED) {
-    // Immediate resolution — bypass queue
-    resolveCard(state, playerId, card);
-    return true;
   }
 
   const row = getStartingRow(speed);
@@ -95,16 +97,16 @@ export function advanceQueue(state, playerId) {
   logEvent(state, { type: 'queue_advance', playerId });
 }
 
-// Resolve cards that have advanced past Row 1 (row <= 0)
-export function resolveQueuedCards(state, playerId) {
+// Collect cards that have advanced past Row 1 (row <= 0) and move them to
+// pending resolutions. They will be resolved through response windows.
+export function collectResolvableCards(state, playerId) {
   const player = state.players[playerId];
-  const toResolve = [];
   const remaining = [];
 
   for (const queued of player.queue) {
     if (queued.row <= 0) {
       queued.faceDown = false;
-      toResolve.push(queued);
+      state.pendingResolutions.push({ card: queued.card, playerId });
     } else {
       remaining.push(queued);
     }
@@ -112,12 +114,8 @@ export function resolveQueuedCards(state, playerId) {
 
   player.queue = remaining;
 
-  for (const queued of toResolve) {
-    resolveCard(state, playerId, queued.card);
-  }
-
-  if (toResolve.length > 0) {
-    logEvent(state, { type: 'queue_resolve', playerId, count: toResolve.length });
+  if (state.pendingResolutions.length > 0) {
+    logEvent(state, { type: 'queue_collect', playerId, count: state.pendingResolutions.length });
   }
 }
 
