@@ -231,11 +231,23 @@ export function getParadigmsByFamily(familyId) {
   return Object.values(EPISTEMOLOGIES).filter((p) => p.family === familyId);
 }
 
-// Helper: get alignment array from 3 selected paradigm ids
+// Helper: get alignment array from 3 selected paradigm ids (one per family — legacy)
 export function getAlignmentsFromSelection(orientationId, structureId, knowledgeId) {
   return [
     EPISTEMOLOGIES[orientationId]?.alignment,
     EPISTEMOLOGIES[structureId]?.alignment,
     EPISTEMOLOGIES[knowledgeId]?.alignment,
   ].filter(Boolean);
+}
+
+// Helper: get alignment array from 3 paradigm IDs (any 3 from any family — free selection)
+export function getAlignmentsFromParadigmIds(paradigmIds) {
+  return paradigmIds
+    .map((id) => EPISTEMOLOGIES[id]?.alignment)
+    .filter(Boolean);
+}
+
+// Helper: get paradigm objects from an array of IDs
+export function getParadigmsByIds(ids) {
+  return ids.map((id) => EPISTEMOLOGIES[id]).filter(Boolean);
 }

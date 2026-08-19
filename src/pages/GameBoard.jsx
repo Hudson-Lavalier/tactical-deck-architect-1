@@ -18,6 +18,7 @@ import Domain from '@/components/game/Domain';
 import Queue from '@/components/game/Queue';
 import DrawPiles from '@/components/game/DrawPiles';
 import PointTracker from '@/components/game/PointTracker';
+import { EPISTEMOLOGIES } from '@/data/epistemologies';
 
 // GameBoard — the main game screen.
 // Single-player vs hardcoded NPC (multiplayer canceled per user directive).
@@ -33,24 +34,23 @@ export default function GameBoard() {
 
   // Initialize game on mount
   useEffect(() => {
-    const stored = sessionStorage.getItem('epistemologySelection');
+    const stored = sessionStorage.getItem('selectedBuild');
     let playerSelection;
     if (stored) {
-      playerSelection = JSON.parse(stored);
+      const build = JSON.parse(stored);
+      playerSelection = { paradigms: build.paradigms.map((p) => p.id) };
     } else {
       // Default selection if none stored
-      playerSelection = { orientation: 'empiricism', structure: 'foundationalism', knowledge: 'infallibilism' };
+      playerSelection = { paradigms: ['empiricism', 'foundationalism', 'infallibilism'] };
     }
 
-    // NPC gets a random valid selection
-    const npcOptions = ['empiricism', 'rationalism', 'pragmatism'];
-    const npcStructure = ['foundationalism', 'coherentism', 'infinitism'];
-    const npcKnowledge = ['infallibilism', 'fallibilism', 'contextualism'];
-    const opponentSelection = {
-      orientation: npcOptions[Math.floor(Math.random() * npcOptions.length)],
-      structure: npcStructure[Math.floor(Math.random() * npcStructure.length)],
-      knowledge: npcKnowledge[Math.floor(Math.random() * npcKnowledge.length)],
-    };
+    // NPC gets a random selection (any 3 from any family)
+    const allParadigmIds = Object.keys(EPISTEMOLOGIES);
+    const npcParadigms = [];
+    for (let i = 0; i < 3; i++) {
+      npcParadigms.push(allParadigmIds[Math.floor(Math.random() * allParadigmIds.length)]);
+    }
+    const opponentSelection = { paradigms: npcParadigms };
 
     const difficulty = parseInt(sessionStorage.getItem('gameDifficulty') || '3');
     const initialState = createInitialState(playerSelection, opponentSelection, difficulty);
@@ -211,8 +211,8 @@ export default function GameBoard() {
 
   if (!state) {
     return (
-      <div className="min-h-screen bg-[#000] flex items-center justify-center text-[#00ff41] font-mono">
-        <div className="animate-pulse">INITIALIZING...</div>
+      <div className="min-h-screen bg-term-bg flex items-center justify-center text-term-green font-mono">
+        <div className="animate-pulse text-ui-lg">INITIALIZING...</div>
       </div>
     );
   }
@@ -236,20 +236,20 @@ export default function GameBoard() {
           <button onClick={() => navigate('/')} className="text-[#888] hover:text-[#00ff41] transition-colors">
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <div className="text-[#555] text-xs tracking-wider">
+          <div className="text-term-faint text-ui-sm tracking-wider">
             TURN {state.turn + 1} — {isPlayerTurn ? 'YOUR TURN' : 'OPPONENT TURN'} — PHASE: {phase.toUpperCase()}
             {!isPlayerTurn && !inResponseWindow && (
-              <span className="text-[#a855f7] animate-pulse ml-2">[ THINKING... ]</span>
+              <span className="text-term-purple animate-pulse ml-2">[ THINKING... ]</span>
             )}
           </div>
           <div className="w-5"></div>
         </div>
 
         {/* Opponent area */}
-        <div className={`mb-4 p-2 border rounded bg-[#0a0a0a] ${!isPlayerTurn && !inResponseWindow ? 'border-[#a855f7]/50' : 'border-[#1a1a2e]'}`}>
+        <div className={`mb-4 p-3 border-2 rounded bg-term-panel ${!isPlayerTurn && !inResponseWindow ? 'border-term-purple/50' : 'border-term-border'}`}>
           <div className="flex justify-between items-center">
             <PointTracker player={opponent} isOpponent />
-            <div className="text-[#555] text-xs font-mono">
+            <div className="text-term-faint text-ui-sm font-mono">
               HAND: {opponent.hand.length + opponent.rhetoricHand.length}
             </div>
           </div>
@@ -287,7 +287,7 @@ export default function GameBoard() {
         </div>
 
         {/* Player area */}
-        <div className={`mt-4 p-2 border rounded bg-[#0a0a0a] ${isPlayerTurn && !inResponseWindow ? 'border-[#00ff41]/50' : 'border-[#1a1a2e]'}`}>
+        <div className={`mt-4 p-3 border-2 rounded bg-term-panel ${isPlayerTurn && !inResponseWindow ? 'border-term-green/50' : 'border-term-border'}`}>
           <PointTracker player={player} />
           <div className="mt-2">
             <PersistentSlots
@@ -302,7 +302,7 @@ export default function GameBoard() {
             {!inResponseWindow && phase === 'board_dev' && selectedCard && selectedCard.category === 'terrain' && (
               <button
                 onClick={handleChangeDomain}
-                className="px-4 py-2 border border-[#a855f7] text-[#a855f7] rounded text-xs hover:bg-[#a855f7] hover:text-black transition-all"
+                className="px-4 py-2 border-2 border-term-purple text-term-purple rounded text-ui-sm hover:bg-term-purple hover:text-term-bg transition-all"
               >
                 CHANGE DOMAIN
               </button>
@@ -311,7 +311,7 @@ export default function GameBoard() {
               <button
                 onClick={handlePlayAction}
                 disabled={actionsPlayed >= getActionAllowance(state, 'player')}
-                className="px-4 py-2 border border-[#00ffff] text-[#00ffff] rounded text-xs hover:bg-[#00ffff] hover:text-black transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                className="px-4 py-2 border-2 border-term-blue text-term-blue rounded text-ui-sm hover:bg-term-blue hover:text-term-bg transition-all disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 PLAY ACTION [{actionsPlayed}/{getActionAllowance(state, 'player')}]
               </button>
@@ -319,7 +319,7 @@ export default function GameBoard() {
             {!inResponseWindow && phase !== 'draw' && (
               <button
                 onClick={handleEndTurn}
-                className="px-4 py-2 border border-[#00ff41] text-[#00ff41] rounded text-xs hover:bg-[#00ff41] hover:text-black transition-all"
+                className="px-4 py-2 border-2 border-term-green text-term-green rounded text-ui-sm hover:bg-term-green hover:text-term-bg transition-all"
               >
                 END TURN
               </button>
@@ -353,18 +353,18 @@ export default function GameBoard() {
       {/* End turn confirmation */}
       {showEndTurnDialog && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-40 font-mono">
-          <div className="border-2 border-[#00ff41] bg-[#0a0a0a] p-6 rounded max-w-sm text-center">
-            <div className="text-[#00ff41] text-sm tracking-wider mb-4">END YOUR TURN?</div>
+          <div className="border-2 border-term-green bg-term-panel p-6 rounded max-w-sm text-center">
+            <div className="text-term-green text-ui-md tracking-wider mb-4">END YOUR TURN?</div>
             <div className="flex gap-3 justify-center">
               <button
                 onClick={handleConfirmEndTurn}
-                className="px-6 py-2 border-2 border-[#00ff41] text-[#00ff41] rounded text-xs hover:bg-[#00ff41] hover:text-black transition-all"
+                className="px-6 py-2 border-2 border-term-green text-term-green rounded text-ui-sm hover:bg-term-green hover:text-term-bg transition-all"
               >
                 CONFIRM
               </button>
               <button
                 onClick={() => setShowEndTurnDialog(false)}
-                className="px-6 py-2 border-2 border-[#555] text-[#555] rounded text-xs hover:bg-[#555] hover:text-black transition-all"
+                className="px-6 py-2 border-2 border-term-border-hover text-term-faint rounded text-ui-sm hover:bg-term-border-hover hover:text-term-bg transition-all"
               >
                 CANCEL
               </button>
@@ -373,10 +373,8 @@ export default function GameBoard() {
         </div>
       )}
 
-      {/* Game log */}
-      <div className="relative z-10 px-4 pb-2">
-        <GameLog log={state.log} />
-      </div>
+      {/* Game log — fixed right-side collapsible panel */}
+      <GameLog log={state.log} />
 
       {/* Response window for the player */}
       {inResponseWindow && state.responseWindow.respondingPlayerId === 'player' && (
@@ -399,15 +397,15 @@ export default function GameBoard() {
       {/* Victory overlay */}
       {state.winner && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-          <div className="border-2 border-[#00ff41] bg-[#0a0a0a] p-8 rounded text-center shadow-[0_0_40px_rgba(0,255,65,0.3)]">
-            <Trophy className="w-16 h-16 text-[#00ff41] mx-auto mb-4" />
-            <div className="text-3xl text-[#00ff41] font-bold tracking-widest mb-2">
+          <div className="border-2 border-term-green bg-term-panel p-8 rounded text-center shadow-[0_0_40px_rgba(0,255,65,0.3)]">
+            <Trophy className="w-16 h-16 text-term-green mx-auto mb-4" />
+            <div className="text-ui-xl text-term-green font-bold tracking-widest mb-2">
               {state.winner === 'player' ? 'VICTORY' : state.winner === 'tie' ? 'DRAW' : 'DEFEAT'}
             </div>
-            <div className="text-[#555] text-xs mb-6">[ FINAL BOARD STATE VISIBLE BEHIND ]</div>
+            <div className="text-term-faint text-ui-xs mb-6">[ FINAL BOARD STATE VISIBLE BEHIND ]</div>
             <button
               onClick={() => navigate('/')}
-              className="px-6 py-2 border-2 border-[#00ff41] text-[#00ff41] rounded text-xs hover:bg-[#00ff41] hover:text-black transition-all"
+              className="px-6 py-2 border-2 border-term-green text-term-green rounded text-ui-sm hover:bg-term-green hover:text-term-bg transition-all"
             >
               RETURN TO MENU
             </button>

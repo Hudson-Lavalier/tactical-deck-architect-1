@@ -45,6 +45,12 @@ export function proceedWithTurn(state) {
 // Check if both draw piles are empty and both players have no cards.
 // If so, calculate who's closest to their victory profile.
 function checkDeckExhaustion(state) {
+  // Guard: don't trigger exhaustion if the game started with no cards
+  // (all card arrays are empty during prototyping — prevents instant draw)
+  if (state.totalCards === 0) return false;
+  // Guard: don't check on the very first turn (give player a chance to play)
+  if (state.turn < 1) return false;
+
   const metaphysicsEmpty = state.drawPiles.metaphysics.length === 0;
   const metaEthicsEmpty = state.drawPiles.meta_ethics.length === 0;
   const playerHandEmpty = state.players.player.hand.length === 0 && state.players.player.rhetoricHand.length === 0;

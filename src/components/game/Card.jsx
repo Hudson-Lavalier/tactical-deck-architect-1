@@ -55,7 +55,7 @@ export default function Card({ card, faceDown = false, size = 'normal', onClick,
         {/* Header */}
         <div className="flex justify-between items-start mb-1">
           <span className={`${textClass} font-bold`}>
-            {alignment?.label || '?'}
+            {alignment?.name || '?'}
           </span>
           {card.artUrl && (
             <span className="text-[#888] text-[8px]">[IMG]</span>

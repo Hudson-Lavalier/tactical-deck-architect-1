@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { ScrollText, X } from 'lucide-react';
 
 const EVENT_LABELS = {
   turn_start: 'TURN START',
@@ -26,36 +27,49 @@ const EVENT_LABELS = {
   deck_exhaustion: 'DECK EXHAUSTION',
 };
 
+// GameLog — collapsible hovering panel on the right side.
+// Toggle button is always visible on the right edge.
+// Panel slides out when expanded.
 export default function GameLog({ log }) {
-  const [collapsed, setCollapsed] = useState(false);
+  const [open, setOpen] = useState(false);
 
   return (
-    <div className="border border-[#1a1a2e] rounded bg-[#0a0a0a] p-2 font-mono text-[10px]">
+    <>
+      {/* Toggle button — always visible on right edge */}
       <button
-        onClick={() => setCollapsed(!collapsed)}
-        className="text-[#555] tracking-wider w-full text-left flex justify-between items-center hover:text-[#888] transition-colors"
+        onClick={() => setOpen(!open)}
+        className="fixed right-0 top-1/2 -translate-y-1/2 z-30 px-2 py-6 bg-term-panel border-l-2 border-y-2 border-term-border rounded-l-lg hover:border-term-green transition-colors"
+        title="Game Log"
       >
-        <span>── GAME LOG ──</span>
-        <span>{collapsed ? '[+]' : '[-]'}</span>
+        <ScrollText className={`w-5 h-5 ${open ? 'text-term-green' : 'text-term-dim'}`} />
       </button>
-      {!collapsed && (
-        <div className="h-28 overflow-y-auto mt-1">
-          {log.length === 0 ? (
-            <div className="text-[#333]">[ NO EVENTS ]</div>
-          ) : (
-            log.slice(-60).map((entry, i) => (
-              <div key={i} className="text-[#666] flex gap-2 leading-tight">
-                <span className="text-[#444]">T{entry.turn}</span>
-                <span className="text-[#a855f7] w-12">
-                  {entry.player ? entry.player.toUpperCase().slice(0, 4) : '----'}
-                </span>
-                <span className="text-[#888]">{EVENT_LABELS[entry.type] || entry.type}</span>
-                {entry.cardId && <span className="text-[#666]">[{entry.cardId}]</span>}
-              </div>
-            ))
-          )}
+
+      {/* Slide-out panel */}
+      {open && (
+        <div className="fixed right-0 top-0 bottom-0 w-80 max-w-[85vw] z-30 bg-term-panel border-l-2 border-term-border flex flex-col shadow-2xl">
+          <div className="flex justify-between items-center p-3 border-b border-term-border">
+            <span className="text-term-dim text-ui-sm tracking-wider font-bold font-mono">GAME LOG</span>
+            <button onClick={() => setOpen(false)} className="text-term-dim hover:text-term-green transition-colors">
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+          <div className="flex-1 overflow-y-auto p-3 font-mono text-ui-xs">
+            {log.length === 0 ? (
+              <div className="text-term-faint">[ NO EVENTS ]</div>
+            ) : (
+              log.slice(-100).reverse().map((entry, i) => (
+                <div key={i} className="flex gap-2 leading-relaxed mb-1.5">
+                  <span className="text-term-faint">T{entry.turn}</span>
+                  <span className="text-term-purple w-14 shrink-0">
+                    {entry.player ? entry.player.toUpperCase().slice(0, 4) : '----'}
+                  </span>
+                  <span className="text-term-text">{EVENT_LABELS[entry.type] || entry.type}</span>
+                </div>
+              ))
+            )}
+          </div>
         </div>
       )}
-    </div>
+    </>
   );
 }

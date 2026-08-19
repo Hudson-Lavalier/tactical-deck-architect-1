@@ -3,6 +3,7 @@ import { ALIGNMENT_COLORS } from './terminalTheme';
 import { POINT_LIMIT } from '@/data/gameConstants';
 
 // PointTracker — displays a player's point breakdown and victory profile.
+// Uses type names (Grounding/System/Adaptation) instead of A/B/C labels.
 export default function PointTracker({ player, isOpponent = false }) {
   if (!player) return null;
 
@@ -10,19 +11,19 @@ export default function PointTracker({ player, isOpponent = false }) {
   const total = points.A + points.B + points.C;
 
   return (
-    <div className={`flex flex-col gap-1 font-mono ${isOpponent ? 'text-[10px]' : 'text-xs'}`}>
-      <div className="text-[#555] tracking-wider">
+    <div className={`flex flex-col gap-1.5 font-mono ${isOpponent ? 'text-ui-xs' : 'text-ui-sm'}`}>
+      <div className="text-term-faint tracking-wider font-bold">
         {isOpponent ? 'OPPONENT' : 'YOU'} — {total}/{POINT_LIMIT}
       </div>
 
-      <div className="flex gap-3">
+      <div className="flex gap-4">
         {Object.entries(ALIGNMENT_COLORS).map(([key, info]) => (
-          <div key={key} className="flex items-center gap-1">
-            <span style={{ color: info.glow }} className="font-bold">{info.label}</span>
-            <span style={{ color: info.glow }}>
+          <div key={key} className="flex items-center gap-1.5">
+            <span style={{ color: info.glow }} className="font-bold">{info.name}</span>
+            <span style={{ color: info.glow }} className="font-bold">
               {points[key]}
               {victoryProfile && (
-                <span className="text-[#555]">/{victoryProfile[key]}</span>
+                <span className="text-term-faint font-normal">/{victoryProfile[key]}</span>
               )}
             </span>
           </div>
@@ -30,7 +31,7 @@ export default function PointTracker({ player, isOpponent = false }) {
       </div>
 
       {/* Progress bar */}
-      <div className="w-full h-1 bg-[#111] rounded overflow-hidden">
+      <div className="w-full h-1.5 bg-term-border rounded overflow-hidden">
         <div
           className="h-full transition-all duration-300"
           style={{

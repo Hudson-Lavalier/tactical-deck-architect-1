@@ -41,6 +41,31 @@
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* ── Terminal UI Typography ── */
+    --ui-text-xl: 1.75rem;
+    --ui-text-lg: 1.25rem;
+    --ui-text-md: 1rem;
+    --ui-text-sm: 0.875rem;
+    --ui-text-xs: 0.75rem;
+
+    /* ── Type Colors ── */
+    --type-grounding: #00ff41;
+    --type-system: #00ffff;
+    --type-adaptation: #a855f7;
+
+    /* ── Terminal UI Colors ── */
+    --term-bg: #000000;
+    --term-bg-panel: #0a0a0a;
+    --term-bg-card: #0d0d12;
+    --term-border: #1a1a2e;
+    --term-border-hover: #333333;
+    --term-text: #e0e0e0;
+    --term-text-dim: #888888;
+    --term-text-faint: #555555;
+    --term-purple: #a855f7;
+    --term-green: #00ff41;
+    --term-blue: #00ffff;
   }
 
   .dark {

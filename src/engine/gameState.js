@@ -4,7 +4,7 @@
 
 import { HAND_LIMIT, QUEUE_LIMIT, POINT_LIMIT, DRAW_PILES } from '../data/gameConstants';
 import { getVictoryProfile } from '../data/victoryProfiles';
-import { getAlignmentsFromSelection } from '../data/epistemologies';
+import { getAlignmentsFromSelection, getAlignmentsFromParadigmIds } from '../data/epistemologies';
 import { buildDrawPiles } from '../data/cards';
 
 // Shuffle helper (Fisher-Yates)
@@ -26,15 +26,24 @@ export function cloneState(state) {
 
 // Create a player's board state
 function createPlayerState(playerId, epistemologySelection, isPlayerOne) {
-  return {
-    id: playerId,
-    isPlayerOne,
-    epistemologies: epistemologySelection, // { orientation, structure, knowledge }
-    alignments: getAlignmentsFromSelection(
+  // Support new format { paradigms: [id1, id2, id3] } (any 3 from any family)
+  // and old format { orientation, structure, knowledge } (one per family)
+  let alignments;
+  if (epistemologySelection.paradigms) {
+    alignments = getAlignmentsFromParadigmIds(epistemologySelection.paradigms);
+  } else {
+    alignments = getAlignmentsFromSelection(
       epistemologySelection.orientation,
       epistemologySelection.structure,
       epistemologySelection.knowledge,
-    ),
+    );
+  }
+
+  return {
+    id: playerId,
+    isPlayerOne,
+    epistemologies: epistemologySelection,
+    alignments,
     victoryProfile: null, // computed after selection
     hand: [],             // max HAND_LIMIT
     handLimit: HAND_LIMIT,
@@ -66,6 +75,7 @@ function createPlayerState(playerId, epistemologySelection, isPlayerOne) {
 // Create the full initial game state
 export function createInitialState(playerSelection, opponentSelection, difficulty = 3) {
   const piles = buildDrawPiles();
+  const totalCards = piles.metaphysics.length + piles.metaEthics.length + piles.rhetoric.length;
 
   const player = createPlayerState('player', playerSelection, true);
   const opponent = createPlayerState('opponent', opponentSelection, false);
@@ -118,6 +128,7 @@ export function createInitialState(playerSelection, opponentSelection, difficult
     },
     pendingResolutions: [], // cards waiting to resolve through response windows
     npcActionCount: 0,    // NPC actions played this turn
+    totalCards,           // total cards in game (0 during prototyping — guards exhaustion)
   };
 }
 
