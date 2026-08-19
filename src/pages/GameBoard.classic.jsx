@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Trophy } from 'lucide-react';
+import { ArrowLeft, Trophy } from 'lucide-react';
 
 import CosmicBackground from '@/components/CosmicBackground';
 import { createInitialState, cloneState } from '@/engine/gameState';
@@ -9,25 +9,28 @@ import { enqueueCard } from '@/engine/queueSystem';
 import { determinePlayMode, canPlayActionCard, getActionAllowance } from '@/engine/resolutionEngine';
 import { playRhetoricResponse, passResponse } from '@/engine/responseSystem';
 import { executeNPCTurn, npcPlayNextAction, npcDecideRhetoric } from '@/logic/npcAI';
-
-// Reused modal/overlay + strip components (rendered flat above the tilted board)
 import ResponseWindow from '@/components/game/ResponseWindow';
 import GameLog from '@/components/game/GameLog';
 import CardDetail from '@/components/game/CardDetail';
 import HelpPanel from '@/components/game/HelpPanel';
 
-// Fresh 2.5D presentational components (on the tilted plane)
-import BoardSurface from '@/components/game25d/BoardSurface';
-import TopBar from '@/components/game25d/TopBar';
-import PointsBar from '@/components/game25d/PointsBar';
-import PersistentRow from '@/components/game25d/PersistentRow';
-import Battlefield from '@/components/game25d/Battlefield';
-import HandFan from '@/components/game25d/HandFan';
+import Hand from '@/components/game/Hand';
+import PersistentSlots from '@/components/game/PersistentSlots';
+import Domain from '@/components/game/Domain';
+import Queue from '@/components/game/Queue';
+import DrawPiles from '@/components/game/DrawPiles';
+import PointTracker from '@/components/game/PointTracker';
 import { EPISTEMOLOGIES } from '@/data/epistemologies';
 
-// GameBoard (2.5D) — single forced-perspective tilted plane.
-// All game logic/engine is reused unchanged from the classic version; only the
-// presentational surface is new. Modals/overlays render flat above the board.
+// GameBoard (CLASSIC BACKUP) — flat grid layout, preserved for reference.
+// The active /play route uses src/pages/GameBoard.jsx (2.5D tilted version).
+const GRID = {
+  gridTemplateColumns: '1fr',
+  gridTemplateRows: 'auto auto auto auto 1fr auto auto auto',
+  gridTemplateAreas:
+    '"topbar" "help" "opp-points" "opp-persistent" "battlefield" "player-persistent" "hand" "player-points"',
+};
+
 export default function GameBoard() {
   const navigate = useNavigate();
   const [state, setState] = useState(null);
@@ -35,6 +38,7 @@ export default function GameBoard() {
   const [phase, setPhase] = useState('draw');
   const [actionsPlayed, setActionsPlayed] = useState(0);
   const [boardDevUsed, setBoardDevUsed] = useState(false);
+  const wasInResponseWindow = useRef(false);
   const [showCardDetail, setShowCardDetail] = useState(null);
   const [showEndTurnDialog, setShowEndTurnDialog] = useState(false);
 
@@ -107,6 +111,15 @@ export default function GameBoard() {
     }, Math.max(700, 1800 - ((state.difficulty || 3) * 200)));
     return () => clearTimeout(timer);
   }, [state?.responseWindow?.active, state?.responseWindow?.respondingPlayerId]);
+
+  useEffect(() => {
+    if (!state) return;
+    if (state.responseWindow?.active) {
+      wasInResponseWindow.current = true;
+    } else if (wasInResponseWindow.current) {
+      wasInResponseWindow.current = false;
+    }
+  }, [state?.responseWindow?.active]);
 
   const handleDraw = useCallback((pileId) => {
     if (!state || state.currentPlayer !== 'player' || phase !== 'draw') return;
@@ -218,24 +231,25 @@ export default function GameBoard() {
   const opponent = state.players.opponent;
   const isPlayerTurn = state.currentPlayer === 'player';
   const inResponseWindow = state.responseWindow?.active;
-  const accent = isPlayerTurn ? '#00ff41' : '#a855f7';
 
   return (
     <div className="h-screen cosmic-shell text-term-text font-mono relative overflow-hidden">
       <CosmicBackground density={45} />
 
-      <BoardSurface accent={accent}>
-        {/* topbar */}
-        <div style={{ gridArea: 'topbar' }}>
-          <TopBar
-            turn={state.turn + 1}
-            isPlayerTurn={isPlayerTurn}
-            inResponseWindow={inResponseWindow}
-            onBack={() => navigate('/')}
-          />
+      <div className="relative z-10 h-full p-2 md:p-3 grid gap-2" style={GRID}>
+        <div style={{ gridArea: 'topbar' }} className="flex justify-between items-center">
+          <button onClick={() => navigate('/')} className="text-term-dim hover:text-term-green transition-colors">
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+          <div className="text-term-faint text-ui-sm tracking-[0.15em] text-center">
+            TURN {state.turn + 1} — {isPlayerTurn ? 'YOUR TURN' : 'OPPONENT TURN'}
+            {!isPlayerTurn && !inResponseWindow && (
+              <span className="text-term-purple animate-pulse ml-2">[ THINKING... ]</span>
+            )}
+          </div>
+          <div className="w-5" />
         </div>
 
-        {/* help */}
         <div style={{ gridArea: 'help' }}>
           <HelpPanel
             phase={inResponseWindow ? 'response' : phase}
@@ -246,52 +260,48 @@ export default function GameBoard() {
           />
         </div>
 
-        {/* opp-points */}
         <div
           style={{
             gridArea: 'opp-points',
             borderColor: !isPlayerTurn && !inResponseWindow ? 'rgba(168,85,247,0.3)' : 'rgba(168,85,247,0.12)',
           }}
-          className="px-3 py-1.5 rounded-lg glass-card cosmic-sheen flex items-center justify-center transition-all"
+          className="px-3 py-2 rounded glass-panel cosmic-sheen flex items-center justify-center relative transition-all"
         >
-          <PointsBar
-            player={opponent}
-            isOpponent
-            handCount={opponent.hand.length + opponent.rhetoricHand.length}
-          />
+          <PointTracker player={opponent} isOpponent />
+          <div className="absolute right-3 top-1/2 -translate-y-1/2 text-term-faint text-ui-sm font-mono">
+            HAND: {opponent.hand.length + opponent.rhetoricHand.length}
+          </div>
         </div>
 
-        {/* opp-persistent */}
         <div style={{ gridArea: 'opp-persistent' }} className="flex justify-center items-center">
-          <PersistentRow slots={opponent.persistentSlots} onSlotClick={handleInspectPlaced} />
+          <PersistentSlots slots={opponent.persistentSlots} onSlotClick={handleInspectPlaced} />
         </div>
 
-        {/* battlefield */}
-        <div style={{ gridArea: 'battlefield' }} className="min-h-0">
-          <Battlefield
-            drawPiles={{
-              metaphysics: state.drawPiles.metaphysics,
-              meta_ethics: state.drawPiles.meta_ethics,
-            }}
-            onDraw={handleDraw}
-            drawDisabled={!isPlayerTurn || phase !== 'draw' || inResponseWindow}
-            opponentQueue={opponent.queue}
-            playerQueue={player.queue}
-            isPlayerTurn={isPlayerTurn}
-            domain={state.domain}
-            modifiers={state.domainModifiers}
-            onDomainClick={handleInspectDomain}
-          />
+        <div
+          style={{ gridArea: 'battlefield' }}
+          className="relative flex items-center justify-center gap-6 min-h-0 overflow-hidden"
+        >
+          <div className="absolute left-0 top-1/2 -translate-y-1/2 z-10">
+            <DrawPiles
+              piles={{
+                metaphysics: state.drawPiles.metaphysics,
+                meta_ethics: state.drawPiles.meta_ethics,
+              }}
+              onDraw={handleDraw}
+              disabled={!isPlayerTurn || phase !== 'draw' || inResponseWindow}
+            />
+          </div>
+          <Queue queuedCards={opponent.queue} isActive={!isPlayerTurn} className="justify-center" />
+          <Domain domain={state.domain} modifiers={state.domainModifiers} onDomainClick={handleInspectDomain} />
+          <Queue queuedCards={player.queue} isActive={isPlayerTurn} className="justify-center" />
         </div>
 
-        {/* player-persistent */}
         <div style={{ gridArea: 'player-persistent' }} className="flex justify-center items-center">
-          <PersistentRow slots={player.persistentSlots} onSlotClick={handleInspectPlaced} />
+          <PersistentSlots slots={player.persistentSlots} onSlotClick={handleInspectPlaced} />
         </div>
 
-        {/* hand */}
-        <div style={{ gridArea: 'hand' }} className="flex justify-center items-end">
-          <HandFan
+        <div style={{ gridArea: 'hand' }} className="flex justify-center items-center">
+          <Hand
             cards={player.hand}
             onSelectCard={handleSelectCard}
             selectedCardId={selectedCardId}
@@ -299,15 +309,14 @@ export default function GameBoard() {
           />
         </div>
 
-        {/* player-points */}
         <div
           style={{
             gridArea: 'player-points',
             borderColor: isPlayerTurn && !inResponseWindow ? 'rgba(0,255,65,0.3)' : 'rgba(168,85,247,0.12)',
           }}
-          className="px-3 py-1.5 rounded-lg glass-card cosmic-sheen flex items-center justify-center relative transition-all"
+          className="px-3 py-2 rounded glass-panel cosmic-sheen flex items-center justify-center relative"
         >
-          <PointsBar player={player} handCount={player.hand.length + player.rhetoricHand.length} />
+          <PointTracker player={player} />
           {phase === 'main' && isPlayerTurn && !inResponseWindow && (
             <button
               onClick={handleEndTurn}
@@ -318,9 +327,7 @@ export default function GameBoard() {
             </button>
           )}
         </div>
-      </BoardSurface>
-
-      {/* ── Flat overlays (above the tilted plane) ── */}
+      </div>
 
       {showCardDetail && (
         <CardDetail
@@ -384,14 +391,8 @@ export default function GameBoard() {
 
       {state.winner && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
-          <div
-            className="glass-panel cosmic-sheen p-8 text-center"
-            style={{ borderColor: '#00ff4140', boxShadow: '0 0 48px rgba(0,255,65,0.25)' }}
-          >
-            <Trophy
-              className="w-16 h-16 text-term-green mx-auto mb-4"
-              style={{ filter: 'drop-shadow(0 0 12px rgba(0,255,65,0.5))' }}
-            />
+          <div className="glass-panel cosmic-sheen p-8 text-center" style={{ borderColor: '#00ff4140', boxShadow: '0 0 48px rgba(0,255,65,0.25)' }}>
+            <Trophy className="w-16 h-16 text-term-green mx-auto mb-4" style={{ filter: 'drop-shadow(0 0 12px rgba(0,255,65,0.5))' }} />
             <div className="text-ui-xl text-term-green font-bold tracking-[0.2em] mb-2">
               {state.winner === 'player' ? 'VICTORY' : state.winner === 'tie' ? 'DRAW' : 'DEFEAT'}
             </div>
