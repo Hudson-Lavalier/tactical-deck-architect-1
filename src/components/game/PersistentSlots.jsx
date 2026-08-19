@@ -1,7 +1,7 @@
 import React from 'react';
 import Card from './Card';
 
-// Persistent slots — 3 permanent card slots. Glass placeholders.
+// Persistent slots — dedicated horizontal battlefield row (3 slots, scaled up).
 export default function PersistentSlots({ slots, onSlotClick, disabled }) {
   const slotLabels = {
     left: 'THEORY OF TIME',
@@ -10,19 +10,19 @@ export default function PersistentSlots({ slots, onSlotClick, disabled }) {
   };
 
   return (
-    <div className="flex gap-2 justify-center">
+    <div className="flex gap-3 justify-center">
       {Object.entries(slots).map(([slot, card]) => (
         <div key={slot} className="flex flex-col items-center gap-1">
-          <div className="text-term-faint font-mono text-[8px] tracking-[0.15em]">
+          <div className="text-term-faint font-mono text-[9px] tracking-[0.15em]">
             {slotLabels[slot]}
           </div>
           {card ? (
-            <Card card={card} size="small" onClick={() => !disabled && onSlotClick?.(slot, card)} />
+            <Card card={card} size="medium" onClick={() => !disabled && onSlotClick?.(slot, card)} />
           ) : (
-            <div className="w-16 h-24 rounded glass-card flex items-center justify-center"
+            <div className="w-24 h-36 rounded glass-card flex items-center justify-center"
               style={{ borderColor: 'rgba(168,85,247,0.15)', borderStyle: 'dashed' }}
             >
-              <span className="text-term-faint font-mono text-[8px]">[ ]</span>
+              <span className="text-term-faint font-mono text-[9px]">[ ]</span>
             </div>
           )}
         </div>

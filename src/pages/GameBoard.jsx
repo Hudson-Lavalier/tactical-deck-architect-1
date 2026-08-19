@@ -211,12 +211,12 @@ export default function GameBoard() {
   const inResponseWindow = state.responseWindow?.active;
 
   return (
-    <div className="min-h-screen cosmic-shell text-term-text font-mono relative overflow-hidden">
+    <div className="h-screen cosmic-shell text-term-text font-mono relative overflow-hidden">
       <CosmicBackground density={45} />
 
-      <div className="relative z-10 p-2 md:p-4 min-h-screen flex flex-col">
+      <div className="relative z-10 h-full p-2 md:p-3 flex flex-col gap-2">
         {/* Top bar */}
-        <div className="flex justify-between items-center mb-2">
+        <div className="flex justify-between items-center shrink-0">
           <button onClick={() => navigate('/')} className="text-term-dim hover:text-term-green transition-colors">
             <ArrowLeft className="w-5 h-5" />
           </button>
@@ -229,91 +229,95 @@ export default function GameBoard() {
           <div className="w-5"></div>
         </div>
 
-        {/* Opponent area */}
-        <div className={`mb-3 p-3 rounded glass-panel cosmic-sheen transition-all ${!isPlayerTurn && !inResponseWindow ? '' : 'opacity-90'}`}
+        {/* Opponent strip — points + hand count */}
+        <div className="shrink-0 px-3 py-2 rounded glass-panel cosmic-sheen flex items-center justify-between transition-all"
           style={{ borderColor: !isPlayerTurn && !inResponseWindow ? 'rgba(168,85,247,0.3)' : 'rgba(168,85,247,0.12)' }}
         >
-          <div className="flex justify-between items-center">
-            <PointTracker player={opponent} isOpponent />
-            <div className="text-term-faint text-ui-sm font-mono">
-              HAND: {opponent.hand.length + opponent.rhetoricHand.length}
-            </div>
+          <PointTracker player={opponent} isOpponent />
+          <div className="text-term-faint text-ui-sm font-mono">
+            HAND: {opponent.hand.length + opponent.rhetoricHand.length}
           </div>
-          <div className="mt-2">
+        </div>
+
+        {/* Central zone: persistent rows bracketing the battlefield (fills remaining height) */}
+        <div className="flex-1 flex flex-col min-h-0 gap-2">
+          {/* Opponent persistent slots — dedicated battlefield row */}
+          <div className="shrink-0">
             <PersistentSlots slots={opponent.persistentSlots} disabled />
           </div>
-        </div>
 
-        {/* Main board area */}
-        <div className="flex-1 flex gap-4 items-center justify-center min-h-0">
-          <DrawPiles
-            piles={{
-              metaphysics: state.drawPiles.metaphysics,
-              meta_ethics: state.drawPiles.meta_ethics,
-            }}
-            onDraw={handleDraw}
-            disabled={!isPlayerTurn || phase !== 'draw'}
-          />
-
-          <div className="flex flex-col items-center gap-3">
-            <Queue queuedCards={opponent.queue} isActive={!isPlayerTurn} />
+          {/* Battlefield row — DrawPiles | opp queue | Domain | player queue, edge-to-edge */}
+          <div className="flex-1 flex items-center gap-4 min-h-0 overflow-hidden">
+            <DrawPiles
+              piles={{
+                metaphysics: state.drawPiles.metaphysics,
+                meta_ethics: state.drawPiles.meta_ethics,
+              }}
+              onDraw={handleDraw}
+              disabled={!isPlayerTurn || phase !== 'draw'}
+            />
+            <Queue queuedCards={opponent.queue} isActive={!isPlayerTurn} className="flex-1 min-w-0" />
             <Domain domain={state.domain} modifiers={state.domainModifiers} />
-            <Queue queuedCards={player.queue} isActive={isPlayerTurn} />
+            <Queue queuedCards={player.queue} isActive={isPlayerTurn} className="flex-1 min-w-0" />
           </div>
-        </div>
 
-        {/* Player area */}
-        <div className="mt-3 p-3 rounded glass-panel cosmic-sheen"
-          style={{ borderColor: isPlayerTurn && !inResponseWindow ? 'rgba(0,255,65,0.3)' : 'rgba(168,85,247,0.12)' }}
-        >
-          <PointTracker player={player} />
-          <div className="mt-2">
+          {/* Player persistent slots — dedicated battlefield row */}
+          <div className="shrink-0">
             <PersistentSlots
               slots={player.persistentSlots}
               onSlotClick={handlePlacePersistent}
               disabled={!isPlayerTurn || phase !== 'board_dev' || !selectedCardId}
             />
           </div>
+        </div>
 
-          <div className="mt-3 flex gap-2 justify-center">
-            {!inResponseWindow && phase === 'board_dev' && selectedCard && selectedCard.category === 'domain' && (
-              <button
-                onClick={handleChangeDomain}
-                className="px-4 py-2 rounded text-ui-sm glass-card cosmic-sheen transition-all hover:scale-105"
-                style={{ borderColor: '#a855f740', color: '#a855f7' }}
-              >
-                CHANGE DOMAIN
-              </button>
-            )}
-            {!inResponseWindow && phase === 'action' && selectedCard && selectedCard.category === 'moral_judgment' && (
-              <button
-                onClick={handlePlayAction}
-                disabled={actionsPlayed >= getActionAllowance(state, 'player')}
-                className="px-4 py-2 rounded text-ui-sm glass-card cosmic-sheen transition-all hover:scale-105 disabled:opacity-40 disabled:cursor-not-allowed"
-                style={{ borderColor: '#00ffff40', color: '#00ffff' }}
-              >
-                PLAY ACTION [{actionsPlayed}/{getActionAllowance(state, 'player')}]
-              </button>
-            )}
-            {!inResponseWindow && phase !== 'draw' && (
-              <button
-                onClick={handleEndTurn}
-                className="px-4 py-2 rounded text-ui-sm glass-card cosmic-sheen transition-all hover:scale-105"
-                style={{ borderColor: '#00ff4140', color: '#00ff41' }}
-              >
-                END TURN
-              </button>
-            )}
+        {/* Player strip — points + action buttons */}
+        <div className="shrink-0 px-3 py-2 rounded glass-panel cosmic-sheen"
+          style={{ borderColor: isPlayerTurn && !inResponseWindow ? 'rgba(0,255,65,0.3)' : 'rgba(168,85,247,0.12)' }}
+        >
+          <div className="flex items-center justify-between gap-3">
+            <PointTracker player={player} />
+            <div className="flex gap-2 shrink-0">
+              {!inResponseWindow && phase === 'board_dev' && selectedCard && selectedCard.category === 'domain' && (
+                <button
+                  onClick={handleChangeDomain}
+                  className="px-4 py-2 rounded text-ui-sm glass-card cosmic-sheen transition-all hover:scale-105"
+                  style={{ borderColor: '#a855f740', color: '#a855f7' }}
+                >
+                  CHANGE DOMAIN
+                </button>
+              )}
+              {!inResponseWindow && phase === 'action' && selectedCard && selectedCard.category === 'moral_judgment' && (
+                <button
+                  onClick={handlePlayAction}
+                  disabled={actionsPlayed >= getActionAllowance(state, 'player')}
+                  className="px-4 py-2 rounded text-ui-sm glass-card cosmic-sheen transition-all hover:scale-105 disabled:opacity-40 disabled:cursor-not-allowed"
+                  style={{ borderColor: '#00ffff40', color: '#00ffff' }}
+                >
+                  PLAY ACTION [{actionsPlayed}/{getActionAllowance(state, 'player')}]
+                </button>
+              )}
+              {!inResponseWindow && phase !== 'draw' && (
+                <button
+                  onClick={handleEndTurn}
+                  className="px-4 py-2 rounded text-ui-sm glass-card cosmic-sheen transition-all hover:scale-105"
+                  style={{ borderColor: '#00ff4140', color: '#00ff41' }}
+                >
+                  END TURN
+                </button>
+              )}
+            </div>
           </div>
+        </div>
 
-          <div className="mt-3">
-            <Hand
-              cards={player.hand}
-              onSelectCard={handleSelectCard}
-              selectedCardId={selectedCardId}
-              disabled={!isPlayerTurn}
-            />
-          </div>
+        {/* Hand */}
+        <div className="shrink-0">
+          <Hand
+            cards={player.hand}
+            onSelectCard={handleSelectCard}
+            selectedCardId={selectedCardId}
+            disabled={!isPlayerTurn}
+          />
         </div>
       </div>
 
