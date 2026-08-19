@@ -39,13 +39,18 @@ export default function Queue({ queuedCards, isActive, className = '' }) {
                 );
               }
 
-              return (
-                <div key={col} className="w-20 h-28 rounded glass-card flex items-center justify-center"
-                  style={{ borderColor: 'rgba(168,85,247,0.08)' }}
-                >
-                  <span className="text-term-faint font-mono text-[8px]">{row}T</span>
-                </div>
-              );
+              // Render 2 placeholder slots per column (queue limit 6 → 2×4=8 capacity).
+              // A rare 3rd card in a row still renders above these.
+              if (col < 2) {
+                return (
+                  <div key={col} className="w-20 h-28 rounded glass-card flex items-center justify-center"
+                    style={{ borderColor: 'rgba(168,85,247,0.08)' }}
+                  >
+                    <span className="text-term-faint font-mono text-[8px]">{row}T</span>
+                  </div>
+                );
+              }
+              return null;
             })}
           </div>
         ))}

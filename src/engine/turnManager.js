@@ -148,7 +148,19 @@ export function drawCard(state, pileId) {
     return null;
   }
 
-  const card = pile.shift();
+  // Bias draw toward temporary one-use cards (testing).
+  // 65% chance to pull a random temporary card from the pile if any exist.
+  const tempIndices = [];
+  for (let i = 0; i < pile.length; i++) {
+    if (pile[i]?.temporary) tempIndices.push(i);
+  }
+  let card;
+  if (tempIndices.length > 0 && Math.random() < 0.65) {
+    const pick = tempIndices[Math.floor(Math.random() * tempIndices.length)];
+    card = pile.splice(pick, 1)[0];
+  } else {
+    card = pile.shift();
+  }
   player.hand.push(card);
   logEvent(state, { type: 'draw', pile: pileId, cardId: card?.id });
   return card;

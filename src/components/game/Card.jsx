@@ -7,9 +7,9 @@ import { ALIGNMENT_COLORS, ALIGNMENT_GLOW, ALIGNMENT_TEXT } from './terminalThem
 const SIZES = {
   small:  { box: 'w-20 h-28', name: 'text-[9px]',  body: 'text-[7px]',  cat: 'text-[6px]',  label: 'text-[8px]'  },
   medium: { box: 'w-24 h-36', name: 'text-[10px]', body: 'text-[8px]',  cat: 'text-[7px]',  label: 'text-[9px]'  },
-  normal: { box: 'w-28 h-44', name: 'text-[11px]', body: 'text-[9px]',  cat: 'text-[7px]',  label: 'text-[10px]' },
-  large:  { box: 'w-36 h-52', name: 'text-[13px]', body: 'text-[10px]', cat: 'text-[8px]',  label: 'text-[11px]' },
-  xlarge: { box: 'w-52 h-72', name: 'text-[16px]', body: 'text-[12px]', cat: 'text-[9px]',  label: 'text-[13px]' },
+  normal: { box: 'w-28 h-40', name: 'text-[11px]', body: 'text-[9px]',  cat: 'text-[7px]',  label: 'text-[10px]' },
+  large:  { box: 'w-32 h-48', name: 'text-[13px]', body: 'text-[10px]', cat: 'text-[8px]',  label: 'text-[11px]' },
+  xlarge: { box: 'w-60 h-72', name: 'text-[18px]', body: 'text-[13px]', cat: 'text-[10px]', label: 'text-[14px]' },
 };
 
 export default function Card({ card, faceDown = false, size = 'normal', onClick, selected = false, disabled = false }) {

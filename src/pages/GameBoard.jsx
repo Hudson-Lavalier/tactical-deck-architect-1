@@ -12,6 +12,7 @@ import { executeNPCTurn, npcPlayNextAction, npcDecideRhetoric } from '@/logic/np
 import ResponseWindow from '@/components/game/ResponseWindow';
 import GameLog from '@/components/game/GameLog';
 import CardDetail from '@/components/game/CardDetail';
+import HelpPanel from '@/components/game/HelpPanel';
 
 import Hand from '@/components/game/Hand';
 import PersistentSlots from '@/components/game/PersistentSlots';
@@ -28,6 +29,7 @@ export default function GameBoard() {
   const [selectedCardId, setSelectedCardId] = useState(null);
   const [phase, setPhase] = useState('draw');
   const [actionsPlayed, setActionsPlayed] = useState(0);
+  const [boardDevUsed, setBoardDevUsed] = useState(false);
   const wasInResponseWindow = useRef(false);
   const [showCardDetail, setShowCardDetail] = useState(null);
   const [showEndTurnDialog, setShowEndTurnDialog] = useState(false);
@@ -65,6 +67,7 @@ export default function GameBoard() {
         setState(newState);
         setPhase('draw');
         setActionsPlayed(0);
+        setBoardDevUsed(false);
       }, Math.max(800, 2000 - ((state.difficulty || 3) * 200)));
       return () => clearTimeout(timer);
     }
@@ -113,6 +116,7 @@ export default function GameBoard() {
         } else if (state.phase === 'draw') {
           setPhase('draw');
           setActionsPlayed(0);
+          setBoardDevUsed(false);
         }
       }
     }
@@ -123,6 +127,7 @@ export default function GameBoard() {
     const newState = cloneState(state);
     drawCard(newState, pileId);
     setState(newState);
+    setBoardDevUsed(false);
     setPhase('board_dev');
   }, [state, phase]);
 
@@ -130,37 +135,57 @@ export default function GameBoard() {
     setShowCardDetail(card);
   }, []);
 
-  const handlePlacePersistent = useCallback((slot) => {
+  // Place a persistent card. Accepts either (slot) from a slot click or
+  // (card, slot) from the CardDetail "Place in Slot" button.
+  const handlePlacePersistent = useCallback((cardOrSlot, slotArg) => {
+    let cardId, slot;
+    if (slotArg) {
+      cardId = cardOrSlot?.id;
+      slot = slotArg;
+    } else {
+      cardId = selectedCardId;
+      slot = cardOrSlot;
+    }
     if (!state || state.currentPlayer !== 'player' || phase !== 'board_dev') return;
-    if (!selectedCardId) return;
+    if (!cardId || !slot || boardDevUsed) return;
     const newState = cloneState(state);
-    placePersistent(newState, selectedCardId, slot);
+    placePersistent(newState, cardId, slot);
     setState(newState);
     setSelectedCardId(null);
+    setShowCardDetail(null);
+    setBoardDevUsed(true);
     if (!newState.responseWindow?.active) {
       setPhase('action');
     }
-  }, [state, phase, selectedCardId]);
+  }, [state, phase, selectedCardId, boardDevUsed]);
 
-  const handleChangeDomain = useCallback(() => {
+  // Change the Domain. Per framework, this ends the turn — the engine handles
+  // the turn end via responseSystem.closeResponseWindow (source === 'domain').
+  // We must NOT override the phase here.
+  const handleChangeDomain = useCallback((cardArg) => {
+    const cardId = cardArg?.id || selectedCardId;
     if (!state || state.currentPlayer !== 'player' || phase !== 'board_dev') return;
-    if (!selectedCardId) return;
+    if (!cardId || boardDevUsed) return;
     const newState = cloneState(state);
-    changeDomain(newState, selectedCardId);
+    const success = changeDomain(newState, cardId);
     setState(newState);
     setSelectedCardId(null);
+    setShowCardDetail(null);
+    if (!success) return; // blocked by an effect — stay in board_dev
+    setBoardDevUsed(true);
+    // If the response window auto-closed (no rhetoric), the engine already
+    // ended the turn — sync local phase to the opponent's draw phase.
     if (!newState.responseWindow?.active) {
       setPhase('draw');
       setActionsPlayed(0);
+      setBoardDevUsed(false);
     }
-  }, [state, phase, selectedCardId]);
+    // If a response window is active, the engine ends the turn when it closes.
+  }, [state, phase, selectedCardId, boardDevUsed]);
 
-  const handlePlayAction = useCallback(() => {
+  const handlePlayAction = useCallback((cardArg) => {
     if (!state || state.currentPlayer !== 'player' || phase !== 'action' || state.responseWindow?.active) return;
-    if (!selectedCardId) return;
-
-    const player = state.players.player;
-    const card = player.hand.find((c) => c.id === selectedCardId);
+    const card = cardArg || state.players.player.hand.find((c) => c.id === selectedCardId);
     if (!card) return;
 
     const allowance = getActionAllowance(state, 'player');
@@ -176,6 +201,7 @@ export default function GameBoard() {
 
     setState(newState);
     setSelectedCardId(null);
+    setShowCardDetail(null);
     setActionsPlayed(actionsPlayed + 1);
   }, [state, phase, selectedCardId, actionsPlayed]);
 
@@ -192,6 +218,7 @@ export default function GameBoard() {
     setSelectedCardId(null);
     setPhase('draw');
     setActionsPlayed(0);
+    setBoardDevUsed(false);
     setShowEndTurnDialog(false);
   }, [state]);
 
@@ -207,7 +234,6 @@ export default function GameBoard() {
   const player = state.players.player;
   const opponent = state.players.opponent;
   const isPlayerTurn = state.currentPlayer === 'player';
-  const selectedCard = player.hand.find((c) => c.id === selectedCardId);
   const inResponseWindow = state.responseWindow?.active;
 
   return (
@@ -221,7 +247,7 @@ export default function GameBoard() {
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div className="text-term-faint text-ui-sm tracking-[0.15em]">
-            TURN {state.turn + 1} — {isPlayerTurn ? 'YOUR TURN' : 'OPPONENT TURN'} — PHASE: {phase.toUpperCase()}
+            TURN {state.turn + 1} — {isPlayerTurn ? 'YOUR TURN' : 'OPPONENT TURN'}
             {!isPlayerTurn && !inResponseWindow && (
               <span className="text-term-purple animate-pulse ml-2">[ THINKING... ]</span>
             )}
@@ -229,8 +255,17 @@ export default function GameBoard() {
           <div className="w-5"></div>
         </div>
 
+        {/* Persistent help panel */}
+        <HelpPanel
+          phase={inResponseWindow ? 'response' : phase}
+          isPlayerTurn={isPlayerTurn}
+          boardDevUsed={boardDevUsed}
+          actionsPlayed={actionsPlayed}
+          actionAllowance={getActionAllowance(state, 'player')}
+        />
+
         {/* Opponent strip — points + hand count */}
-        <div className="shrink-0 px-3 py-2 rounded glass-panel cosmic-sheen flex items-center justify-between transition-all"
+        <div className="shrink-0 px-3 py-1.5 rounded glass-panel cosmic-sheen flex items-center justify-between transition-all"
           style={{ borderColor: !isPlayerTurn && !inResponseWindow ? 'rgba(168,85,247,0.3)' : 'rgba(168,85,247,0.12)' }}
         >
           <PointTracker player={opponent} isOpponent />
@@ -246,67 +281,42 @@ export default function GameBoard() {
             <PersistentSlots slots={opponent.persistentSlots} disabled />
           </div>
 
-          {/* Battlefield row — DrawPiles | opp queue | Domain | player queue, edge-to-edge */}
-          <div className="flex-1 flex items-center gap-4 min-h-0 overflow-hidden">
-            <DrawPiles
-              piles={{
-                metaphysics: state.drawPiles.metaphysics,
-                meta_ethics: state.drawPiles.meta_ethics,
-              }}
-              onDraw={handleDraw}
-              disabled={!isPlayerTurn || phase !== 'draw'}
-            />
-            <Queue queuedCards={opponent.queue} isActive={!isPlayerTurn} className="flex-1 min-w-0" />
+          {/* Battlefield — queues flank the centered Domain (no DrawPiles offset) */}
+          <div className="flex-1 flex items-center justify-center gap-6 min-h-0 overflow-hidden">
+            <Queue queuedCards={opponent.queue} isActive={!isPlayerTurn} className="flex-1 min-w-0 justify-center" />
             <Domain domain={state.domain} modifiers={state.domainModifiers} />
-            <Queue queuedCards={player.queue} isActive={isPlayerTurn} className="flex-1 min-w-0" />
+            <Queue queuedCards={player.queue} isActive={isPlayerTurn} className="flex-1 min-w-0 justify-center" />
           </div>
 
           {/* Player persistent slots — dedicated battlefield row */}
           <div className="shrink-0">
-            <PersistentSlots
-              slots={player.persistentSlots}
-              onSlotClick={handlePlacePersistent}
-              disabled={!isPlayerTurn || phase !== 'board_dev' || !selectedCardId}
-            />
+            <PersistentSlots slots={player.persistentSlots} />
           </div>
         </div>
 
-        {/* Player strip — points + action buttons */}
-        <div className="shrink-0 px-3 py-2 rounded glass-panel cosmic-sheen"
+        {/* Player strip — draw piles + points + end turn */}
+        <div className="shrink-0 px-3 py-2 rounded glass-panel cosmic-sheen flex items-center justify-between gap-3"
           style={{ borderColor: isPlayerTurn && !inResponseWindow ? 'rgba(0,255,65,0.3)' : 'rgba(168,85,247,0.12)' }}
         >
-          <div className="flex items-center justify-between gap-3">
-            <PointTracker player={player} />
-            <div className="flex gap-2 shrink-0">
-              {!inResponseWindow && phase === 'board_dev' && selectedCard && selectedCard.category === 'domain' && (
-                <button
-                  onClick={handleChangeDomain}
-                  className="px-4 py-2 rounded text-ui-sm glass-card cosmic-sheen transition-all hover:scale-105"
-                  style={{ borderColor: '#a855f740', color: '#a855f7' }}
-                >
-                  CHANGE DOMAIN
-                </button>
-              )}
-              {!inResponseWindow && phase === 'action' && selectedCard && selectedCard.category === 'moral_judgment' && (
-                <button
-                  onClick={handlePlayAction}
-                  disabled={actionsPlayed >= getActionAllowance(state, 'player')}
-                  className="px-4 py-2 rounded text-ui-sm glass-card cosmic-sheen transition-all hover:scale-105 disabled:opacity-40 disabled:cursor-not-allowed"
-                  style={{ borderColor: '#00ffff40', color: '#00ffff' }}
-                >
-                  PLAY ACTION [{actionsPlayed}/{getActionAllowance(state, 'player')}]
-                </button>
-              )}
-              {!inResponseWindow && phase !== 'draw' && (
-                <button
-                  onClick={handleEndTurn}
-                  className="px-4 py-2 rounded text-ui-sm glass-card cosmic-sheen transition-all hover:scale-105"
-                  style={{ borderColor: '#00ff4140', color: '#00ff41' }}
-                >
-                  END TURN
-                </button>
-              )}
-            </div>
+          <DrawPiles
+            piles={{
+              metaphysics: state.drawPiles.metaphysics,
+              meta_ethics: state.drawPiles.meta_ethics,
+            }}
+            onDraw={handleDraw}
+            disabled={!isPlayerTurn || phase !== 'draw' || inResponseWindow}
+          />
+          <PointTracker player={player} />
+          <div className="flex gap-2 shrink-0">
+            {!inResponseWindow && phase !== 'draw' && isPlayerTurn && (
+              <button
+                onClick={handleEndTurn}
+                className="px-4 py-2 rounded text-ui-sm glass-card cosmic-sheen transition-all hover:scale-105"
+                style={{ borderColor: '#00ff4140', color: '#00ff41' }}
+              >
+                END TURN
+              </button>
+            )}
           </div>
         </div>
 
@@ -324,10 +334,15 @@ export default function GameBoard() {
       {showCardDetail && (
         <CardDetail
           card={showCardDetail}
-          onSelect={() => {
-            setSelectedCardId(showCardDetail.id);
-            setShowCardDetail(null);
-          }}
+          state={state}
+          phase={phase}
+          isPlayerTurn={isPlayerTurn}
+          boardDevUsed={boardDevUsed}
+          actionsPlayed={actionsPlayed}
+          actionAllowance={getActionAllowance(state, 'player')}
+          onPlacePersistent={handlePlacePersistent}
+          onChangeDomain={handleChangeDomain}
+          onPlayAction={handlePlayAction}
           onClose={() => setShowCardDetail(null)}
         />
       )}

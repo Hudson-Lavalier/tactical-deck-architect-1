@@ -22,6 +22,7 @@ import { moralRealityCards } from './moralReality';
 import { moralGroundingCards } from './moralGrounding';
 import { moralJudgmentCards } from './moralJudgment';
 import { rhetoricCards } from './rhetoric';
+import { testCards } from './testCards';
 
 export const ALL_CARDS = {
   [CARD_CATEGORIES.DOMAIN.id]: domainCards,
@@ -49,16 +50,26 @@ export function getCardById(id) {
 //   Metaphysics pile: Domain, Theory of Time, Universals
 //   Meta-Ethics pile: Moral Reality, Moral Grounding, Moral Judgment
 // (Rhetoric is drawn separately on a cadence, not from these piles.)
+//
+// Test action cards (temporary: true) are mixed in for testing so one-use
+// action cards appear in draws. They can be purged later by filtering
+// `temporary: true`.
 export function buildDrawPiles() {
+  const testUniversals = testCards.filter((c) => c.category === 'universals');
+  const testJudgment = testCards.filter((c) => c.category === 'moral_judgment');
+  const testRhetoric = testCards.filter((c) => c.category === 'rhetoric');
+
   const metaphysics = [
     ...domainCards,
     ...theoryOfTimeCards,
     ...universalsCards,
+    ...testUniversals,
   ];
   const metaEthics = [
     ...moralRealityCards,
     ...moralGroundingCards,
     ...moralJudgmentCards,
+    ...testJudgment,
   ];
-  return { metaphysics, metaEthics, rhetoric: [...rhetoricCards] };
+  return { metaphysics, metaEthics, rhetoric: [...rhetoricCards, ...testRhetoric] };
 }

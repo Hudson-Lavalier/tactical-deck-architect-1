@@ -9,7 +9,7 @@ export default function Hand({ cards, onSelectCard, selectedCardId, disabled }) 
   const maxVisible = HAND_LIMIT;
 
   return (
-    <div className="flex items-end justify-center gap-1.5 pb-2 min-h-[12rem] perspective-[1000px]">
+    <div className="flex items-end justify-center gap-1.5 pb-2 min-h-[11rem] perspective-[1000px]">
       {cards.slice(0, maxVisible).map((card, index) => {
         const midPoint = (Math.min(handCount, maxVisible) - 1) / 2;
         const offset = index - midPoint;

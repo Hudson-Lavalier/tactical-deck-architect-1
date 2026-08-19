@@ -15,6 +15,7 @@ export const testCards = [
     category: 'universals',
     subcategory: 'Test',
     test: true,
+    temporary: true,
     text: `TEST CARD — DELETE LATER.
 
 Attach to a queued card. That card's queue duration is extended by 1 turn.`,
@@ -26,6 +27,7 @@ Attach to a queued card. That card's queue duration is extended by 1 turn.`,
     category: 'universals',
     subcategory: 'Test',
     test: true,
+    temporary: true,
     text: `TEST CARD — DELETE LATER.
 
 Attach to a persistent card. That card generates 1 additional point of its type at the next round end.`,
@@ -37,6 +39,7 @@ Attach to a persistent card. That card generates 1 additional point of its type 
     category: 'universals',
     subcategory: 'Test',
     test: true,
+    temporary: true,
     text: `TEST CARD — DELETE LATER.
 
 Attach to a queued card. Removes any paused or delayed state from that card.`,
@@ -50,6 +53,7 @@ Attach to a queued card. Removes any paused or delayed state from that card.`,
     category: 'moral_judgment',
     subcategory: 'Test',
     test: true,
+    temporary: true,
     text: `TEST CARD — DELETE LATER.
 
 Remove 1 point from the opponent of the type they have the most of.`,
@@ -61,6 +65,7 @@ Remove 1 point from the opponent of the type they have the most of.`,
     category: 'moral_judgment',
     subcategory: 'Test',
     test: true,
+    temporary: true,
     text: `TEST CARD — DELETE LATER.
 
 Add 1 point to yourself matching the active Domain's type.`,
@@ -72,6 +77,7 @@ Add 1 point to yourself matching the active Domain's type.`,
     category: 'moral_judgment',
     subcategory: 'Test',
     test: true,
+    temporary: true,
     text: `TEST CARD — DELETE LATER.
 
 Place this card to immediately draw 2 cards from the Metaphysics pile.`,
@@ -85,6 +91,7 @@ Place this card to immediately draw 2 cards from the Metaphysics pile.`,
     category: 'rhetoric',
     subcategory: 'Test',
     test: true,
+    temporary: true,
     text: `TEST CARD — DELETE LATER.
 
 Cancel the target card's effect.`,
@@ -96,6 +103,7 @@ Cancel the target card's effect.`,
     category: 'rhetoric',
     subcategory: 'Test',
     test: true,
+    temporary: true,
     text: `TEST CARD — DELETE LATER.
 
 Protect the target card from the next opposing rhetoric card.`,
@@ -107,6 +115,7 @@ Protect the target card from the next opposing rhetoric card.`,
     category: 'rhetoric',
     subcategory: 'Test',
     test: true,
+    temporary: true,
     text: `TEST CARD — DELETE LATER.
 
 Add 1 turn to the target card's queue timer.`,
