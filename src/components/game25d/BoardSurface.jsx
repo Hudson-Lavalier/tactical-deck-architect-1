@@ -11,7 +11,7 @@ export default function BoardSurface({ children, accent = '#00ffff' }) {
         style={{
           width: '92%',
           height: '100%',
-          transform: 'rotateX(8deg) translateY(-32px)',
+          transform: 'rotateX(8deg) translateY(-30px)',
           transformOrigin: 'center 55%',
           gridTemplateColumns: '1fr',
           gridTemplateRows: 'auto auto auto auto 1fr auto auto auto',
