@@ -3,13 +3,14 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 // Carousel3D — true cylindrical 3D carousel. Cards sit on a drum
 // (rotateY(angle) translateZ(radius)) and the whole drum rotates as one.
-// Perspective magnifies whatever is pushed toward the camera, so each
-// card's CSS box is pre-shrunk by the exact inverse of that magnification
-// factor (P/(P−radius)) — the on-screen (post-transform) size of the
-// FRONT card always equals the requested itemWidth/itemHeight, so it can
-// never clip. Back-of-drum cards stay dimly visible (never opacity 0) as
-// they rotate around. Click uses a ref-based drag guard (not state) so a
-// quick tap is never dropped by a stale render closure.
+// Perspective magnifies whatever is pushed toward the camera, so the
+// front card's transform includes a compensating scale(boxScale) —
+// the CSS box itself stays at the true requested itemWidth/itemHeight
+// (never shrunk), only the rendered transform is scaled down so the
+// magnified result lands back at the requested size. Back-of-drum cards
+// stay dimly visible (never opacity 0) as they rotate around. Click uses
+// a ref-based drag guard (not state) so a quick tap is never dropped by
+// a stale render closure.
 export default function Carousel3D({
   items,
   renderItem,
@@ -34,18 +35,17 @@ export default function Carousel3D({
   const P = 1200; // fixed perspective depth (px)
   const angleStep = n > 0 ? 360 / n : 0;
 
-  // Cylindrical radius — geometric formula for even card spacing, capped
-  // so it never approaches P (which would blow up the compensation).
+  // Cylindrical radius — wide enough that adjacent card planes don't
+  // intersect, capped so it never approaches P (which would blow up scale).
   const rawRadius =
-    n <= 1 ? 0 : n <= 3 ? wNum * 0.7 : wNum / 2 / Math.tan(Math.PI / n) + wNum * 0.15;
+    n <= 1 ? 0 : n <= 3 ? wNum * 0.9 : (wNum / 2 / Math.tan(Math.PI / n)) * 1.35 + wNum * 0.3;
   const radius = Math.min(rawRadius, P * 0.45);
 
-  // Inverse-magnification box scale: shrink the CSS box now so that once
-  // the front card is pushed forward by `radius`, perspective magnifies it
-  // back to exactly the requested size.
+  // Inverse-magnification scale factor: perspective magnifies a plane
+  // pushed forward by `radius` by P/(P-radius); applying scale(boxScale)
+  // in the same transform cancels that out so the front card renders at
+  // exactly its true itemWidth/itemHeight.
   const boxScale = radius > 0 ? (P - radius) / P : 1;
-  const cssW = wNum * boxScale;
-  const cssH = hNum * boxScale;
 
   const rotateTo = useCallback(
     (index) => {
@@ -98,7 +98,7 @@ export default function Carousel3D({
   return (
     <div className="relative w-full flex flex-col items-center select-none">
       <div
-        className="relative w-full overflow-hidden touch-none"
+        className="relative w-full touch-none"
         style={{ height: `${hNum + 48}px`, perspective: `${P}px` }}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
@@ -129,14 +129,14 @@ export default function Carousel3D({
                 key={item.id || i}
                 className="absolute"
                 style={{
-                  width: dim(itemWidth, `${cssW}px`),
-                  height: dim(itemHeight, `${cssH}px`),
-                  marginLeft: `-${cssW / 2}px`,
-                  marginTop: `-${cssH / 2}px`,
+                  width: dim(itemWidth, `${wNum}px`),
+                  height: dim(itemHeight, `${hNum}px`),
+                  marginLeft: `-${wNum / 2}px`,
+                  marginTop: `-${hNum / 2}px`,
                   top: 0,
                   left: 0,
                   transformStyle: 'preserve-3d',
-                  transform: `rotateY(${cardAngle}deg) translateZ(${radius}px)`,
+                  transform: `rotateY(${cardAngle}deg) translateZ(${radius}px) scale(${boxScale})`,
                   transition: 'opacity 0.5s ease-out',
                   opacity,
                   zIndex: Math.round(1000 + cosVal * 100),
