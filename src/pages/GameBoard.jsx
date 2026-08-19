@@ -2,13 +2,11 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Trophy } from 'lucide-react';
 
-import { createInitialState } from '@/engine/gameState';
+import { createInitialState, cloneState } from '@/engine/gameState';
 import { drawCard, endTurn, startTurn, placePersistent, changeDomain } from '@/engine/turnManager';
 import { enqueueCard } from '@/engine/queueSystem';
 import { determinePlayMode, canPlayActionCard, getActionAllowance } from '@/engine/resolutionEngine';
 import { executeNPCTurn } from '@/logic/npcAI';
-import { getPointBreakdown } from '@/engine/pointSystem';
-import { EPISTEMOLOGIES } from '@/data/epistemologies';
 
 import Hand from '@/components/game/Hand';
 import PersistentSlots from '@/components/game/PersistentSlots';
@@ -48,9 +46,8 @@ export default function GameBoard() {
     };
 
     const initialState = createInitialState(playerSelection, opponentSelection);
-    setState(initialState);
     startTurn(initialState);
-    setState({ ...initialState });
+    setState(cloneState(initialState));
   }, []);
 
   // NPC turn handling
@@ -58,9 +55,9 @@ export default function GameBoard() {
     if (!state || state.winner) return;
     if (state.currentPlayer === 'opponent') {
       const timer = setTimeout(() => {
-        const newState = { ...state };
+        const newState = cloneState(state);
         executeNPCTurn(newState);
-        setState({ ...newState });
+        setState(newState);
         setPhase('draw');
         setActionsPlayed(0);
       }, 1000);
@@ -71,9 +68,9 @@ export default function GameBoard() {
   // Handle draw from a pile
   const handleDraw = useCallback((pileId) => {
     if (!state || state.currentPlayer !== 'player' || phase !== 'draw') return;
-    const newState = { ...state };
+    const newState = cloneState(state);
     drawCard(newState, pileId);
-    setState({ ...newState });
+    setState(newState);
     setPhase('board_dev');
   }, [state, phase]);
 
@@ -86,9 +83,9 @@ export default function GameBoard() {
   const handlePlacePersistent = useCallback((slot) => {
     if (!state || state.currentPlayer !== 'player' || phase !== 'board_dev') return;
     if (!selectedCardId) return;
-    const newState = { ...state };
+    const newState = cloneState(state);
     placePersistent(newState, selectedCardId, slot);
-    setState({ ...newState });
+    setState(newState);
     setSelectedCardId(null);
     setPhase('action');
   }, [state, phase, selectedCardId]);
@@ -97,9 +94,9 @@ export default function GameBoard() {
   const handleChangeDomain = useCallback(() => {
     if (!state || state.currentPlayer !== 'player' || phase !== 'board_dev') return;
     if (!selectedCardId) return;
-    const newState = { ...state };
+    const newState = cloneState(state);
     changeDomain(newState, selectedCardId);
-    setState({ ...newState });
+    setState(newState);
     setSelectedCardId(null);
     setPhase('draw');
     setActionsPlayed(0);
@@ -118,7 +115,7 @@ export default function GameBoard() {
     if (actionsPlayed >= allowance) return;
     if (!canPlayActionCard(state, 'player', card)) return;
 
-    const newState = { ...state };
+    const newState = cloneState(state);
     const playMode = determinePlayMode(newState, card);
     enqueueCard(newState, 'player', card, playMode.speed);
 
@@ -126,7 +123,7 @@ export default function GameBoard() {
     const idx = newState.players.player.hand.findIndex((c) => c.id === card.id);
     if (idx !== -1) newState.players.player.hand.splice(idx, 1);
 
-    setState({ ...newState });
+    setState(newState);
     setSelectedCardId(null);
     setActionsPlayed(actionsPlayed + 1);
   }, [state, phase, selectedCardId, actionsPlayed]);
@@ -134,9 +131,9 @@ export default function GameBoard() {
   // Handle ending turn
   const handleEndTurn = useCallback(() => {
     if (!state || state.currentPlayer !== 'player') return;
-    const newState = { ...state };
+    const newState = cloneState(state);
     endTurn(newState);
-    setState({ ...newState });
+    setState(newState);
     setSelectedCardId(null);
     setPhase('draw');
     setActionsPlayed(0);

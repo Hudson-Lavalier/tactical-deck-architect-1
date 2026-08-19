@@ -12,7 +12,9 @@ import { POINT_LIMIT, ALIGNMENT } from '../data/gameConstants';
 import { checkVictory } from '../data/victoryProfiles';
 import { logEvent } from './gameState';
 
-// Add points to a player (respects 12-point limit)
+// Add points to a player (respects 12-point limit).
+// Victory is NOT checked here — it is checked in startTurn() after a full round,
+// so the opponent gets a turn to disrupt before anyone wins.
 export function addPoints(state, playerId, type, amount) {
   const player = state.players[playerId];
   const currentTotal = player.points.A + player.points.B + player.points.C;
@@ -21,13 +23,6 @@ export function addPoints(state, playerId, type, amount) {
 
   player.points[type] += actual;
   logEvent(state, { type: 'points_added', playerId, pointType: type, amount: actual });
-
-  // Check victory
-  if (checkVictory(player.points, player.victoryProfile)) {
-    state.winner = playerId;
-    state.phase = 'game_over';
-    logEvent(state, { type: 'victory', playerId });
-  }
 
   return actual;
 }
@@ -50,21 +45,18 @@ export function stealPoints(state, fromPlayerId, toPlayerId, type, amount) {
   return gained;
 }
 
-// Convert points from one type to another
+// Convert points from one type to another.
+// A pure conversion removes and adds the same amount, so the total never changes
+// and the 12-point limit can never be exceeded by a conversion.
 export function convertPoints(state, playerId, fromType, toType, amount) {
   const player = state.players[playerId];
-  const currentTotal = player.points.A + player.points.B + player.points.C;
-  const space = POINT_LIMIT - currentTotal;
   const actualFrom = Math.min(amount, player.points[fromType]);
 
   player.points[fromType] -= actualFrom;
+  player.points[toType] += actualFrom;
 
-  // Converting doesn't add total, just changes type — but still respect limit
-  const actualTo = Math.min(actualFrom, Math.max(0, space + actualFrom));
-  player.points[toType] += actualTo;
-
-  logEvent(state, { type: 'points_converted', playerId, fromType, toType, amount: actualTo });
-  return actualTo;
+  logEvent(state, { type: 'points_converted', playerId, fromType, toType, amount: actualFrom });
+  return actualFrom;
 }
 
 // Get total points for a player

@@ -17,6 +17,13 @@ export function shuffle(array) {
   return arr;
 }
 
+// Deep clone state for safe mutation.
+// The engine mutates state in place; the UI must clone before any engine call
+// to avoid corrupting React's state references (shallow spread is not enough).
+export function cloneState(state) {
+  return JSON.parse(JSON.stringify(state));
+}
+
 // Create a player's board state
 function createPlayerState(playerId, epistemologySelection, isPlayerOne) {
   return {

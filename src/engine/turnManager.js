@@ -13,11 +13,26 @@ import { advanceQueue, resolveQueuedCards } from './queueSystem';
 import { generateDomainPoints } from './domainSystem';
 import { checkVictory } from '../data/victoryProfiles';
 
-// Start a player's turn
+// Start a player's turn.
+// Queue advancement and resolution happen HERE (when it comes back to this player),
+// not at the end of the previous player's turn.
+// Victory is checked AFTER resolution — the opponent had their full turn to disrupt.
 export function startTurn(state) {
   const player = state.players[state.currentPlayer];
   player.personalTurnCount++;
   state.phase = 'draw';
+
+  // Advance queue and resolve (cards come back to this player)
+  advanceQueue(state, state.currentPlayer);
+  resolveQueuedCards(state, state.currentPlayer);
+
+  // Check victory (after all resolutions — opponent had their turn to disrupt)
+  if (checkVictory(player.points, player.victoryProfile)) {
+    state.winner = state.currentPlayer;
+    state.phase = 'game_over';
+    logEvent(state, { type: 'victory', player: state.currentPlayer });
+    return;
+  }
 
   // Rhetoric draw check — every 5th personal turn
   player.rhetoricDrawCounter++;
@@ -98,38 +113,29 @@ export function changeDomain(state, cardId) {
   return true;
 }
 
-// End the current player's turn
+// End the current player's turn.
+// Queue advancement and victory check are handled by startTurn() for the NEXT player,
+// so that cards resolve "when it comes back to your turn" and victory is checked
+// only after the opponent had a full turn to disrupt.
 export function endTurn(state) {
   const player = state.players[state.currentPlayer];
 
-  // Advance queued cards (slide forward one row)
-  advanceQueue(state, state.currentPlayer);
-
-  // Check for queue resolutions (cards that pass Row 1)
-  resolveQueuedCards(state, state.currentPlayer);
-
-  // Decrement ability cooldowns
+  // Decrement ability cooldowns for the player ending their turn
   if (player.abilityCooldowns.orientation > 0) player.abilityCooldowns.orientation--;
   if (player.abilityCooldowns.knowledge > 0) player.abilityCooldowns.knowledge--;
-
-  // Check victory
-  if (checkVictory(player.points, player.victoryProfile)) {
-    state.winner = state.currentPlayer;
-    state.phase = 'game_over';
-    logEvent(state, { type: 'victory', player: state.currentPlayer });
-    return;
-  }
 
   // Switch player
   state.currentPlayer = state.currentPlayer === 'player' ? 'opponent' : 'player';
   state.turn++;
-  state.phase = 'draw';
 
   // Full round check (both players completed a turn)
   if (state.currentPlayer === 'player') {
     state.roundCount++;
     generateDomainPoints(state);
   }
+
+  // Start the next player's turn (advances queue, resolves, checks victory)
+  startTurn(state);
 
   logEvent(state, { type: 'turn_end' });
 }
