@@ -291,8 +291,18 @@ export default function GameBoard() {
           </div>
         </div>
 
-        {/* Draw piles (far-left) + hand — above the points bar */}
-        <div className="shrink-0 flex items-end gap-4">
+        {/* Hand — its own centered row */}
+        <div className="shrink-0 flex justify-center">
+          <Hand
+            cards={player.hand}
+            onSelectCard={handleSelectCard}
+            selectedCardId={selectedCardId}
+            disabled={!isPlayerTurn}
+          />
+        </div>
+
+        {/* Draw piles — own element, far-left, above the points bar */}
+        <div className="shrink-0 flex justify-start">
           <DrawPiles
             piles={{
               metaphysics: state.drawPiles.metaphysics,
@@ -301,14 +311,6 @@ export default function GameBoard() {
             onDraw={handleDraw}
             disabled={!isPlayerTurn || phase !== 'draw' || inResponseWindow}
           />
-          <div className="flex-1 flex justify-center pb-1">
-            <Hand
-              cards={player.hand}
-              onSelectCard={handleSelectCard}
-              selectedCardId={selectedCardId}
-              disabled={!isPlayerTurn}
-            />
-          </div>
         </div>
 
         {/* Player points bar — centered victory standard */}
