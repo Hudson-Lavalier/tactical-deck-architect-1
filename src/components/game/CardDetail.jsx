@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Card from './Card';
+import ItemViewer from './ItemViewer';
 import { ALIGNMENT_COLORS } from './terminalTheme';
 import { determinePlayMode } from '@/engine/resolutionEngine';
 
@@ -25,6 +26,7 @@ export default function CardDetail({
   onPlayAction,
   onClose,
 }) {
+  const [showViewer, setShowViewer] = useState(false);
   if (!card) return null;
 
   const alignment = card.alignment ? ALIGNMENT_COLORS[card.alignment] : null;
@@ -54,10 +56,11 @@ export default function CardDetail({
   const isAction = card.category === 'moral_judgment' || card.category === 'universals';
 
   return (
+    <>
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-40 font-mono" onClick={onClose}>
       <div className="glass-panel glass-blur cosmic-sheen p-6 max-w-md w-[90vw]" style={{ borderColor: `${accent}40`, boxShadow: `0 0 32px ${accent}20` }} onClick={(e) => e.stopPropagation()}>
         <div className="flex justify-center mb-4">
-          <Card card={card} size="large" />
+          <Card card={card} size="large" onClick={(e) => { e.stopPropagation(); setShowViewer(true); }} />
         </div>
         <div className="text-term-text text-sm mb-2 text-center font-bold">{card.name || 'UNNAMED CARD'}</div>
         <div className="text-term-dim text-xs mb-4 text-center leading-relaxed whitespace-pre-line max-h-40 overflow-y-auto">{card.text || card.description || '[ NO DESCRIPTION ]'}</div>
@@ -112,5 +115,7 @@ export default function CardDetail({
         </div>
       </div>
     </div>
+    {showViewer && <ItemViewer card={card} onClose={() => setShowViewer(false)} />}
+    </>
   );
 }
