@@ -18,6 +18,19 @@ const SIZES = {
   domain: { box: 'game-card-domain aspect-[5/7] w-44 max-w-full', name: 'text-[15px]', body: 'text-[9px]', cat: 'text-[8px]', label: 'text-[10px]' }
 };
 
+// Calculates dynamic font size based on title character count
+function getNameStyles(name = '', size = 'normal', defaultClass = '') {
+  const len = name.length;
+
+  if (size === 'hand' || size === 'small' || size === 'medium' || size === 'normal' || size === 'large') {
+    if (len > 22) return 'text-[8.5px] leading-[9.5px] tracking-tighter';
+    if (len > 15) return 'text-[10px] leading-[11px] tracking-tight';
+    if (len > 10) return 'text-[12px] leading-[13px] tracking-tight';
+  }
+
+  return defaultClass;
+}
+
 export default function Card({ card, faceDown = false, size = 'normal', onClick, selected = false, disabled = false }) {
   if (!card && !faceDown) return null;
 
@@ -35,13 +48,13 @@ export default function Card({ card, faceDown = false, size = 'normal', onClick,
         </div>
       </div>
     );
-
   }
 
   const alignment = card.alignment ? ALIGNMENT_COLORS[card.alignment] : null;
   const glowClass = card.alignment ? ALIGNMENT_GLOW[card.alignment] : '';
   const textClass = card.alignment ? ALIGNMENT_TEXT[card.alignment] : '';
   const accent = alignment?.glow || '#a855f7';
+  const nameStyle = getNameStyles(card.name || '', size, s.name);
 
   return (
     <div
@@ -62,7 +75,7 @@ export default function Card({ card, faceDown = false, size = 'normal', onClick,
 
         <section className="game-card-concept relative flex min-h-0 items-center justify-center overflow-hidden rounded-md border border-white/10 bg-cosmic-deep/75 px-1.5 py-1 text-center">
           <div className="game-card-grid pointer-events-none absolute inset-0 opacity-35" />
-          <div className={`${textClass} ${s.name} relative z-10 break-words font-bold uppercase leading-tight tracking-[0.04em]`}>
+          <div className={`${textClass} ${nameStyle} relative z-10 break-words font-bold uppercase leading-tight tracking-[0.04em]`}>
             {card.name || 'UNNAMED'}
           </div>
         </section>
@@ -80,5 +93,4 @@ export default function Card({ card, faceDown = false, size = 'normal', onClick,
       </div>
     </div>
   );
-
 }
