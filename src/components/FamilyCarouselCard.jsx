@@ -22,32 +22,32 @@ export default function FamilyCarouselCard({ family, paradigms = [], selectedPar
 
   return (
     <div
-      className={`game-card-premium holo-frame relative flex h-full max-h-[460px] w-full max-w-[320px] cursor-pointer flex-col overflow-hidden break-words rounded-2xl border border-t-white/20 bg-cosmic-deep/90 p-5 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1.5 ${
-        isCenter ? 'ring-1 ring-white/30' : ''
+      className={`game-card-premium holo-frame relative flex h-full max-h-[460px] w-full max-w-[320px] cursor-pointer flex-col overflow-hidden break-words rounded-2xl border border-t-white/20 bg-cosmic-deep/95 p-5 backdrop-blur-xl transition-all duration-300 hover:border-white/40 hover:brightness-110 ${
+        isCenter ? 'ring-1 ring-white/20' : ''
       }`}
       style={{
         '--accent-color': accent,
         boxShadow: isCenter
-          ? `0 0 32px ${accent}45, inset 0 1px 0 rgba(255,255,255,0.18)`
-          : `0 0 16px ${accent}20`,
+          ? `0 0 16px ${accent}25, inset 0 1px 0 rgba(255,255,255,0.15)`
+          : `0 0 8px ${accent}10, inset 0 1px 0 rgba(255,255,255,0.05)`,
       }}
     >
       {/* Top Family Header */}
-      <div className="flex items-start justify-between border-b pb-3" style={{ borderColor: `${accent}35` }}>
+      <div className="flex items-start justify-between border-b pb-3" style={{ borderColor: `${accent}25` }}>
         <div>
           <div className="text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: accent }}>
             {theme.label}
           </div>
-          <div className="mt-0.5 text-base font-bold uppercase tracking-[0.1em] text-term-text" style={{ textShadow: `0 0 10px ${accent}50` }}>
+          <div className="mt-0.5 text-base font-bold uppercase tracking-[0.1em] text-term-text" style={{ textShadow: `0 0 6px ${accent}30` }}>
             {family.name}
           </div>
         </div>
         {hasSelection ? (
-          <div className="rounded border px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-[0.14em]" style={{ borderColor: accent, backgroundColor: `${accent}25`, color: accent }}>
+          <div className="rounded border px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-[0.14em]" style={{ borderColor: `${accent}60`, backgroundColor: `${accent}18`, color: accent }}>
             ● EQUIPPED
           </div>
         ) : (
-          <div className="rounded border px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-[0.14em] text-term-faint" style={{ borderColor: `${accent}30` }}>
+          <div className="rounded border px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-[0.14em] text-term-faint" style={{ borderColor: 'rgba(255,255,255,0.15)' }}>
             SELECT
           </div>
         )}
@@ -71,14 +71,14 @@ export default function FamilyCarouselCard({ family, paradigms = [], selectedPar
               <div
                 key={p.id || p.name}
                 className={`flex items-center justify-between rounded-lg border px-3 py-2 text-xs transition-all ${
-                  isSelected ? 'bg-white/10 font-bold' : 'bg-cosmic-deep/60'
+                  isSelected ? 'bg-white/10 font-bold' : 'bg-cosmic-deep/70'
                 }`}
                 style={{
-                  borderColor: isSelected ? pColor : `${pColor}35`,
-                  boxShadow: isSelected ? `0 0 12px ${pColor}40` : 'none',
+                  borderColor: isSelected ? pColor : `${pColor}25`,
+                  boxShadow: isSelected ? `0 0 8px ${pColor}25` : 'none',
                 }}
               >
-                <span style={{ color: pColor, textShadow: isSelected ? `0 0 8px ${pColor}50` : 'none' }}>
+                <span style={{ color: pColor, textShadow: isSelected ? `0 0 4px ${pColor}40` : 'none' }}>
                   {p.name}
                 </span>
                 {alignInfo && (
@@ -94,10 +94,10 @@ export default function FamilyCarouselCard({ family, paradigms = [], selectedPar
 
       {/* Hover Call-to-Action Footer */}
       <div
-        className="mt-4 flex w-full items-center justify-center rounded-lg border py-2 text-xs font-bold uppercase tracking-[0.16em] transition-all group-hover:brightness-125"
+        className="mt-4 flex w-full items-center justify-center rounded-lg border py-2 text-xs font-bold uppercase tracking-[0.16em] transition-all"
         style={{
-          borderColor: `${accent}50`,
-          backgroundColor: `${accent}15`,
+          borderColor: `${accent}35`,
+          backgroundColor: `${accent}10`,
           color: accent,
         }}
       >
