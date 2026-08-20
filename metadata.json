@@ -1,0 +1,8 @@
+{
+  "name": "Tactical Deck Architect",
+  "description": "A tactical deck architect and philosophy card game with 2.5D interactive board and epistemology mechanics.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
