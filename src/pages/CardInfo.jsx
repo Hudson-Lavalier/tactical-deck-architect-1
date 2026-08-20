@@ -115,7 +115,7 @@ function CardCarouselCard({ card, isCenter }) {
   const alignmentInfo = card.alignment ? ALIGNMENT_COLORS[card.alignment] : null;
   const accent = alignmentInfo?.glow || '#a855f7';
   return (
-    <div className={`game-card-premium holo-frame relative flex h-full max-h-[480px] w-full max-w-[340px] flex-col overflow-hidden break-words rounded-2xl border border-t-white/20 bg-cosmic-deep/90 p-4 backdrop-blur-xl transition-all duration-500 ${isCenter ? 'opacity-100' : 'opacity-70'}`} style={{ '--accent-color': accent }}>
+    <div className={`game-card-premium holo-frame relative flex h-full max-h-[460px] w-full max-w-[320px] flex-col overflow-hidden break-words rounded-2xl border border-t-white/20 bg-cosmic-deep/90 p-4 backdrop-blur-xl transition-all duration-500 ${isCenter ? 'pointer-events-auto opacity-100' : 'opacity-70'}`} style={{ '--accent-color': accent }}>
       <div className="flex min-w-0 items-start justify-between gap-2">
         <span className="accent-border accent-bg-subtle max-w-[65%] truncate rounded-md border px-2 py-1 text-[10px] font-bold uppercase tracking-[0.14em] md:text-xs" style={{ color: accent }}>{alignmentInfo?.name || 'Unaligned'}</span>
         <span className="max-w-[35%] truncate text-right text-[10px] font-bold uppercase tracking-[0.12em] text-term-faint md:text-xs">{card.subcategory || card.category?.replace(/_/g, ' ')}</span>
@@ -135,7 +135,7 @@ function CardCarouselCard({ card, isCenter }) {
 function computeDims() {
   const vh = typeof window !== 'undefined' ? window.innerHeight : 900;
   const vw = typeof window !== 'undefined' ? window.innerWidth : 1200;
-  const cardH = Math.min(480, Math.max(320, Math.round(vh * 0.5)));
-  const cardW = Math.min(340, Math.max(280, Math.round(cardH * 0.7), Math.round((vw - 120) / 5)));
+  const cardH = Math.min(460, Math.max(320, Math.round(vh * 0.5)));
+  const cardW = Math.min(320, Math.max(280, Math.round(cardH * 0.7), Math.round((vw - 120) / 5)));
   return { cardW, cardH };
 }

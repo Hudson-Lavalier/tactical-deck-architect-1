@@ -164,9 +164,9 @@ export default function PhilosophyBuild() {
                   paradigm={paradigm}
                   isCenter={isCenter}
                   isSelected={selection[paradigm.family] === paradigm.id}
-                  onClick={() => handleParadigmClick(paradigm)}
                 />
               )}
+              onItemClick={handleParadigmClick}
               itemWidth={dims.parW}
               itemHeight={dims.parH}
             />
@@ -180,7 +180,7 @@ export default function PhilosophyBuild() {
 function computeDims() {
   const vh = typeof window !== 'undefined' ? window.innerHeight : 900;
   const vw = typeof window !== 'undefined' ? window.innerWidth : 1200;
-  const cardH = Math.min(480, Math.max(360, vh - 340));
-  const cardW = Math.min(340, Math.max(280, Math.round(cardH * 0.7), Math.round(vw * 0.22)));
+  const cardH = Math.min(460, Math.max(360, vh - 340));
+  const cardW = Math.min(320, Math.max(280, Math.round(cardH * 0.7), Math.round(vw * 0.22)));
   return { famW: cardW, famH: cardH, parW: cardW, parH: cardH };
 }
