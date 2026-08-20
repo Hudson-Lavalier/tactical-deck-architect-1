@@ -30,6 +30,6 @@ export default function PersistentRow({ slots, onSlotClick, placementEffect }) {
           </div>
         );
       })}
-    </div>);
-
+    </div>
+  );
 }
