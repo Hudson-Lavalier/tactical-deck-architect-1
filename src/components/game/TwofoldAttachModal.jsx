@@ -15,8 +15,8 @@ export default function TwofoldAttachModal({ hand, onConfirm, onClose }) {
   const right = hand.find((c) => c.id === rightId);
 
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 font-mono" onClick={onClose}>
-      <div className="glass-panel glass-blur cosmic-sheen p-6 max-w-2xl w-[90vw]" style={{ borderColor: '#a855f740' }} onClick={(e) => e.stopPropagation()}>
+    <div className="fixed inset-0 bg-black/85 flex items-center justify-center z-50 font-mono" onClick={onClose}>
+      <div className="glass-panel p-6 max-w-2xl w-[90vw]" style={{ borderColor: '#a855f740' }} onClick={(e) => e.stopPropagation()}>
         <div className="text-term-purple text-ui-md tracking-[0.15em] mb-4 text-center font-bold">── ATTACH DOMAINS TO TWOFOLD REALITY ──</div>
 
         <div className="grid grid-cols-2 gap-4">
@@ -52,7 +52,7 @@ export default function TwofoldAttachModal({ hand, onConfirm, onClose }) {
         </div>
 
         <div className="flex gap-3 justify-center mt-6">
-          <button onClick={() => onConfirm(leftId, rightId)} className="px-6 py-2 rounded text-ui-sm glass-card cosmic-sheen transition-[transform,box-shadow] hover:scale-105" style={{ borderColor: '#a855f740', color: '#a855f7' }}>
+          <button onClick={() => onConfirm(leftId, rightId)} className="px-6 py-2 rounded text-ui-sm glass-card transition-[transform,box-shadow] hover:scale-105" style={{ borderColor: '#a855f740', color: '#a855f7' }}>
             CONFIRM
           </button>
           <button onClick={onClose} className="px-6 py-2 rounded text-ui-sm glass-card transition-[transform,box-shadow] hover:scale-105" style={{ borderColor: '#33333340', color: '#888888' }}>

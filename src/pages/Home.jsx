@@ -58,7 +58,7 @@ export default function Home() {
 
         {/* Menu */}
         <div className="flex flex-col gap-3 w-full max-w-sm">
-          <GlassPanel className="p-3 mb-1">
+          <GlassPanel className="p-3 mb-1" sheen={false}>
             <div className="text-term-faint text-ui-xs tracking-[0.2em] mb-2 text-center font-bold">DIFFICULTY</div>
             <div className="flex gap-1.5">
               {[1, 2, 3, 4, 5].map((level) => (
@@ -77,7 +77,7 @@ export default function Home() {
             </div>
           </GlassPanel>
 
-          <GlassPanel className="p-3 mb-1">
+          <GlassPanel className="p-3 mb-1" sheen={false}>
             <button
               onClick={handleToggleTestMode}
               className={`w-full py-2 rounded text-ui-sm font-bold tracking-[0.15em] transition-[color,background-color,border-color] ${
@@ -92,8 +92,8 @@ export default function Home() {
 
           <button
             onClick={handlePlayMatch}
-            className="group flex items-center gap-3 px-6 py-3.5 rounded transition-[transform,box-shadow] duration-200 hover:scale-[1.02] glass-panel cosmic-sheen"
-            style={{ borderColor: 'rgba(0,255,65,0.35)', boxShadow: '0 0 24px rgba(0,255,65,0.12), inset 0 1px 0 rgba(255,255,255,0.04)' }}
+            className="group flex items-center gap-3 px-6 py-3.5 rounded border bg-cosmic-deep/90 transition-transform duration-200 hover:scale-[1.02]"
+            style={{ borderColor: 'rgba(0,255,65,0.35)' }}
           >
             <Play className="w-5 h-5 text-term-green" style={{ filter: 'drop-shadow(0 0 6px rgba(0,255,65,0.5))' }} />
             <span className="font-bold tracking-[0.15em] text-term-green text-ui-md">PLAY MATCH</span>
@@ -121,7 +121,7 @@ function MenuButton({ to, icon: Icon, label, color }) {
   return (
     <Link
       to={to}
-      className="group flex items-center gap-3 px-6 py-3.5 rounded transition-[transform,box-shadow] duration-200 hover:scale-[1.02] glass-panel cosmic-sheen"
+      className="group flex items-center gap-3 px-6 py-3.5 rounded border bg-cosmic-deep/90 transition-transform duration-200 hover:scale-[1.02]"
       style={{ borderColor: `${color}30` }}
     >
       <Icon className="w-5 h-5" style={{ color, filter: `drop-shadow(0 0 5px ${color}80)` }} />

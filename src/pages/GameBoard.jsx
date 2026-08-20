@@ -9,7 +9,7 @@ import { enqueueCard } from '@/engine/queueSystem';
 import { determinePlayMode, canPlayActionCard, getActionAllowance } from '@/engine/resolutionEngine';
 import { playRhetoricResponse, passResponse } from '@/engine/responseSystem';
 import { executeNPCTurn, npcPlayNextAction, npcDecideRhetoric } from '@/logic/npcAI';
-import { attachTwofoldDomains, switchTwofoldDomain } from '@/engine/twofoldSystem';
+import { attachTwofoldDomains, attachTwofoldFlank, switchTwofoldDomain } from '@/engine/twofoldSystem';
 import { sfx, setMuted, isMuted } from '@/lib/audio';
 
 // Reused modal/overlay + strip components (rendered flat above the tilted board)
@@ -21,6 +21,12 @@ import HandView from '@/components/game/HandView';
 import TwofoldAttachModal from '@/components/game/TwofoldAttachModal';
 import TwofoldSwitchModal from '@/components/game/TwofoldSwitchModal';
 import TestPanel from '@/components/game/TestPanel';
+import ItemViewer from '@/components/game/ItemViewer';
+import ParticleBurst from '@/components/game/ParticleBurst';
+import DomainCutscene from '@/components/game/DomainCutscene';
+import TurnBanner from '@/components/game/TurnBanner';
+import TwofoldFlankModal from '@/components/game/TwofoldFlankModal';
+import { ALIGNMENT_COLORS } from '@/components/game/terminalTheme';
 
 // Fresh 2.5D presentational components (on the tilted plane)
 import BoardSurface from '@/components/game25d/BoardSurface';
@@ -41,6 +47,7 @@ const EVENT_SFX = {
   rhetoric_response: 'counter',
   response_window_open: 'responseOpen',
   twofold_switch: 'switch',
+  twofold_attach: 'attach',
   turn_end: 'endTurn',
 };
 
@@ -56,6 +63,12 @@ export default function GameBoard() {
   const [showEndTurnDialog, setShowEndTurnDialog] = useState(false);
   const [showEndGameDialog, setShowEndGameDialog] = useState(false);
   const [showHandView, setShowHandView] = useState(false);
+  const [handViewerCard, setHandViewerCard] = useState(null);
+  const [twofoldFlankCard, setTwofoldFlankCard] = useState(null);
+  const [placementEffect, setPlacementEffect] = useState(null);
+  const [burstEffect, setBurstEffect] = useState(null);
+  const [domainCutscene, setDomainCutscene] = useState(null);
+  const [showTurnBanner, setShowTurnBanner] = useState(false);
   const [showTwofoldSwitch, setShowTwofoldSwitch] = useState(false);
   const [twofoldAttachDismissed, setTwofoldAttachDismissed] = useState(false);
   const [showTestPanel, setShowTestPanel] = useState(false);
@@ -98,6 +111,22 @@ export default function GameBoard() {
         const ev = log[i];
         const name = EVENT_SFX[ev.type];
         if (name) sfx(name);
+        if (ev.type === 'place_persistent') {
+          const key = Date.now() + i;
+          setPlacementEffect({ playerId: ev.playerId || ev.player, slot: ev.slot, key });
+          const placed = state.players[ev.playerId || ev.player]?.persistentSlots?.[ev.slot];
+          setBurstEffect({ key, color: ALIGNMENT_COLORS[placed?.alignment]?.glow || '#a855f7', position: (ev.playerId || ev.player) === 'player' ? 'persistent' : 'opponentPersistent' });
+          setTimeout(() => setBurstEffect((current) => current?.key === key ? null : current), 700);
+        }
+        if (ev.type === 'domain_change') {
+          setDomainCutscene(state.domain);
+          setTimeout(() => setDomainCutscene(null), 1100);
+        }
+        if (ev.type === 'twofold_attach') {
+          const key = Date.now() + i;
+          setBurstEffect({ key, color: '#a855f7', position: 'domain' });
+          setTimeout(() => setBurstEffect((current) => current?.key === key ? null : current), 700);
+        }
       }
     }
     lastLogLenRef.current = log.length;
@@ -195,19 +224,20 @@ export default function GameBoard() {
     if (!state || state.currentPlayer !== 'player' || phase !== 'main') return;
     if (!cardId || !slot || boardDevUsed) return;
     const newState = cloneState(state);
-    placePersistent(newState, cardId, slot);
+    const success = placePersistent(newState, cardId, slot);
+    if (!success) return;
     setState(newState);
     setSelectedCardId(null);
     setShowCardDetail(null);
     setBoardDevUsed(true);
   }, [state, phase, selectedCardId, boardDevUsed]);
 
-  const handleChangeDomain = useCallback((cardArg) => {
+  const handleChangeDomain = useCallback((cardArg, options = {}) => {
     const cardId = cardArg?.id || selectedCardId;
     if (!state || state.currentPlayer !== 'player' || phase !== 'main') return;
     if (!cardId || boardDevUsed || actionsPlayed > 0) return;
     const newState = cloneState(state);
-    const success = changeDomain(newState, cardId);
+    const success = changeDomain(newState, cardId, options);
     setState(newState);
     setSelectedCardId(null);
     setShowCardDetail(null);
@@ -249,6 +279,9 @@ export default function GameBoard() {
 
   const handleConfirmEndTurn = useCallback(() => {
     if (!state || state.currentPlayer !== 'player') return;
+    setShowTurnBanner(true);
+    sfx('turnBanner');
+    setTimeout(() => setShowTurnBanner(false), 1200);
     const newState = cloneState(state);
     endTurn(newState);
     setState(newState);
@@ -285,6 +318,21 @@ export default function GameBoard() {
       setTwofoldAttachDismissed(false);
     }
   }, [state?.domain?.id]);
+
+  const handleAttachTwofoldCard = useCallback((card) => {
+    setShowCardDetail(null);
+    setTwofoldFlankCard(card);
+  }, []);
+
+  const handleChooseTwofoldFlank = useCallback((side) => {
+    if (!state || !twofoldFlankCard) return;
+    const newState = cloneState(state);
+    const success = attachTwofoldFlank(newState, 'player', twofoldFlankCard.id, side);
+    if (!success) return;
+    setState(newState);
+    setBoardDevUsed(true);
+    setTwofoldFlankCard(null);
+  }, [state, twofoldFlankCard]);
 
   const handleTwofoldSwitch = useCallback((side) => {
     if (!state) return;
@@ -374,7 +422,7 @@ export default function GameBoard() {
 
         {/* opp-persistent */}
         <div style={{ gridArea: 'opp-persistent' }} className="flex justify-center items-center">
-          <PersistentRow slots={opponent.persistentSlots} onSlotClick={handleInspectPlaced} />
+          <PersistentRow slots={opponent.persistentSlots} onSlotClick={handleInspectPlaced} placementEffect={placementEffect?.playerId === 'opponent' ? placementEffect : null} />
         </div>
 
         {/* battlefield */}
@@ -401,7 +449,7 @@ export default function GameBoard() {
 
         {/* player-persistent */}
         <div style={{ gridArea: 'player-persistent' }} className="flex justify-center items-center">
-          <PersistentRow slots={player.persistentSlots} onSlotClick={handleInspectPlaced} />
+          <PersistentRow slots={player.persistentSlots} onSlotClick={handleInspectPlaced} placementEffect={placementEffect?.playerId === 'player' ? placementEffect : null} />
         </div>
 
         {/* hand */}
@@ -445,6 +493,13 @@ export default function GameBoard() {
       </BoardSurface>
 
       {/* ── Flat overlays (above the tilted plane) ── */}
+      {domainCutscene && <DomainCutscene card={domainCutscene} />}
+      {showTurnBanner && <TurnBanner />}
+      {burstEffect && (
+        <div className={`pointer-events-none fixed z-[66] ${burstEffect.position === 'persistent' ? 'left-1/2 top-[72%]' : burstEffect.position === 'opponentPersistent' ? 'left-1/2 top-[28%]' : 'left-1/2 top-1/2'}`}>
+          <ParticleBurst key={burstEffect.key} color={burstEffect.color} />
+        </div>
+      )}
 
       {showCardDetail && (
         <CardDetail
@@ -458,6 +513,7 @@ export default function GameBoard() {
           actionAllowance={getActionAllowance(state, 'player')}
           onPlacePersistent={handlePlacePersistent}
           onChangeDomain={handleChangeDomain}
+          onAttachTwofold={handleAttachTwofoldCard}
           onPlayAction={handlePlayAction}
           onClose={() => setShowCardDetail(null)}
         />
@@ -466,8 +522,19 @@ export default function GameBoard() {
       {showHandView && (
         <HandView
           cards={player.hand}
-          onSelectCard={(card) => { setShowHandView(false); setShowCardDetail({ card, readOnly: false }); }}
+          onSelectCard={(card) => { setShowHandView(false); setHandViewerCard(card); }}
           onClose={() => setShowHandView(false)}
+        />
+      )}
+
+      {handViewerCard && <ItemViewer card={handViewerCard} onClose={() => setHandViewerCard(null)} />}
+
+      {twofoldFlankCard && (
+        <TwofoldFlankModal
+          card={twofoldFlankCard}
+          attached={state.domainAttached}
+          onChoose={handleChooseTwofoldFlank}
+          onClose={() => setTwofoldFlankCard(null)}
         />
       )}
 
@@ -489,8 +556,8 @@ export default function GameBoard() {
       )}
 
       {showEndTurnDialog && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-40 font-mono">
-          <div className="glass-panel glass-blur cosmic-sheen p-6 max-w-sm text-center" style={{ borderColor: '#00ff4140' }}>
+        <div className="fixed inset-0 bg-black/85 flex items-center justify-center z-40 font-mono">
+          <div className="glass-panel p-6 max-w-sm text-center" style={{ borderColor: '#00ff4140' }}>
             <div className="text-term-green text-ui-md tracking-[0.15em] mb-4">END YOUR TURN?</div>
             <div className="flex gap-3 justify-center">
               <button
@@ -513,8 +580,8 @@ export default function GameBoard() {
       )}
 
       {showEndGameDialog && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 font-mono">
-          <div className="glass-panel glass-blur cosmic-sheen p-6 max-w-sm text-center" style={{ borderColor: '#ff444480' }}>
+        <div className="fixed inset-0 bg-black/85 flex items-center justify-center z-50 font-mono">
+          <div className="glass-panel p-6 max-w-sm text-center" style={{ borderColor: '#ff444480' }}>
             <div className="text-[#ff6666] text-ui-md tracking-[0.15em] mb-2">END THE GAME?</div>
             <div className="text-term-faint text-ui-xs mb-4">All progress in this match will be lost.</div>
             <div className="flex gap-3 justify-center">
@@ -576,9 +643,9 @@ export default function GameBoard() {
       )}
 
       {state.winner && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/85 flex items-center justify-center z-50">
           <div
-            className="glass-panel glass-blur cosmic-sheen p-8 text-center"
+            className="glass-panel p-8 text-center"
             style={{ borderColor: '#00ff4140', boxShadow: '0 0 48px rgba(0,255,65,0.25)' }}
           >
             <Trophy

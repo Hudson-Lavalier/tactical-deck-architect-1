@@ -41,7 +41,8 @@ export default function Card({ card, faceDown = false, size = 'normal', onClick,
   return (
     <div
       onClick={onClick}
-      disabled={disabled}
+      data-card-interactive={onClick ? 'true' : undefined}
+      aria-disabled={disabled}
       className={`${s.box} rounded glass-card cosmic-sheen relative overflow-hidden cursor-pointer transition-[transform,box-shadow] duration-200 hover:scale-105 ${glowClass} ${selected ? 'ring-2 ring-offset-2 ring-offset-[#050308] scale-105' : ''} ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
       style={{ borderColor: `${accent}40` }}>
       

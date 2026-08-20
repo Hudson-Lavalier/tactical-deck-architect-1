@@ -8,14 +8,16 @@ const SLOT_LABELS = {
   right: 'MORAL GROUNDING'
 };
 
-export default function PersistentRow({ slots, onSlotClick }) {
+export default function PersistentRow({ slots, onSlotClick, placementEffect }) {
   return (
     <div className="flex gap-3 justify-center">
       {Object.entries(slots).map(([slot, card]) =>
       <div key={slot} className="flex flex-col items-center gap-1">
           <div className="text-term-text font-mono text-[12px] font-bold tracking-[0.15em] px-10 py-1">{SLOT_LABELS[slot]}</div>
           {card ?
-        <Card card={card} size="medium" onClick={() => onSlotClick?.(slot, card)} /> :
+        <div className={placementEffect?.slot === slot ? 'animate-card-place' : ''} key={`${card.id}-${placementEffect?.slot === slot ? placementEffect.key : 0}`}>
+          <Card card={card} size="medium" onClick={() => onSlotClick?.(slot, card)} />
+        </div> :
 
         <div
           className="w-24 h-36 rounded glass-card flex items-center justify-center"

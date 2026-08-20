@@ -211,7 +211,7 @@ export function placePersistent(state, cardId, slot) {
 
 // Board development: change the domain.
 // Per framework: placing/changing domain immediately ends the turn.
-export function changeDomain(state, cardId) {
+export function changeDomain(state, cardId, options = {}) {
   const player = state.players[state.currentPlayer];
   const cardIndex = player.hand.findIndex((c) => c.id === cardId);
   if (cardIndex === -1) return false;
@@ -220,7 +220,7 @@ export function changeDomain(state, cardId) {
   // Unity, Twofold Reality, Ontological Independence) can cancel it via the
   // before:domain_change_attempted event. If cancelled, abort.
   const card = player.hand[cardIndex];
-  const allowed = dispatchDomainChangeAttempt(state, state.currentPlayer, card);
+  const allowed = options.replaceTwofold === true || dispatchDomainChangeAttempt(state, state.currentPlayer, card);
   if (!allowed) {
     logEvent(state, { type: 'domain_change_blocked', reason: 'effect_cancelled' });
     return false;

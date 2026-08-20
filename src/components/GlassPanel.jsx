@@ -8,6 +8,7 @@ export default function GlassPanel({
   className = '',
   accent,
   glow = false,
+  sheen = true,
   ...props
 }) {
   const style = {};
@@ -19,7 +20,7 @@ export default function GlassPanel({
   }
 
   return (
-    <div className={`glass-panel relative cosmic-sheen ${className}`} style={style} {...props}>
+    <div className={`glass-panel relative ${sheen ? 'cosmic-sheen' : ''} ${className}`} style={style} {...props}>
       {children}
     </div>
   );

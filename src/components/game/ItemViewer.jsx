@@ -1,106 +1,75 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { ALIGNMENT_COLORS } from './terminalTheme';
 import RichText from '@/components/RichText';
 
-// ItemViewer — full-screen overlay presenting a single card exactly as it
-// appears in Card Info (large glass frame, full RichText body).
-// Tilt follows the cursor via requestAnimationFrame + direct style mutation
-// (no per-mousemove React state → no re-render storm / jank).
 export default function ItemViewer({ card, onClose }) {
-  const ref = useRef(null);
-  const rafRef = useRef(0);
-  const targetRef = useRef({ rx: 0, ry: 0 });
+  const cardRef = useRef(null);
+  const frameRef = useRef(0);
+  const motionRef = useRef({ targetX: 0, targetY: 0, currentX: 0, currentY: 0 });
+  const boundsRef = useRef(null);
 
   useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
+    const element = cardRef.current;
+    if (!element) return;
 
-    const apply = () => {
-      rafRef.current = 0;
-      const { rx, ry } = targetRef.current;
-      el.style.transform = `perspective(1200px) rotateX(${rx.toFixed(2)}deg) rotateY(${ry.toFixed(2)}deg)`;
+    const animate = () => {
+      const motion = motionRef.current;
+      motion.currentX += (motion.targetX - motion.currentX) * 0.16;
+      motion.currentY += (motion.targetY - motion.currentY) * 0.16;
+      element.style.transform = `perspective(1200px) rotateX(${motion.currentX}deg) rotateY(${motion.currentY}deg)`;
+      const moving = Math.abs(motion.targetX - motion.currentX) > 0.04 || Math.abs(motion.targetY - motion.currentY) > 0.04;
+      if (moving) frameRef.current = requestAnimationFrame(animate);
+      else frameRef.current = 0;
     };
 
-    const onMove = (e) => {
-      const rect = el.getBoundingClientRect();
-      const px = (e.clientX - rect.left) / rect.width;
-      const py = (e.clientY - rect.top) / rect.height;
-      targetRef.current = { rx: -(py - 0.5) * 14, ry: (px - 0.5) * 14 };
-      if (!rafRef.current) rafRef.current = requestAnimationFrame(apply);
+    const start = () => {
+      if (!frameRef.current) frameRef.current = requestAnimationFrame(animate);
     };
-
+    const onEnter = () => {
+      boundsRef.current = element.getBoundingClientRect();
+    };
+    const onMove = (event) => {
+      const bounds = boundsRef.current;
+      if (!bounds) return;
+      motionRef.current.targetY = ((event.clientX - bounds.left) / bounds.width - 0.5) * 7;
+      motionRef.current.targetX = -((event.clientY - bounds.top) / bounds.height - 0.5) * 7;
+      start();
+    };
     const onLeave = () => {
-      targetRef.current = { rx: 0, ry: 0 };
-      if (!rafRef.current) rafRef.current = requestAnimationFrame(apply);
+      motionRef.current.targetX = 0;
+      motionRef.current.targetY = 0;
+      start();
     };
 
-    el.addEventListener('mousemove', onMove);
-    el.addEventListener('mouseleave', onLeave);
+    element.addEventListener('pointerenter', onEnter);
+    element.addEventListener('pointermove', onMove, { passive: true });
+    element.addEventListener('pointerleave', onLeave);
     return () => {
-      el.removeEventListener('mousemove', onMove);
-      el.removeEventListener('mouseleave', onLeave);
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      element.removeEventListener('pointerenter', onEnter);
+      element.removeEventListener('pointermove', onMove);
+      element.removeEventListener('pointerleave', onLeave);
+      if (frameRef.current) cancelAnimationFrame(frameRef.current);
     };
   }, []);
 
   if (!card) return null;
-
-  const alignmentInfo = card.alignment ? ALIGNMENT_COLORS[card.alignment] : null;
-  const accent = alignmentInfo?.glow || '#a855f7';
+  const alignment = card.alignment ? ALIGNMENT_COLORS[card.alignment] : null;
+  const accent = alignment?.glow || '#a855f7';
 
   return (
-    <div
-      className="fixed inset-0 bg-black/85 backdrop-blur-sm flex items-center justify-center z-50 font-mono"
-      onClick={onClose}
-    >
-      <div
-        ref={ref}
-        onClick={(e) => e.stopPropagation()}
-        className="w-[min(62vw,560px)] h-[min(74vh,660px)] p-6 rounded glass-card cosmic-sheen flex flex-col relative overflow-hidden"
-        style={{
-          borderColor: `${accent}30`,
-          boxShadow: `0 0 44px ${accent}26, inset 0 1px 0 rgba(255,255,255,0.05)`,
-          transformStyle: 'preserve-3d',
-          willChange: 'transform',
-        }}
-      >
-        {/* Header */}
-        <div className="flex justify-between items-start mb-2 relative">
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/90 p-5 font-mono" onClick={onClose}>
+      <div ref={cardRef} onClick={(event) => event.stopPropagation()} className="relative flex h-[min(78vh,720px)] w-[min(68vw,620px)] flex-col overflow-hidden rounded-xl border bg-cosmic-deep p-8" style={{ borderColor: `${accent}55`, boxShadow: `0 0 36px ${accent}20`, transformStyle: 'preserve-3d' }}>
+        <div className="flex items-start justify-between border-b pb-4" style={{ borderColor: `${accent}25` }}>
           <div>
-            <div className="font-bold text-ui-lg leading-tight" style={{ color: accent, textShadow: `0 0 10px ${accent}40` }}>
-              {card.name || 'UNNAMED'}
-            </div>
-            {alignmentInfo && (
-              <div className="text-ui-sm font-bold mt-0.5" style={{ color: accent }}>{alignmentInfo.name}</div>
-            )}
+            <div className="text-2xl font-bold leading-tight" style={{ color: accent }}>{card.name || 'UNNAMED'}</div>
+            {alignment && <div className="mt-1 text-ui-sm font-bold" style={{ color: accent }}>{alignment.name}</div>}
           </div>
-          {card.subcategory && (
-            <div className="text-term-faint text-ui-xs text-right shrink-0">{card.subcategory}</div>
-          )}
+          <div className="text-right text-ui-xs font-bold text-term-faint">{card.category?.replace(/_/g, ' ').toUpperCase()}</div>
         </div>
-
-        <div className="border-t my-2 relative" style={{ borderColor: `${accent}20` }} />
-
-        <div className="flex-1 overflow-y-auto pr-1 min-h-0 relative">
-          {card.text ? (
-            <RichText text={card.text} alignment={card.alignment} />
-          ) : (
-            <div className="text-term-faint text-ui-md italic">[ NO TEXT DEFINED ]</div>
-          )}
+        <div className="min-h-0 flex-1 overflow-y-auto py-6 pr-2">
+          {card.text ? <RichText text={card.text} alignment={card.alignment} /> : <div className="text-ui-md italic text-term-faint">[ NO TEXT DEFINED ]</div>}
         </div>
-
-        {card.category && (
-          <div className="text-term-faint text-ui-xs mt-2 pt-2 border-t relative" style={{ borderColor: `${accent}15` }}>
-            {card.category.replace(/_/g, ' ').toUpperCase()}
-          </div>
-        )}
-
-        <button
-          onClick={onClose}
-          className="absolute top-3 right-3 text-term-faint hover:text-term-text text-ui-xs font-bold transition-colors"
-        >
-          ✕
-        </button>
+        <button onClick={onClose} className="absolute right-4 top-4 text-ui-sm font-bold text-term-faint hover:text-term-text">✕</button>
       </div>
     </div>
   );

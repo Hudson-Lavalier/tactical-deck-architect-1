@@ -163,6 +163,39 @@
     pointer-events: none;
   }
 
+  .game-particle {
+    position: absolute;
+    left: 0;
+    top: 0;
+    border-radius: 9999px;
+    background: var(--particle-color);
+    box-shadow: 0 0 9px var(--particle-color);
+    animation: game-particle-burst 620ms ease-out var(--particle-delay) both;
+  }
+
+  .animate-card-place { animation: card-place 280ms cubic-bezier(.2,.8,.2,1) both; }
+  .animate-domain-curtain { animation: domain-curtain 1100ms ease-in-out both; }
+  .animate-domain-slam { animation: domain-slam 1100ms cubic-bezier(.16,.8,.25,1) both; }
+  .animate-domain-edge { animation: domain-edge 1100ms ease-out both; }
+  .animate-turn-curtain { animation: turn-curtain 1200ms ease-in-out both; }
+  .animate-turn-banner { animation: turn-banner 1200ms cubic-bezier(.2,.8,.2,1) both; }
+
+  @keyframes game-particle-burst {
+    0% { opacity: 0; transform: translate3d(0,0,0) scale(.4); }
+    18% { opacity: 1; }
+    100% { opacity: 0; transform: translate3d(var(--particle-x),var(--particle-y),0) scale(0); }
+  }
+  @keyframes card-place {
+    0% { opacity: 0; transform: translate3d(0,-34px,0) scale(1.08); }
+    70% { opacity: 1; transform: translate3d(0,3px,0) scale(.98); }
+    100% { transform: translate3d(0,0,0) scale(1); }
+  }
+  @keyframes domain-curtain { 0%,100% { opacity: 0; } 12%,78% { opacity: 1; } }
+  @keyframes domain-slam { 0% { opacity: 0; transform: scale(2.1) translateY(-40px); } 42% { opacity: 1; transform: scale(.9) translateY(5px); } 58% { transform: scale(1.04); } 80% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(.96); } }
+  @keyframes domain-edge { 0%,100% { opacity: 0; } 42% { opacity: .75; } 68% { opacity: .18; } }
+  @keyframes turn-curtain { 0%,100% { opacity: 0; } 15%,80% { opacity: 1; } }
+  @keyframes turn-banner { 0% { opacity: 0; transform: translateX(-8%); } 20%,75% { opacity: 1; transform: translateX(0); } 100% { opacity: 0; transform: translateX(8%); } }
+
   /* Cosmic page shell — deep space gradient base */
   .cosmic-shell {
     background:

@@ -4,6 +4,7 @@
 
 import { logEvent } from './gameState';
 import { emit } from './effects/eventBus';
+import { discardCard } from './effects/primitives';
 
 // Attach two domain cards from the placing player's hand to the flanks.
 // Either id may be null (skip). Cards are removed from hand.
@@ -24,6 +25,22 @@ export function attachTwofoldDomains(state, playerId, leftCardId, rightCardId) {
     state.domainAttached.activeSide = state.domainAttached.left ? 'left' : (state.domainAttached.right ? 'right' : null);
   }
   logEvent(state, { type: 'twofold_attach', playerId, left: !!state.domainAttached.left, right: !!state.domainAttached.right });
+}
+
+// Attach one domain from hand to either flank. An occupied flank is discarded.
+export function attachTwofoldFlank(state, playerId, cardId, side) {
+  if (state.domain?.id !== 'twofold_reality' || state.domainPlacedBy !== playerId) return false;
+  if (!['left', 'right'].includes(side)) return false;
+  const player = state.players[playerId];
+  const cardIndex = player.hand.findIndex((card) => card.id === cardId && card.category === 'domain');
+  if (cardIndex === -1) return false;
+  if (!state.domainAttached) state.domainAttached = { left: null, right: null, activeSide: null, switchesThisTurn: 0 };
+  const replaced = state.domainAttached[side];
+  if (replaced) discardCard(state, replaced, playerId);
+  state.domainAttached[side] = player.hand.splice(cardIndex, 1)[0];
+  if (!state.domainAttached.activeSide || state.domainAttached.activeSide === side) state.domainAttached.activeSide = side;
+  logEvent(state, { type: 'twofold_attach', playerId, side, cardId, replacedCardId: replaced?.id || null });
+  return true;
 }
 
 // Switch the active flank. Only the placing player, on their turn, up to 2×/turn.

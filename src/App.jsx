@@ -6,6 +6,7 @@ import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import ScrollToTop from './components/ScrollToTop';
+import GlobalInteractionAudio from './components/GlobalInteractionAudio';
 // Add page imports here
 import Home from './pages/Home';
 import PhilosophyBuild from './pages/PhilosophyBuild';
@@ -62,6 +63,7 @@ function App() {
       <QueryClientProvider client={queryClientInstance}>
         <Router>
           <ScrollToTop />
+          <GlobalInteractionAudio />
           <AuthenticatedApp />
         </Router>
         <Toaster />
