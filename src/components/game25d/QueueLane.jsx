@@ -23,7 +23,7 @@ export default function QueueLane({ queuedCards, isActive, accent = '#888888', l
       <div className="w-full rounded-lg p-2" style={{ border: `1px solid ${accent}40`, boxShadow: `inset 0 0 18px ${accent}10` }}>
         <div className="flex w-full flex-row items-end justify-center gap-2">
           {rows.map((row) =>
-          <div key={row} className="game-queue-column flex min-w-0 flex-1 flex-col items-center gap-2">
+          <div key={row} className="flex min-w-0 flex-1 flex-col items-center gap-2">
               {slots.map((col) => {
               const cards = cardsByRow[row] || [];
               const queued = cards[col];
