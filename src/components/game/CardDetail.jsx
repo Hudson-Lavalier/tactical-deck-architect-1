@@ -36,7 +36,7 @@ export default function CardDetail({
 
   return (
     <>
-      <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/90 p-4 font-mono backdrop-blur-sm" onClick={onClose}>
+      <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/90 p-4 font-mono backdrop-blur-sm" onClick={onClose}>
         <div className="cyber-panel accent-border grid h-[90vh] max-h-[calc(100vh-2rem)] w-full max-w-3xl grid-cols-[auto_1fr] items-center gap-7 rounded-2xl border border-t-white/20 bg-cosmic-deep/85 p-7 text-center backdrop-blur-xl" style={{ '--accent-color': accent }} onClick={(event) => event.stopPropagation()}>
           <button className="justify-self-center" onClick={() => setShowViewer(true)} aria-label={`Open full details for ${card.name}`}>
             <Card card={card} size="inspection" />

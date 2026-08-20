@@ -78,9 +78,17 @@ export default function HandView({ cards, onSelectCard, onPlayCard, onClose }) {
     else onSelectCard?.(card);
   };
 
+  const scrollByCard = (direction) => {
+    const scroller = scrollerRef.current;
+    const card = scroller?.firstElementChild;
+    if (!scroller || !card) return;
+    const gap = parseFloat(window.getComputedStyle(scroller).columnGap) || 0;
+    scroller.scrollBy({ left: direction * (card.getBoundingClientRect().width + gap), behavior: 'smooth' });
+  };
+
   return (
-    <div className="fixed inset-0 z-40 flex flex-col items-center justify-center bg-black/85 font-mono" onClick={onClose}>
-      <div className="relative z-10 flex w-full flex-col items-center" onClick={(event) => event.stopPropagation()}>
+    <div className="fixed inset-0 z-40 flex flex-col items-center justify-center bg-black/85 font-mono">
+      <div className="relative z-10 flex w-full flex-col items-center">
         <div className="mb-4 flex w-full max-w-6xl items-center justify-between px-6">
           <div className="text-ui-lg font-bold tracking-[0.25em] text-term-text">── HAND VIEW ──</div>
           <div className="flex items-center gap-3">
@@ -96,20 +104,36 @@ export default function HandView({ cards, onSelectCard, onPlayCard, onClose }) {
         {cards.length === 0 ? (
           <div className="text-ui-md italic text-term-faint">[ HAND EMPTY ]</div>
         ) : (
-          <div
-            ref={scrollerRef}
-            className={`flex w-full items-center gap-4 overflow-x-auto overflow-y-hidden px-[44vw] py-12 select-none ${dragging ? 'cursor-grabbing' : 'cursor-grab'}`}
-            style={{ scrollSnapType: 'x proximity', touchAction: 'pan-y' }}
-            onPointerDown={handlePointerDown}
-            onPointerMove={handlePointerMove}
-            onPointerUp={finishPointer}
-            onPointerCancel={finishPointer}
-          >
-            {cards.map((card, index) => (
-              <div key={card.id || index} className="shrink-0 transition-[transform,opacity] duration-150 ease-out" style={{ scrollSnapAlign: 'center', transformOrigin: 'center' }}>
-                <Card card={card} size="handView" onClick={() => selectCard(card)} />
-              </div>
-            ))}
+          <div className="relative w-full">
+            <button
+              onClick={() => scrollByCard(-1)}
+              className="absolute left-4 top-1/2 z-50 -translate-y-1/2 rounded-full border border-white/20 bg-cosmic-deep/90 p-3 text-xl font-bold text-white shadow-xl transition-colors hover:bg-slate-800"
+              aria-label="Previous card"
+            >
+              &lt;
+            </button>
+            <div
+              ref={scrollerRef}
+              className={`flex w-full items-center gap-4 overflow-x-auto overflow-y-hidden px-[44vw] py-12 select-none ${dragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+              style={{ scrollSnapType: 'x proximity', touchAction: 'pan-y' }}
+              onPointerDown={handlePointerDown}
+              onPointerMove={handlePointerMove}
+              onPointerUp={finishPointer}
+              onPointerCancel={finishPointer}
+            >
+              {cards.map((card, index) => (
+                <div key={card.id || index} className="shrink-0 transition-[transform,opacity] duration-150 ease-out" style={{ scrollSnapAlign: 'center', transformOrigin: 'center' }}>
+                  <Card card={card} size="handView" onClick={() => selectCard(card)} />
+                </div>
+              ))}
+            </div>
+            <button
+              onClick={() => scrollByCard(1)}
+              className="absolute right-4 top-1/2 z-50 -translate-y-1/2 rounded-full border border-white/20 bg-cosmic-deep/90 p-3 text-xl font-bold text-white shadow-xl transition-colors hover:bg-slate-800"
+              aria-label="Next card"
+            >
+              &gt;
+            </button>
           </div>
         )}
       </div>

@@ -225,6 +225,7 @@ export default function GameBoard() {
     const newState = cloneState(state);
     const success = placePersistent(newState, cardId, slot);
     if (!success) return;
+    setShowHandView(false);
     setState(newState);
     setSelectedCardId(null);
     setShowCardDetail(null);
@@ -241,6 +242,7 @@ export default function GameBoard() {
     setSelectedCardId(null);
     setShowCardDetail(null);
     if (!success) return;
+    setShowHandView(false);
     setBoardDevUsed(true);
     if (!newState.responseWindow?.active && !newState.twofoldAttachPending) {
       setPhase('draw');
@@ -268,6 +270,7 @@ export default function GameBoard() {
     setState(newState);
     setSelectedCardId(null);
     setShowCardDetail(null);
+    setShowHandView(false);
     setActionsPlayed(actionsPlayed + 1);
   }, [state, phase, selectedCardId, actionsPlayed]);
 
@@ -336,6 +339,7 @@ export default function GameBoard() {
     const success = attachTwofoldFlank(newState, 'player', twofoldFlankCard.id, side);
     if (!success) return;
     setState(newState);
+    setShowHandView(false);
     setBoardDevUsed(true);
     setTwofoldFlankCard(null);
   }, [state, twofoldFlankCard]);
@@ -507,10 +511,7 @@ export default function GameBoard() {
         <HandView
           cards={player.hand}
           onSelectCard={(card) => setHandViewerCard(card)}
-          onPlayCard={(card) => {
-            setShowHandView(false);
-            handleSelectCard(card);
-          }}
+          onPlayCard={(card) => handleSelectCard(card)}
           onClose={() => setShowHandView(false)}
         />
       )}
