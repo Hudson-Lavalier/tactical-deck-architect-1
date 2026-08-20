@@ -9,7 +9,7 @@ import { ALL_CARDS } from '@/data/cards';
 import { CARD_OVERVIEWS } from '@/data/cardOverviews';
 import Carousel3D from '@/components/Carousel3D';
 import RichText from '@/components/RichText';
-import CardDetail from '@/components/game/CardDetail';
+import ItemViewer from '@/components/game/ItemViewer';
 import { ALIGNMENT_COLORS } from '@/components/game/terminalTheme';
 
 export default function CardInfo() {
@@ -71,7 +71,7 @@ export default function CardInfo() {
             <div className="flex min-w-0 flex-col justify-between gap-3">
               <div>
                 <div className="mb-2 text-ui-xs font-bold uppercase tracking-[0.22em] text-term-blue">Category overview</div>
-                <div className="card-overview-copy max-h-16 overflow-hidden text-ui-sm text-term-dim"><RichText text={overview} /></div>
+                <div className="card-overview-copy max-h-28 overflow-y-auto text-ui-sm text-term-dim"><RichText text={overview} /></div>
               </div>
               <button onClick={() => setShowOverview(true)} className="hud-control w-fit rounded-lg border border-term-blue/35 bg-term-blue/10 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.16em] text-term-blue transition-all hover:-translate-y-0.5 hover:shadow-[0_0_16px_rgba(0,255,255,0.2)] md:text-xs">Click to view full overview</button>
             </div>
@@ -119,7 +119,7 @@ export default function CardInfo() {
         </div>
       )}
 
-      {selectedCard && <CardDetail card={selectedCard} readOnly onClose={() => setSelectedCard(null)} />}
+      {selectedCard && <ItemViewer card={selectedCard} onClose={() => setSelectedCard(null)} />}
     </div>
   );
 }
