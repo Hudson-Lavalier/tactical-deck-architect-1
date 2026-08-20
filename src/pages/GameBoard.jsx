@@ -407,7 +407,7 @@ export default function GameBoard() {
         </div>
 
         {/* help */}
-        <div style={{ gridArea: 'help' }}>
+        <div style={{ gridArea: 'help' }} className="flex min-w-0 flex-col gap-1.5">
           <HelpPanel
             phase={inResponseWindow ? 'response' : phase}
             isPlayerTurn={isPlayerTurn}
@@ -415,6 +415,7 @@ export default function GameBoard() {
             actionsPlayed={actionsPlayed}
             actionAllowance={getActionAllowance(state, 'player')}
           />
+          <button onClick={handleEndGame} className="hud-control self-start rounded-lg border border-red-400/35 bg-cosmic-deep/85 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-red-300 shadow-lg transition-all hover:-translate-y-0.5">End game</button>
         </div>
 
         {/* battlefield */}
@@ -454,12 +455,10 @@ export default function GameBoard() {
         </div>
       </BoardSurface>
 
-      <button onClick={handleEndGame} className="hud-control absolute left-3 top-[7.25rem] z-40 rounded-lg border border-red-400/35 bg-cosmic-deep/85 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-red-300 shadow-lg backdrop-blur-xl transition-all hover:-translate-y-0.5">End game</button>
-
       {phase === 'main' && isPlayerTurn && !inResponseWindow && (
         <>
-          <button onClick={() => setShowHandView(true)} className="hud-control absolute bottom-3 left-3 z-40 min-w-[120px] rounded-xl border border-term-blue/40 bg-cosmic-deep/90 px-5 py-2.5 text-xs font-bold uppercase tracking-[0.14em] text-term-blue shadow-lg backdrop-blur-xl transition-all hover:-translate-y-1 md:text-sm">Hand view</button>
-          <button onClick={handleEndTurn} className="hud-control absolute bottom-3 right-3 z-40 min-w-[120px] rounded-xl border border-term-green/40 bg-cosmic-deep/90 px-5 py-2.5 text-xs font-bold uppercase tracking-[0.14em] text-term-green shadow-lg backdrop-blur-xl transition-all hover:-translate-y-1 md:text-sm">End turn</button>
+          <button onClick={() => setShowHandView(true)} className="hud-control absolute bottom-6 left-6 z-40 min-w-[120px] rounded-xl border border-term-blue/40 bg-cosmic-deep/90 px-5 py-2.5 text-xs font-bold uppercase tracking-[0.14em] text-term-blue shadow-lg backdrop-blur-xl transition-all hover:-translate-y-1 md:text-sm">Hand view</button>
+          <button onClick={handleEndTurn} className="hud-control absolute bottom-6 right-6 z-40 min-w-[120px] rounded-xl border border-term-green/40 bg-cosmic-deep/90 px-5 py-2.5 text-xs font-bold uppercase tracking-[0.14em] text-term-green shadow-lg backdrop-blur-xl transition-all hover:-translate-y-1 md:text-sm">End turn</button>
         </>
       )}
 

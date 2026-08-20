@@ -17,14 +17,16 @@ export default function HandFan({ cards, onSelectCard, selectedCardId, disabled 
   const handlePointerDown = (event) => {
     dragRef.current = { pointerId: event.pointerId, startX: event.clientX, scrollLeft: scrollRef.current.scrollLeft, moved: false };
     setDragging(true);
-    event.currentTarget.setPointerCapture?.(event.pointerId);
   };
 
   const handlePointerMove = (event) => {
     const drag = dragRef.current;
     if (!drag || drag.pointerId !== event.pointerId) return;
     const delta = event.clientX - drag.startX;
-    if (Math.abs(delta) >= DRAG_THRESHOLD) drag.moved = true;
+    if (Math.abs(delta) >= DRAG_THRESHOLD && !drag.moved) {
+      drag.moved = true;
+      event.currentTarget.setPointerCapture?.(event.pointerId);
+    }
     if (!drag.moved) return;
     event.preventDefault();
     scrollRef.current.scrollLeft = drag.scrollLeft - delta;
@@ -47,14 +49,14 @@ export default function HandFan({ cards, onSelectCard, selectedCardId, disabled 
   return (
     <div
       ref={scrollRef}
-      className={`game-hand-fan relative z-30 mx-auto min-h-[clamp(6rem,12vh,10rem)] w-full overflow-x-auto overflow-y-visible px-4 pb-1 select-none ${dragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+      className={`game-hand-fan relative z-30 mx-auto min-h-[clamp(8rem,16vh,13rem)] w-full overflow-x-auto overflow-y-visible px-4 pb-1 select-none ${dragging ? 'cursor-grabbing' : 'cursor-grab'}`}
       style={{ touchAction: 'pan-y', scrollSnapType: 'x proximity' }}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={finishPointer}
       onPointerCancel={finishPointer}
     >
-      <div className="mx-auto flex min-h-[clamp(6rem,12vh,10rem)] w-max min-w-full items-end justify-center gap-1 md:gap-1.5">
+      <div className="mx-auto flex min-h-[clamp(8rem,16vh,13rem)] w-max min-w-full items-end justify-center gap-1.5 md:gap-2">
         {visible.map((card, index) => {
           const offset = index - midPoint;
           const angle = midPoint !== 0 ? (offset / midPoint) * fanAngle : 0;
@@ -70,9 +72,9 @@ export default function HandFan({ cards, onSelectCard, selectedCardId, disabled 
                 zIndex: isSelected ? 100 : index,
                 scrollSnapAlign: 'center',
               }}
-              className="w-[clamp(3.75rem,5.5vw,7rem)] shrink-0 overflow-visible opacity-100 transition-all duration-300 ease-out"
+              className="w-[clamp(5rem,7vw,9rem)] shrink-0 overflow-visible opacity-100 transition-all duration-300 ease-out"
             >
-              <Card card={card} size="normal" onClick={() => handleCardClick(card)} selected={isSelected} disabled={disabled} />
+              <Card card={card} size="hand" onClick={() => handleCardClick(card)} selected={isSelected} disabled={disabled} />
             </div>
           );
         })}

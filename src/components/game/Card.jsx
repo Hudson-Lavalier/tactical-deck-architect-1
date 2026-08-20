@@ -8,6 +8,7 @@ const SIZES = {
   small: { box: 'game-card-small aspect-[5/7] w-20 max-w-full', name: 'text-[12px]', body: 'text-[9px]', cat: 'text-[8px]', label: 'text-[10px]' },
   medium: { box: 'game-card-medium aspect-[5/7] w-24 max-w-full', name: 'text-[13px]', body: 'text-[10px]', cat: 'text-[9px]', label: 'text-[11px]' },
   normal: { box: 'game-card-normal aspect-[5/7] w-28 max-w-full', name: 'text-[15px]', body: 'text-[11px]', cat: 'text-[9px]', label: 'text-[12px]' },
+  hand: { box: 'game-card-hand aspect-[5/7] w-36 max-w-full', name: 'text-[17px]', body: 'text-[12px]', cat: 'text-[10px]', label: 'text-[13px]' },
   large: { box: 'game-card-large aspect-[5/7] w-32 max-w-full', name: 'text-[17px]', body: 'text-[12px]', cat: 'text-[10px]', label: 'text-[13px]' },
   xlarge: { box: 'game-card-xlarge aspect-[5/7] w-60 max-w-full', name: 'text-[22px]', body: 'text-[16px]', cat: 'text-[12px]', label: 'text-[16px]' },
   inspection: { box: 'game-card-inspection aspect-[5/7] w-60 max-w-full', name: 'text-[22px]', body: 'text-[16px]', cat: 'text-[12px]', label: 'text-[16px]' },
