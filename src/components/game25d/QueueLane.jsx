@@ -20,33 +20,33 @@ export default function QueueLane({ queuedCards, isActive, accent = '#888888', l
       </div>
       <div className="rounded-lg p-1.5" style={{ border: `1px solid ${accent}40`, boxShadow: `inset 0 0 18px ${accent}10` }}>
         <div className="flex flex-row gap-1 justify-center items-end">
-          {rows.map((row) => (
-            <div key={row} className="flex flex-col gap-1 items-center">
+          {rows.map((row) =>
+          <div key={row} className="flex flex-col gap-1 items-center">
               {[0, 1].map((col) => {
-                const cards = cardsByRow[row] || [];
-                const queued = cards[col];
-                if (queued) {
-                  return (
-                    <div key={col} className="relative flex items-center justify-center w-20 h-28">
+              const cards = cardsByRow[row] || [];
+              const queued = cards[col];
+              if (queued) {
+                return (
+                  <div key={col} className="relative flex items-center justify-center w-20 h-28">
                       <Card card={queued.card} faceDown={hidden} size="small" onClick={!hidden ? () => onCardClick?.(queued.card) : undefined} />
-                      {queued.faceDown && (
-                        <div className="absolute -top-1 -right-1 text-[10px] font-mono bg-cosmic-deep px-1 rounded" style={{ color: accent }}>
+                      {queued.faceDown &&
+                    <div className="absolute -top-1 -right-1 text-[10px] font-mono bg-cosmic-deep px-1 rounded" style={{ color: accent }}>
                           {queued.turnsRemaining}T
                         </div>
-                      )}
-                    </div>
-                  );
-                }
-                return (
-                  <div key={col} className="w-20 h-28 rounded glass-card flex items-center justify-center" style={{ borderColor: `${accent}15` }}>
+                    }
+                    </div>);
+
+              }
+              return (
+                <div key={col} className="w-20 h-28 rounded glass-card flex items-center justify-center mx-8 my-3 px-1" style={{ borderColor: `${accent}15` }}>
                     <span className="text-term-faint font-mono text-[10px]">{row}T</span>
-                  </div>
-                );
-              })}
+                  </div>);
+
+            })}
             </div>
-          ))}
+          )}
         </div>
       </div>
-    </div>
-  );
+    </div>);
+
 }
