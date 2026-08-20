@@ -3,7 +3,7 @@ import { Volume2, VolumeX } from 'lucide-react';
 
 export default function TopBar({ turn, isPlayerTurn, inResponseWindow, onEndGame, muted, onToggleMute }) {
   return (
-    <div className="game-topbar flex w-full items-center justify-between gap-3 rounded-xl border border-white/10 bg-cosmic-deep/80 px-4 py-2 shadow-lg backdrop-blur-xl">
+    <div className="game-topbar col-span-2 flex w-full items-center justify-between gap-3 rounded-xl border border-white/10 bg-cosmic-deep/80 px-4 py-2 shadow-lg backdrop-blur-xl">
       <button
         onClick={onEndGame}
         className="hud-control rounded-lg px-3 py-1 text-ui-xs font-bold uppercase tracking-[0.16em] glass-card transition-all duration-300 hover:-translate-y-0.5 active:scale-95"
