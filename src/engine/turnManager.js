@@ -228,7 +228,6 @@ export function changeDomain(state, cardId, options = {}) {
 
   const oldDomain = state.domain;
   const oldDomainPlacedBy = state.domainPlacedBy;
-  if (oldDomain) dispatchRemove(state, oldDomainPlacedBy, oldDomain);
 
   state.domain = card;
   state.domainPlacedBy = state.currentPlayer;

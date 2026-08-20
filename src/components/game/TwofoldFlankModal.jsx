@@ -13,8 +13,9 @@ export default function TwofoldFlankModal({ card, attached, onChoose, onClose })
         <div className="mt-6 grid grid-cols-2 gap-5">
           {['left', 'right'].map((side) => {
             const existing = attached?.[side];
+            const validSide = (card?.alignment === 'A' && side === 'left') || (card?.alignment === 'B' && side === 'right');
             return (
-              <button key={side} onClick={() => onChoose(side)} className="flex flex-col items-center gap-3 rounded-lg border border-term-purple/20 bg-cosmic-deep/70 p-4 transition-[border-color,transform] hover:scale-[1.02]" style={{ borderColor: `${accent}35` }}>
+              <button key={side} onClick={() => onChoose(side)} disabled={!validSide} className="flex flex-col items-center gap-3 rounded-lg border border-term-purple/20 bg-cosmic-deep/70 p-4 transition-[border-color,transform] hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:scale-100" style={{ borderColor: `${accent}35` }}>
                 <span className="text-ui-sm font-bold tracking-[0.18em]" style={{ color: side === 'left' ? ALIGNMENT_COLORS.A.glow : ALIGNMENT_COLORS.B.glow }}>{side.toUpperCase()} FLANK</span>
                 {existing ? <Card card={existing} size="medium" /> : <div className="flex h-36 w-24 items-center justify-center rounded border border-dashed border-term-purple/30 text-ui-xs text-term-faint">EMPTY</div>}
                 <span className="text-ui-xs font-bold" style={{ color: accent }}>{existing ? 'REPLACE THIS FLANK' : 'ATTACH HERE'}</span>

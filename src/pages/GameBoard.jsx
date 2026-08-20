@@ -70,7 +70,6 @@ export default function GameBoard() {
   const [domainCutscene, setDomainCutscene] = useState(null);
   const [showTurnBanner, setShowTurnBanner] = useState(false);
   const [showTwofoldSwitch, setShowTwofoldSwitch] = useState(false);
-  const [twofoldAttachDismissed, setTwofoldAttachDismissed] = useState(false);
   const [showTestPanel, setShowTestPanel] = useState(false);
   const [muted, setMutedState] = useState(isMuted());
   const [testMode] = useState(() => sessionStorage.getItem('testMode') === 'true');
@@ -204,8 +203,9 @@ export default function GameBoard() {
     setShowCardDetail({ card, readOnly: true });
   }, []);
 
-  const handleInspectDomain = useCallback(() => {
-    if (state?.domain) setShowCardDetail({ card: state.domain, readOnly: true });
+  const handleInspectDomain = useCallback((card) => {
+    const inspected = card?.category === 'domain' ? card : state?.domain;
+    if (inspected) setShowCardDetail({ card: inspected, readOnly: true });
   }, [state?.domain]);
 
   const handleInspectQueue = useCallback((card) => {
@@ -243,7 +243,7 @@ export default function GameBoard() {
     setShowCardDetail(null);
     if (!success) return;
     setBoardDevUsed(true);
-    if (!newState.responseWindow?.active) {
+    if (!newState.responseWindow?.active && !newState.twofoldAttachPending) {
       setPhase('draw');
       setActionsPlayed(0);
       setBoardDevUsed(false);
@@ -304,20 +304,27 @@ export default function GameBoard() {
 
   // Twofold attach — auto-prompt when Twofold is placed with no flanks.
   const handleTwofoldAttach = useCallback((leftId, rightId) => {
-    if (!state || state.domainPlacedBy !== 'player') return;
+    if (!state || state.twofoldAttachPending !== 'player') return;
     const newState = cloneState(state);
     attachTwofoldDomains(newState, 'player', leftId, rightId);
+    newState.twofoldAttachPending = null;
+    endTurn(newState);
     setState(newState);
-    setTwofoldAttachDismissed(true);
+    setPhase('draw');
+    setActionsPlayed(0);
+    setBoardDevUsed(false);
   }, [state]);
 
-  // Reset the attach-dismiss flag whenever a non-Twofold domain is active,
-  // so a future Twofold placement can prompt again.
-  useEffect(() => {
-    if (state && state.domain?.id !== 'twofold_reality') {
-      setTwofoldAttachDismissed(false);
-    }
-  }, [state?.domain?.id]);
+  const handleSkipTwofoldAttach = useCallback(() => {
+    if (!state || state.twofoldAttachPending !== 'player') return;
+    const newState = cloneState(state);
+    newState.twofoldAttachPending = null;
+    endTurn(newState);
+    setState(newState);
+    setPhase('draw');
+    setActionsPlayed(0);
+    setBoardDevUsed(false);
+  }, [state]);
 
   const handleAttachTwofoldCard = useCallback((card) => {
     setShowCardDetail(null);
@@ -348,7 +355,7 @@ export default function GameBoard() {
     const newState = cloneState(state);
     const p = newState.players[target];
     if (p && p.hand.length < p.handLimit) {
-      p.hand.push({ ...card, id: `${card.id}_${Date.now()}_${Math.random().toString(36).slice(2, 6)}` });
+      p.hand.push({ ...card, instanceId: `${card.id}_${Date.now()}_${Math.random().toString(36).slice(2, 6)}` });
     }
     setState(newState);
     sfx('draw');
@@ -377,8 +384,8 @@ export default function GameBoard() {
   const inResponseWindow = state.responseWindow?.active;
   const accent = isPlayerTurn ? '#00ff41' : '#a855f7';
 
-  const isTwofold = state.domain?.id === 'twofold_reality';
-  const twofoldNeedsAttach = isTwofold && state.domainAttached && !state.domainAttached.left && !state.domainAttached.right && isPlayerTurn && state.domainPlacedBy === 'player' && !twofoldAttachDismissed;
+  const isTwofold = (state.domain?.effectId || state.domain?.id) === 'twofold_reality';
+  const twofoldNeedsAttach = isTwofold && state.twofoldAttachPending === 'player' && state.domainPlacedBy === 'player';
   const switchesLeft = state.domainAttached ? Math.max(0, 2 - (state.domainAttached.switchesThisTurn || 0)) : 0;
 
   return (
@@ -542,7 +549,7 @@ export default function GameBoard() {
         <TwofoldAttachModal
           hand={player.hand}
           onConfirm={(leftId, rightId) => handleTwofoldAttach(leftId, rightId)}
-          onClose={() => setTwofoldAttachDismissed(true)}
+          onClose={handleSkipTwofoldAttach}
         />
       )}
 

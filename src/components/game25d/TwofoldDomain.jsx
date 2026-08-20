@@ -30,7 +30,7 @@ export default function TwofoldDomain({ domain, domainAttached, onDomainClick, o
               {attached.activeSide === 'left' && (
                 <div className="absolute -inset-1 rounded pointer-events-none" style={{ boxShadow: `0 0 14px ${ALIGNMENT_COLORS.A.glow}80` }} />
               )}
-              <Card card={attached.left} size="medium" onClick={onDomainClick} />
+              <Card card={attached.left} size="medium" onClick={() => onDomainClick(attached.left)} />
             </div>
           ) : (
             <div className="w-24 h-36 rounded glass-card flex items-center justify-center" style={{ borderColor: 'rgba(0,255,65,0.2)', borderStyle: 'dashed' }}>
@@ -42,7 +42,7 @@ export default function TwofoldDomain({ domain, domainAttached, onDomainClick, o
         {/* Center — small Twofold card */}
         <div className="flex flex-col items-center gap-1">
           <div className="text-term-faint font-mono text-[9px] tracking-[0.15em]">TWOFOLD</div>
-          <Card card={domain} size="small" onClick={onDomainClick} />
+          <Card card={domain} size="small" onClick={() => onDomainClick(domain)} />
         </div>
 
         {/* Right attached (System) */}
@@ -53,7 +53,7 @@ export default function TwofoldDomain({ domain, domainAttached, onDomainClick, o
               {attached.activeSide === 'right' && (
                 <div className="absolute -inset-1 rounded pointer-events-none" style={{ boxShadow: `0 0 14px ${ALIGNMENT_COLORS.B.glow}80` }} />
               )}
-              <Card card={attached.right} size="medium" onClick={onDomainClick} />
+              <Card card={attached.right} size="medium" onClick={() => onDomainClick(attached.right)} />
             </div>
           ) : (
             <div className="w-24 h-36 rounded glass-card flex items-center justify-center" style={{ borderColor: 'rgba(0,255,255,0.2)', borderStyle: 'dashed' }}>

@@ -21,6 +21,7 @@ import { proceedWithTurn, endTurn } from './turnManager';
 import { dispatchPlace, dispatchRemove, dispatchRhetoric } from './effects/dispatcher';
 import { emit, emitBefore } from './effects/eventBus';
 import { discardCard } from './effects/primitives';
+import { autoAttachTwofoldDomains } from './twofoldSystem';
 
 // Open a response window for a card that is becoming active.
 // `extra` carries source-specific context (e.g. slot for board_dev, oldDomain for domain).
@@ -95,6 +96,7 @@ export function passResponse(state, playerId) {
 export function closeResponseWindow(state) {
   const window = state.responseWindow;
   const { activeCard, activePlayerId, cancelled, source, slot, oldDomain, oldDomainPlacedBy } = window;
+  let resolvedSuccessfully = false;
 
   if (cancelled && activeCard) {
     // Protective effects (e.g. Objective Authority) may override the cancellation
@@ -103,14 +105,16 @@ export function closeResponseWindow(state) {
     if (before.cancelled) {
       // Cancellation overridden — resolve/place normally.
       clearWindow(state);
-      handleResolve(state, source, activeCard, activePlayerId, slot);
+      handleResolve(state, source, activeCard, activePlayerId, slot, oldDomain, oldDomainPlacedBy);
+      resolvedSuccessfully = true;
     } else {
       clearWindow(state);
       handleCancel(state, source, activeCard, activePlayerId, slot, oldDomain, oldDomainPlacedBy);
     }
   } else if (activeCard) {
     clearWindow(state);
-    handleResolve(state, source, activeCard, activePlayerId, slot);
+    handleResolve(state, source, activeCard, activePlayerId, slot, oldDomain, oldDomainPlacedBy);
+    resolvedSuccessfully = true;
   } else {
     clearWindow(state);
   }
@@ -133,7 +137,14 @@ export function closeResponseWindow(state) {
     if (source === 'queue') {
       proceedWithTurn(state);
     } else if (source === 'domain') {
-      endTurn(state);
+      const resolvedTwofold = resolvedSuccessfully && (state.domain?.effectId || state.domain?.id) === 'twofold_reality' && state.domainPlacedBy === activePlayerId && state.domainAttached;
+      if (resolvedTwofold && activePlayerId === 'player') {
+        state.twofoldAttachPending = 'player';
+        state.phase = 'twofold_attach';
+      } else {
+        if (resolvedTwofold) autoAttachTwofoldDomains(state, activePlayerId);
+        endTurn(state);
+      }
     } else {
       // 'action' or 'board_dev' → return to action phase
       state.phase = 'action';
@@ -155,10 +166,11 @@ function clearWindow(state) {
 }
 
 // Card resolved successfully — dispatch its effect/placement.
-function handleResolve(state, source, card, playerId, slot) {
+function handleResolve(state, source, card, playerId, slot, oldDomain, oldDomainPlacedBy) {
   if (source === 'board_dev') {
     dispatchPlace(state, playerId, card, slot);
   } else if (source === 'domain') {
+    if (oldDomain) dispatchRemove(state, oldDomainPlacedBy, oldDomain);
     dispatchPlace(state, playerId, card, 'domain');
   } else {
     // 'queue' or 'action' — resolve as a one-time-use action card

@@ -10,7 +10,7 @@ import TwofoldDomain from './TwofoldDomain';
 export default function DomainCenter({ domain, modifiers, onDomainClick, domainAttached, onSwitchTwofold, isPlayerTurn, domainPlacedBy }) {
   const accent = domain ? ALIGNMENT_COLORS[domain.alignment]?.glow : '#a855f7';
 
-  if (domain && domain.id === 'twofold_reality') {
+  if (domain && (domain.effectId || domain.id) === 'twofold_reality') {
     return (
       <TwofoldDomain
         domain={domain}
@@ -50,7 +50,7 @@ export default function DomainCenter({ domain, modifiers, onDomainClick, domainA
                 backgroundSize: '12px 12px',
               }}
             />
-            <Card card={domain} size="domain" onClick={onDomainClick} />
+            <Card card={domain} size="domain" onClick={() => onDomainClick(domain)} />
           </div>
         ) : (
           <div

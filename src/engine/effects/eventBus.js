@@ -25,7 +25,14 @@ export function getHandler(cardId) { return _getHandler(cardId); }
 // Collect every active persistent card: the shared Domain + both players' slots.
 function activeCards(state) {
   const cards = [];
-  if (state.domain) cards.push({ owner: 'domain', card: state.domain });
+  if (state.domain) {
+    cards.push({ owner: 'domain', card: state.domain });
+    if ((state.domain.effectId || state.domain.id) === 'twofold_reality') {
+      const side = state.domainAttached?.activeSide;
+      const activeFlank = side ? state.domainAttached?.[side] : null;
+      if (activeFlank) cards.push({ owner: 'domain', card: activeFlank });
+    }
+  }
   for (const pid of ['player', 'opponent']) {
     const p = state.players?.[pid];
     if (!p?.persistentSlots) continue;
@@ -41,7 +48,7 @@ function activeCards(state) {
 export function emitBefore(state, eventType, payload = {}) {
   let current = { ...payload };
   for (const { owner, card } of activeCards(state)) {
-    const handler = _getHandler(card.id);
+    const handler = _getHandler(card.effectId || card.id);
     if (!handler?.onEvent) continue;
     const res = handler.onEvent(state, owner, 'before:' + eventType, current);
     if (res?.cancel) return { cancelled: true, cancelledBy: owner, card };
@@ -53,7 +60,7 @@ export function emitBefore(state, eventType, payload = {}) {
 // Informational "after" event. Handlers react; return values are ignored.
 export function emit(state, eventType, payload = {}) {
   for (const { owner, card } of activeCards(state)) {
-    const handler = _getHandler(card.id);
+    const handler = _getHandler(card.effectId || card.id);
     if (!handler?.onEvent) continue;
     handler.onEvent(state, owner, eventType, payload);
   }

@@ -17,7 +17,8 @@ export default function CardDetail({
   const alignment = card.alignment ? ALIGNMENT_COLORS[card.alignment] : null;
   const accent = alignment?.glow || '#a855f7';
   const isDomain = card.category === 'domain';
-  const twofoldActive = state?.domain?.id === 'twofold_reality' && state?.domainPlacedBy === 'player';
+  const twofoldActive = (state?.domain?.effectId || state?.domain?.id) === 'twofold_reality' && state?.domainPlacedBy === 'player';
+  const canAttachTwofold = twofoldActive && (card.alignment === 'A' || card.alignment === 'B');
   const persistentSlot = CATEGORY_SLOT[card.category];
   const isAction = card.category === 'moral_judgment' || card.category === 'universals';
   const canChangeDomain = isPlayerTurn && phase === 'main' && !boardDevUsed && actionsPlayed === 0;
@@ -48,7 +49,7 @@ export default function CardDetail({
             <div className="mt-5 flex flex-col gap-2">
               {!readOnly && isDomain && twofoldActive && (
                 <>
-                  <button onClick={() => onAttachTwofold?.(card)} disabled={!canChangeDomain} className="rounded border px-4 py-2 text-ui-xs font-bold disabled:cursor-not-allowed disabled:opacity-40" style={{ borderColor: `${accent}55`, color: accent }}>ATTACH AS FLANK</button>
+                  {canAttachTwofold && <button onClick={() => onAttachTwofold?.(card)} disabled={!canChangeDomain} className="rounded border px-4 py-2 text-ui-xs font-bold disabled:cursor-not-allowed disabled:opacity-40" style={{ borderColor: `${accent}55`, color: accent }}>ATTACH AS {card.alignment === 'A' ? 'LEFT' : 'RIGHT'} FLANK</button>}
                   <button onClick={() => onChangeDomain?.(card, { replaceTwofold: true })} disabled={!canChangeDomain} className="rounded border px-4 py-2 text-ui-xs font-bold disabled:cursor-not-allowed disabled:opacity-40" style={{ borderColor: '#ff666655', color: '#ff8888' }}>REPLACE DOMAIN</button>
                 </>
               )}
