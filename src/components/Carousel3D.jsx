@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 const TAP_THRESHOLD = 6;
-const ANGLE_STEP = 28;
+const ANGLE_STEP = 32;
 const MOMENTUM_MS = 180;
 
 export default function Carousel3D({
@@ -21,8 +21,10 @@ export default function Carousel3D({
   const count = items.length;
   const width = Math.min(320, Number(itemWidth) || 320);
   const height = Math.min(460, Number(itemHeight) || 460);
-  const snapDistance = Math.max(130, width * 0.48);
-  const radius = Math.min(560, Math.max(390, width * 1.42));
+  const snapDistance = Math.max(140, width * 0.52);
+
+  // Widen 3D radius so cards sit side-by-side with clear physical depth
+  const radius = Math.max(520, width * 1.75);
 
   const normalizeIndex = (index) => {
     if (!count) return 0;
@@ -134,18 +136,24 @@ export default function Carousel3D({
           const distance = Math.abs(offset);
           const angle = offset * ANGLE_STEP;
           const radians = angle * (Math.PI / 180);
+
+          // Trigonometric cylinder layout
           const translateX = Math.sin(radians) * radius;
-          const translateZ = Math.cos(radians) * radius - radius + (distance < 0.001 ? 32 : 0);
-          const scale = Math.max(0.72, 1 - distance * 0.08);
+          const translateZ = Math.cos(radians) * radius - radius + (distance < 0.001 ? 25 : 0);
+          const scale = Math.max(0.82, 1 - distance * 0.05);
           const zIndex = Math.round(100 - distance * 10);
           const isActive = Math.abs(relativeOffset(index)) < 0.001;
-          const isVisible = distance <= 5.25;
+
+          // Render cards curving all the way to 95° around the cylinder horizon
+          const isVisible = Math.abs(angle) <= 95;
 
           return (
             <div
               key={item.id || index}
               data-carousel-index={index}
-              className={`absolute left-1/2 top-1/2 overflow-hidden break-words opacity-100 ${isDragging ? 'transition-none' : 'transition-[transform,filter] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]'} ${isVisible ? 'pointer-events-auto visible' : 'pointer-events-none invisible'}`}
+              className={`absolute left-1/2 top-1/2 overflow-hidden break-words opacity-100 ${
+                isDragging ? 'transition-none' : 'transition-[transform,filter] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]'
+              } ${isVisible ? 'pointer-events-auto visible' : 'pointer-events-none invisible'}`}
               style={{
                 width: `${width}px`,
                 height: `${height}px`,
@@ -155,7 +163,10 @@ export default function Carousel3D({
                 transform: `translate(-50%, -50%) translateX(${translateX}px) translateZ(${translateZ}px) rotateY(${angle}deg) scale(${scale})`,
                 transformStyle: 'preserve-3d',
                 backfaceVisibility: 'hidden',
-                filter: isActive ? 'brightness(1.06) saturate(1.05)' : `brightness(${Math.max(0.58, 0.9 - distance * 0.06)}) saturate(0.82)`,
+                // Bright, solid physical card backing (no muddy dimming)
+                filter: isActive ? 'brightness(1.08) saturate(1.05)' : `brightness(${Math.max(0.82, 0.96 - distance * 0.03)})`,
+                backgroundColor: '#0c0a14',
+                borderRadius: '1rem',
               }}
             >
               <div className={`relative h-full max-h-[460px] w-full max-w-[320px] overflow-hidden break-words opacity-100 ${isActive ? 'pointer-events-auto' : ''}`}>
