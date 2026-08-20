@@ -36,17 +36,17 @@ export default function CardDetail({
   return (
     <>
       <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/90 p-4 font-mono" onClick={onClose}>
-        <div className="glass-panel grid h-[90vh] max-h-[calc(100vh-2rem)] w-full max-w-3xl grid-cols-[auto_1fr] place-items-center gap-7 p-7 text-center" style={{ borderColor: `${accent}45` }} onClick={(event) => event.stopPropagation()}>
-          <button onClick={() => setShowViewer(true)} aria-label={`Open full details for ${card.name}`}>
-            <Card card={card} size="xlarge" />
+        <div className="glass-panel grid h-[90vh] max-h-[calc(100vh-2rem)] w-full max-w-3xl grid-cols-[auto_1fr] items-center gap-7 p-7 text-center" style={{ borderColor: `${accent}45` }} onClick={(event) => event.stopPropagation()}>
+          <button className="justify-self-center" onClick={() => setShowViewer(true)} aria-label={`Open full details for ${card.name}`}>
+            <Card card={card} size="inspection" />
           </button>
-          <div className="flex min-w-0 w-full flex-col items-center justify-center">
+          <div className="flex h-full min-w-0 w-full flex-col items-center">
             <div className="text-2xl font-bold leading-tight" style={{ color: accent }}>{card.name || 'UNNAMED CARD'}</div>
             <div className="mt-1 text-ui-xs font-bold tracking-[0.18em] text-term-faint">{card.category?.replace(/_/g, ' ').toUpperCase()}</div>
             <div className="my-4 h-px w-full" style={{ background: `${accent}30` }} />
-            <div className="max-h-52 w-full overflow-y-auto whitespace-pre-line px-2 text-ui-sm font-semibold leading-relaxed text-term-text">{card.text || card.description || '[ NO DESCRIPTION ]'}</div>
+            <div className="flex min-h-0 w-full flex-1 items-center justify-center overflow-y-auto whitespace-pre-line px-2 text-ui-sm font-semibold leading-relaxed text-term-text">{card.text || card.description || '[ NO DESCRIPTION ]'}</div>
             {timing && <div className="mt-4 w-full max-w-md rounded border px-3 py-2 text-ui-xs" style={{ borderColor: `${accent}30`, color: accent }}>RESOLUTION TIMING: {timing}</div>}
-            <div className="mt-5 flex w-full max-w-md flex-col gap-2">
+            <div className="mt-auto flex w-full max-w-md flex-col gap-2">
               {!readOnly && isDomain && twofoldActive && (
                 <>
                   {canAttachTwofold && <button onClick={() => onAttachTwofold?.(card)} disabled={!canChangeDomain} className="rounded border px-4 py-2 text-ui-xs font-bold disabled:cursor-not-allowed disabled:opacity-40" style={{ borderColor: `${accent}55`, color: accent }}>ATTACH AS {card.alignment === 'A' ? 'LEFT' : 'RIGHT'} FLANK</button>}
