@@ -2,31 +2,28 @@ import React from 'react';
 import DrawDecks from './DrawDecks';
 import QueueLane from './QueueLane';
 import DomainCenter from './DomainCenter';
+import PersistentRow from './PersistentRow';
 
-// Battlefield — the central play region on the tilted plane.
-// DrawDecks pinned far-left (out of flow); Domain centered between the two
-// equal-flanking queues so it sits at the true horizontal center.
+// Battlefield — horizontal table matching the physical board composition.
 export default function Battlefield({
-  drawPiles,
-  onDraw,
-  drawDisabled,
-  opponentQueue,
-  playerQueue,
-  isPlayerTurn,
-  domain,
-  modifiers,
-  onDomainClick,
-  onQueueCardClick,
-  domainAttached,
-  onSwitchTwofold,
-  domainPlacedBy,
+  drawPiles, onDraw, drawDisabled, opponentQueue, playerQueue, isPlayerTurn,
+  domain, modifiers, onDomainClick, onQueueCardClick, domainAttached,
+  onSwitchTwofold, domainPlacedBy, opponentSlots, playerSlots,
+  onPersistentClick, placementEffect,
 }) {
   return (
-    <div className="game-battlefield relative flex items-center justify-center gap-5 min-h-0 overflow-hidden w-full h-full">
-      <div className="absolute left-0 top-1/2 -translate-y-1/2 z-10">
-        <DrawDecks piles={drawPiles} onDraw={onDraw} disabled={drawDisabled} />
+    <div className="game-battlefield grid h-full min-h-0 w-full grid-cols-[auto_minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-5 overflow-hidden">
+      <DrawDecks piles={drawPiles} onDraw={onDraw} disabled={drawDisabled} />
+
+      <div className="game-board-side flex min-w-0 flex-col items-center justify-center gap-3">
+        <PersistentRow
+          slots={opponentSlots}
+          onSlotClick={onPersistentClick}
+          placementEffect={placementEffect?.playerId === 'opponent' ? placementEffect : null}
+        />
+        <QueueLane queuedCards={opponentQueue} isActive={!isPlayerTurn} accent="#888888" label="OPPONENT QUEUE" hidden />
       </div>
-      <QueueLane queuedCards={opponentQueue} isActive={!isPlayerTurn} accent="#888888" label="OPPONENT QUEUE" hidden />
+
       <DomainCenter
         domain={domain}
         modifiers={modifiers}
@@ -36,7 +33,15 @@ export default function Battlefield({
         isPlayerTurn={isPlayerTurn}
         domainPlacedBy={domainPlacedBy}
       />
-      <QueueLane queuedCards={playerQueue} isActive={isPlayerTurn} accent="#00ff41" label="PLAYER QUEUE" onCardClick={onQueueCardClick} />
+
+      <div className="game-board-side flex min-w-0 flex-col items-center justify-center gap-3">
+        <QueueLane queuedCards={playerQueue} isActive={isPlayerTurn} accent="#00ff41" label="PLAYER QUEUE" onCardClick={onQueueCardClick} />
+        <PersistentRow
+          slots={playerSlots}
+          onSlotClick={onPersistentClick}
+          placementEffect={placementEffect?.playerId === 'player' ? placementEffect : null}
+        />
+      </div>
     </div>
   );
 }

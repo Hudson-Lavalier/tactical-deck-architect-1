@@ -9,7 +9,7 @@ export default function DrawDecks({ piles, onDraw, disabled }) {
   ];
 
   return (
-    <div className="game-draw-decks flex flex-col gap-2 shrink-0">
+    <div className="game-draw-decks flex flex-col gap-6 shrink-0">
       <div className="text-term-text font-mono text-[12px] font-bold tracking-[0.2em] text-center">DRAW</div>
       {decks.map((d) => (
         <div

@@ -1,7 +1,7 @@
 // Queue system — the face-down card queue with row-based timers.
 //
 // Per framework:
-//   - Max 6 queued cards per player
+//   - Max 12 queued cards per player (3 cards in each of 4 turn rows)
 //   - Cards are placed face-down (hidden information)
 //   - 4 rows extending backward from the shared Domain:
 //       Row 1: 1 turn remaining (resolves next turn)

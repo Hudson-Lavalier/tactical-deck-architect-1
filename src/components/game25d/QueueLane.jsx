@@ -1,11 +1,13 @@
 import React from 'react';
 import Card from '@/components/game/Card';
+import { QUEUE_COLS, QUEUE_LIMIT } from '@/data/gameConstants';
 
 // QueueLane — 4-column horizontal lane inside a bordered grid frame.
 // Leftmost column = row 1 (1 turn, resolves first). Up to 2 cards per column.
 // Each cell is a fixed-size flex container so cards sit centered (no offset).
 export default function QueueLane({ queuedCards, isActive, accent = '#888888', label = 'QUEUE', hidden = false, onCardClick }) {
   const rows = [1, 2, 3, 4];
+  const slots = Array.from({ length: QUEUE_COLS }, (_, index) => index);
 
   const cardsByRow = {};
   for (const queued of queuedCards) {
@@ -16,13 +18,13 @@ export default function QueueLane({ queuedCards, isActive, accent = '#888888', l
   return (
     <div className={`game-queue-lane flex flex-col gap-1 min-w-0 ${isActive ? '' : 'opacity-55'}`}>
       <div className="text-term-text font-mono text-[12px] font-bold tracking-[0.15em] text-center">
-        {label} [{queuedCards.length}/6]
+        {label} [{queuedCards.length}/{QUEUE_LIMIT}]
       </div>
       <div className="rounded-lg p-1.5" style={{ border: `1px solid ${accent}40`, boxShadow: `inset 0 0 18px ${accent}10` }}>
         <div className="flex flex-row gap-1 justify-center items-end">
           {rows.map((row) =>
           <div key={row} className="flex flex-col gap-1 items-center">
-              {[0, 1].map((col) => {
+              {slots.map((col) => {
               const cards = cardsByRow[row] || [];
               const queued = cards[col];
               if (queued) {

@@ -2,7 +2,7 @@
 // No card content is invented here — only structural limits and timing rules.
 
 export const HAND_LIMIT = 10;
-export const QUEUE_LIMIT = 6;          // max queued cards per player
+export const QUEUE_LIMIT = 12;         // max queued cards per player (4 turns × 3 slots)
 export const QUEUE_ROWS = 4;           // 4 rows extending backward from domain
 export const QUEUE_COLS = 3;           // 3 slots per row
 export const POINT_LIMIT = 12;         // max total points a player can hold

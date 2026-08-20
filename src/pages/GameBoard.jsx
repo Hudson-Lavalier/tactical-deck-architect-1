@@ -32,7 +32,6 @@ import { ALIGNMENT_COLORS } from '@/components/game/terminalTheme';
 import BoardSurface from '@/components/game25d/BoardSurface';
 import TopBar from '@/components/game25d/TopBar';
 import PointsBar from '@/components/game25d/PointsBar';
-import PersistentRow from '@/components/game25d/PersistentRow';
 import Battlefield from '@/components/game25d/Battlefield';
 import HandFan from '@/components/game25d/HandFan';
 import { EPISTEMOLOGIES } from '@/data/epistemologies';
@@ -427,11 +426,6 @@ export default function GameBoard() {
           <PointsBar player={opponent} isOpponent handCount={opponent.hand.length + opponent.rhetoricHand.length} />
         </div>
 
-        {/* opp-persistent */}
-        <div style={{ gridArea: 'opp-persistent' }} className="flex justify-center items-center">
-          <PersistentRow slots={opponent.persistentSlots} onSlotClick={handleInspectPlaced} placementEffect={placementEffect?.playerId === 'opponent' ? placementEffect : null} />
-        </div>
-
         {/* battlefield */}
         <div style={{ gridArea: 'battlefield' }} className="min-h-0">
           <Battlefield
@@ -451,12 +445,11 @@ export default function GameBoard() {
             domainAttached={state.domainAttached}
             onSwitchTwofold={() => setShowTwofoldSwitch(true)}
             domainPlacedBy={state.domainPlacedBy}
+            opponentSlots={opponent.persistentSlots}
+            playerSlots={player.persistentSlots}
+            onPersistentClick={handleInspectPlaced}
+            placementEffect={placementEffect}
           />
-        </div>
-
-        {/* player-persistent */}
-        <div style={{ gridArea: 'player-persistent' }} className="flex justify-center items-center">
-          <PersistentRow slots={player.persistentSlots} onSlotClick={handleInspectPlaced} placementEffect={placementEffect?.playerId === 'player' ? placementEffect : null} />
         </div>
 
         {/* hand */}
