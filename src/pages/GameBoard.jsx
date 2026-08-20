@@ -387,7 +387,7 @@ export default function GameBoard() {
   const switchesLeft = state.domainAttached ? Math.max(0, 2 - (state.domainAttached.switchesThisTurn || 0)) : 0;
 
   return (
-    <div className="h-screen cosmic-shell text-term-text font-mono relative overflow-hidden">
+    <div className="h-screen cosmic-shell text-term-text font-mono relative overflow-visible">
       <CosmicBackground density={15} />
 
       <BoardSurface accent={accent}>
@@ -445,7 +445,7 @@ export default function GameBoard() {
         </div>
 
         {/* hand */}
-        <div style={{ gridArea: 'hand' }} className="flex min-h-0 items-end justify-center pb-1">
+        <div style={{ gridArea: 'hand' }} className="flex min-h-0 items-end justify-center overflow-visible pb-1">
           <HandFan
             cards={player.hand}
             onSelectCard={handleSelectCard}

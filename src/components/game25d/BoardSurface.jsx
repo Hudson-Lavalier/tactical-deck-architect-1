@@ -4,7 +4,7 @@ import React from 'react';
 // Children are arranged in named grid regions without perspective transforms.
 export default function BoardSurface({ children, accent = '#00ffff' }) {
   return (
-    <div className="fixed inset-0 flex items-center justify-center overflow-hidden bg-slate-950 p-2 md:p-4">
+    <div className="fixed inset-0 flex items-center justify-center overflow-visible bg-slate-950 p-2 md:p-4">
       <div
         className="game-board-surface relative grid h-full w-full gap-1 overflow-visible rounded-2xl border-t border-t-white/20 p-2 backdrop-blur-xl md:gap-2 md:p-3"
         style={{
