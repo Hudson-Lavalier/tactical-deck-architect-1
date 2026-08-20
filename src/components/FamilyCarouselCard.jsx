@@ -22,15 +22,15 @@ export default function FamilyCarouselCard({ family, paradigms = [], selectedPar
 
   return (
     <div
-      className={`group game-card-premium holo-frame relative flex h-full max-h-[460px] w-full max-w-[320px] cursor-pointer flex-col overflow-hidden break-words rounded-2xl border border-t-white/20 p-5 backdrop-blur-xl transition-all duration-300 ${
+      className={`group game-card-premium holo-frame relative flex h-full max-h-[460px] w-full max-w-[320px] cursor-pointer flex-col overflow-hidden break-words rounded-2xl border border-t-white/20 bg-cosmic-deep/90 p-4 backdrop-blur-xl transition-all duration-300 ${
         isCenter ? 'ring-1 ring-white/20' : ''
       }`}
       style={{
         '--accent-color': accent,
-        boxShadow: 'none', // Outer glow removed
+        boxShadow: 'none',
       }}
     >
-      {/* Background surface glow on hover (behind all text) */}
+      {/* Radial Hover Fill */}
       <div
         className="absolute inset-0 -z-10 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
         style={{
@@ -38,36 +38,43 @@ export default function FamilyCarouselCard({ family, paradigms = [], selectedPar
         }}
       />
 
-      {/* Top Family Header */}
-      <div className="relative z-10 flex items-start justify-between border-b pb-3" style={{ borderColor: `${accent}25` }}>
-        <div>
-          <div className="text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: accent }}>
-            {theme.label}
-          </div>
-          <div className="mt-0.5 text-base font-bold uppercase tracking-[0.1em] text-term-text">
-            {family.name}
-          </div>
-        </div>
+      {/* 1. Top Header Badge Row */}
+      <div className="relative z-10 flex min-w-0 items-center justify-between gap-2">
+        <span
+          className="rounded-md border px-2 py-1 text-[10px] font-bold uppercase tracking-[0.14em]"
+          style={{ borderColor: `${accent}50`, backgroundColor: `${accent}15`, color: accent }}
+        >
+          {theme.label}
+        </span>
         {hasSelection ? (
-          <div className="rounded border px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-[0.14em]" style={{ borderColor: accent, backgroundColor: `${accent}20`, color: accent }}>
+          <span className="animate-pulse font-mono text-[9px] font-bold uppercase tracking-[0.18em]" style={{ color: accent }}>
             ● EQUIPPED
-          </div>
+          </span>
         ) : (
-          <div className="rounded border px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-[0.14em] text-term-faint" style={{ borderColor: 'rgba(255,255,255,0.15)' }}>
-            SELECT
-          </div>
+          <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-term-faint">
+            {paradigms.length} CONSTRUCTS
+          </span>
         )}
       </div>
 
-      {/* Description */}
-      <div className="relative z-10 my-3 text-xs leading-relaxed text-term-dim">
-        {family.description || 'Click to browse paradigms and lock in a construct for this branch.'}
+      {/* 2. Central Concept Block (Matching Paradigm & CardInfo) */}
+      <div className="game-card-concept relative z-10 my-3 flex min-h-24 items-center justify-center overflow-hidden rounded-xl border border-white/10 bg-cosmic-deep/80 px-3 py-4 text-center">
+        <div className="game-card-grid pointer-events-none absolute inset-0 opacity-40" />
+        <div
+          className="relative z-10 max-w-full text-base font-bold uppercase leading-tight tracking-[0.06em] md:text-lg"
+          style={{ color: accent }}
+        >
+          {family.name}
+        </div>
       </div>
 
-      {/* Sub-Paradigm Construct Badges */}
-      <div className="relative z-10 mt-auto flex min-h-0 flex-1 flex-col justify-end gap-2 pt-2">
-        <div className="text-[9px] font-bold uppercase tracking-[0.18em] text-term-faint">Branch Constructs</div>
-        <div className="flex flex-col gap-1.5">
+      {/* 3. Description & Branch Constructs Box */}
+      <div className="cyber-richtext relative z-10 flex min-h-0 flex-1 flex-col justify-between overflow-y-auto break-words rounded-xl border border-white/10 bg-cosmic-deep/55 p-3 text-xs leading-normal">
+        <div className="mb-2 text-term-dim leading-relaxed">
+          {family.description || 'Select a paradigm construct from this philosophical branch.'}
+        </div>
+
+        <div className="flex flex-col gap-1 border-t border-white/10 pt-2">
           {paradigms.map((p) => {
             const alignInfo = p.alignment ? ALIGNMENT_COLORS[p.alignment] : null;
             const pColor = alignInfo?.glow || accent;
@@ -76,38 +83,30 @@ export default function FamilyCarouselCard({ family, paradigms = [], selectedPar
             return (
               <div
                 key={p.id || p.name}
-                className={`flex items-center justify-between rounded-lg border px-3 py-2 text-xs transition-all ${
-                  isSelected ? 'bg-white/10 font-bold' : 'bg-cosmic-deep/70'
+                className={`flex items-center justify-between rounded px-2 py-1 text-[11px] ${
+                  isSelected ? 'bg-white/10 font-bold' : ''
                 }`}
-                style={{
-                  borderColor: isSelected ? pColor : `${pColor}25`,
-                }}
+                style={{ color: pColor }}
               >
-                <span style={{ color: pColor }}>
-                  {p.name}
-                </span>
-                {alignInfo && (
-                  <span className="text-[9px] font-bold uppercase tracking-[0.1em]" style={{ color: pColor }}>
-                    [{alignInfo.name}]
-                  </span>
-                )}
+                <span>{p.name}</span>
+                {alignInfo && <span className="text-[9px] opacity-75">[{alignInfo.name}]</span>}
               </div>
             );
           })}
         </div>
       </div>
 
-      {/* Hover Call-to-Action Footer */}
-      <div
-        className="relative z-10 mt-4 flex w-full items-center justify-center rounded-lg border py-2 text-xs font-bold uppercase tracking-[0.16em] transition-all"
+      {/* 4. Footer Action Button */}
+      <button
+        className="relative z-10 mt-3 w-full rounded-lg border py-2 text-xs font-bold uppercase tracking-[0.16em] transition-all"
         style={{
-          borderColor: `${accent}35`,
-          backgroundColor: `${accent}10`,
+          borderColor: `${accent}60`,
+          backgroundColor: `${accent}15`,
           color: accent,
         }}
       >
         BROWSE {family.name.toUpperCase()} ➔
-      </div>
+      </button>
     </div>
   );
 }
