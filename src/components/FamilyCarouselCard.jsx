@@ -22,28 +22,34 @@ export default function FamilyCarouselCard({ family, paradigms = [], selectedPar
 
   return (
     <div
-      className={`game-card-premium holo-frame relative flex h-full max-h-[460px] w-full max-w-[320px] cursor-pointer flex-col overflow-hidden break-words rounded-2xl border border-t-white/20 bg-cosmic-deep/95 p-5 backdrop-blur-xl transition-all duration-300 hover:border-white/40 hover:brightness-110 ${
+      className={`group game-card-premium holo-frame relative flex h-full max-h-[460px] w-full max-w-[320px] cursor-pointer flex-col overflow-hidden break-words rounded-2xl border border-t-white/20 p-5 backdrop-blur-xl transition-all duration-300 ${
         isCenter ? 'ring-1 ring-white/20' : ''
       }`}
       style={{
         '--accent-color': accent,
-        boxShadow: isCenter
-          ? `0 0 16px ${accent}25, inset 0 1px 0 rgba(255,255,255,0.15)`
-          : `0 0 8px ${accent}10, inset 0 1px 0 rgba(255,255,255,0.05)`,
+        boxShadow: 'none', // Outer glow removed
       }}
     >
+      {/* Background surface glow on hover (behind all text) */}
+      <div
+        className="absolute inset-0 -z-10 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+        style={{
+          background: `radial-gradient(circle at 50% 35%, ${accent}33 0%, rgba(12, 10, 20, 0.95) 85%)`,
+        }}
+      />
+
       {/* Top Family Header */}
-      <div className="flex items-start justify-between border-b pb-3" style={{ borderColor: `${accent}25` }}>
+      <div className="relative z-10 flex items-start justify-between border-b pb-3" style={{ borderColor: `${accent}25` }}>
         <div>
           <div className="text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: accent }}>
             {theme.label}
           </div>
-          <div className="mt-0.5 text-base font-bold uppercase tracking-[0.1em] text-term-text" style={{ textShadow: `0 0 6px ${accent}30` }}>
+          <div className="mt-0.5 text-base font-bold uppercase tracking-[0.1em] text-term-text">
             {family.name}
           </div>
         </div>
         {hasSelection ? (
-          <div className="rounded border px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-[0.14em]" style={{ borderColor: `${accent}60`, backgroundColor: `${accent}18`, color: accent }}>
+          <div className="rounded border px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-[0.14em]" style={{ borderColor: accent, backgroundColor: `${accent}20`, color: accent }}>
             ● EQUIPPED
           </div>
         ) : (
@@ -54,12 +60,12 @@ export default function FamilyCarouselCard({ family, paradigms = [], selectedPar
       </div>
 
       {/* Description */}
-      <div className="my-3 text-xs leading-relaxed text-term-dim">
+      <div className="relative z-10 my-3 text-xs leading-relaxed text-term-dim">
         {family.description || 'Click to browse paradigms and lock in a construct for this branch.'}
       </div>
 
       {/* Sub-Paradigm Construct Badges */}
-      <div className="mt-auto flex min-h-0 flex-1 flex-col justify-end gap-2 pt-2">
+      <div className="relative z-10 mt-auto flex min-h-0 flex-1 flex-col justify-end gap-2 pt-2">
         <div className="text-[9px] font-bold uppercase tracking-[0.18em] text-term-faint">Branch Constructs</div>
         <div className="flex flex-col gap-1.5">
           {paradigms.map((p) => {
@@ -75,10 +81,9 @@ export default function FamilyCarouselCard({ family, paradigms = [], selectedPar
                 }`}
                 style={{
                   borderColor: isSelected ? pColor : `${pColor}25`,
-                  boxShadow: isSelected ? `0 0 8px ${pColor}25` : 'none',
                 }}
               >
-                <span style={{ color: pColor, textShadow: isSelected ? `0 0 4px ${pColor}40` : 'none' }}>
+                <span style={{ color: pColor }}>
                   {p.name}
                 </span>
                 {alignInfo && (
@@ -94,7 +99,7 @@ export default function FamilyCarouselCard({ family, paradigms = [], selectedPar
 
       {/* Hover Call-to-Action Footer */}
       <div
-        className="mt-4 flex w-full items-center justify-center rounded-lg border py-2 text-xs font-bold uppercase tracking-[0.16em] transition-all"
+        className="relative z-10 mt-4 flex w-full items-center justify-center rounded-lg border py-2 text-xs font-bold uppercase tracking-[0.16em] transition-all"
         style={{
           borderColor: `${accent}35`,
           backgroundColor: `${accent}10`,
