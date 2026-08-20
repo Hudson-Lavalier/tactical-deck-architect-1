@@ -10,6 +10,7 @@ const SIZES = {
   normal: { box: 'game-card-normal aspect-[5/7] w-24 max-w-full', name: 'text-[13px]', body: 'text-[10px]', cat: 'text-[8px]', label: 'text-[11px]' },
   hand: { box: 'game-card-hand aspect-[5/7] w-28 max-w-full', name: 'text-[14px]', body: 'text-[10px]', cat: 'text-[8px]', label: 'text-[11px]' },
   large: { box: 'game-card-large aspect-[5/7] w-28 max-w-full', name: 'text-[14px]', body: 'text-[10px]', cat: 'text-[8px]', label: 'text-[11px]' },
+  handView: { box: 'game-card-hand-view aspect-[5/7] w-48 max-w-[70vw] md:w-56', name: 'text-[18px]', body: 'text-[13px]', cat: 'text-[10px]', label: 'text-[13px]' },
   xlarge: { box: 'game-card-xlarge aspect-[5/7] w-48 max-w-full', name: 'text-[18px]', body: 'text-[13px]', cat: 'text-[10px]', label: 'text-[13px]' },
   inspection: { box: 'game-card-inspection aspect-[5/7] w-48 max-w-full', name: 'text-[18px]', body: 'text-[13px]', cat: 'text-[10px]', label: 'text-[13px]' },
   // Compact tier for the in-board domain card — smaller body text so the

@@ -455,25 +455,26 @@ export default function GameBoard() {
             visible={showBoardHand}
           />
         </div>
+
+        <button
+          onClick={() => setShowHandView((open) => !open)}
+          className="hud-control absolute bottom-3 left-3 z-50 min-w-[120px] rounded-xl border border-term-blue/40 bg-cosmic-deep/90 px-5 py-2.5 text-xs font-bold uppercase tracking-[0.14em] text-term-blue shadow-lg backdrop-blur-xl transition-all hover:-translate-y-1 md:text-sm"
+        >
+          Hand view
+        </button>
+
+        <button
+          onClick={() => setShowBoardHand((visible) => !visible)}
+          className="hud-control glass-card absolute bottom-3 left-1/2 z-50 -translate-x-1/2 rounded-xl border px-4 py-2 text-xs font-bold uppercase shadow-lg transition-all hover:-translate-y-1"
+        >
+          {showBoardHand ? 'Hide hand' : 'Show hand'}
+        </button>
+
+        {phase === 'main' && isPlayerTurn && !inResponseWindow && (
+          <button onClick={handleEndTurn} className="hud-control absolute bottom-3 right-3 z-50 min-w-[120px] rounded-xl border border-term-green/40 bg-cosmic-deep/90 px-5 py-2.5 text-xs font-bold uppercase tracking-[0.14em] text-term-green shadow-lg backdrop-blur-xl transition-all hover:-translate-y-1 md:text-sm">End turn</button>
+        )}
       </BoardSurface>
 
-      <button
-        onClick={() => setShowHandView((open) => !open)}
-        className="hud-control absolute bottom-3 left-3 z-50 min-w-[120px] rounded-xl border border-term-blue/40 bg-cosmic-deep/90 px-5 py-2.5 text-xs font-bold uppercase tracking-[0.14em] text-term-blue shadow-lg backdrop-blur-xl transition-all hover:-translate-y-1 md:text-sm"
-      >
-        Hand view
-      </button>
-
-      <button
-        onClick={() => setShowBoardHand((visible) => !visible)}
-        className="hud-control glass-card absolute bottom-3 left-1/2 z-50 -translate-x-1/2 rounded-xl border px-4 py-2 text-xs font-bold uppercase shadow-lg transition-all hover:-translate-y-1"
-      >
-        {showBoardHand ? 'Hide hand' : 'Show hand'}
-      </button>
-
-      {phase === 'main' && isPlayerTurn && !inResponseWindow && (
-        <button onClick={handleEndTurn} className="hud-control absolute bottom-6 right-6 z-40 min-w-[120px] rounded-xl border border-term-green/40 bg-cosmic-deep/90 px-5 py-2.5 text-xs font-bold uppercase tracking-[0.14em] text-term-green shadow-lg backdrop-blur-xl transition-all hover:-translate-y-1 md:text-sm">End turn</button>
-      )}
 
       {/* ── Flat overlays ── */}
       {domainCutscene && <DomainCutscene card={domainCutscene} />}
@@ -506,6 +507,10 @@ export default function GameBoard() {
         <HandView
           cards={player.hand}
           onSelectCard={(card) => setHandViewerCard(card)}
+          onPlayCard={(card) => {
+            setShowHandView(false);
+            handleSelectCard(card);
+          }}
           onClose={() => setShowHandView(false)}
         />
       )}

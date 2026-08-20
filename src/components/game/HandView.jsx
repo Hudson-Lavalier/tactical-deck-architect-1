@@ -3,12 +3,13 @@ import Card from './Card';
 
 const DRAG_THRESHOLD = 5;
 
-export default function HandView({ cards, onSelectCard, onClose }) {
+export default function HandView({ cards, onSelectCard, onPlayCard, onClose }) {
   const scrollerRef = useRef(null);
   const frameRef = useRef(0);
   const dragRef = useRef(null);
   const suppressClickRef = useRef(false);
   const [dragging, setDragging] = useState(false);
+  const [playMode, setPlayMode] = useState(false);
 
   useEffect(() => {
     const scroller = scrollerRef.current;
@@ -32,6 +33,8 @@ export default function HandView({ cards, onSelectCard, onClose }) {
 
     scroller.addEventListener('scroll', schedule, { passive: true });
     window.addEventListener('resize', schedule);
+    const middleCard = scroller.children[Math.floor(cards.length / 2)];
+    middleCard?.scrollIntoView({ behavior: 'auto', block: 'center', inline: 'center' });
     schedule();
     return () => {
       scroller.removeEventListener('scroll', schedule);
@@ -70,13 +73,26 @@ export default function HandView({ cards, onSelectCard, onClose }) {
   };
 
   const selectCard = (card) => {
-    if (!suppressClickRef.current) onSelectCard?.(card);
+    if (suppressClickRef.current) return;
+    if (playMode) onPlayCard?.(card);
+    else onSelectCard?.(card);
   };
 
   return (
     <div className="fixed inset-0 z-40 flex flex-col items-center justify-center bg-black/85 font-mono" onClick={onClose}>
       <div className="relative z-10 flex w-full flex-col items-center" onClick={(event) => event.stopPropagation()}>
-        <div className="mb-6 text-ui-lg font-bold tracking-[0.25em] text-term-text">── HAND VIEW ──</div>
+        <div className="mb-4 flex w-full max-w-6xl items-center justify-between px-6">
+          <div className="text-ui-lg font-bold tracking-[0.25em] text-term-text">── HAND VIEW ──</div>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setPlayMode((active) => !active)}
+              className={`hud-control rounded-lg border px-4 py-2 text-ui-xs font-bold uppercase tracking-[0.14em] transition-all ${playMode ? 'border-term-green/50 bg-term-green/10 text-term-green' : 'border-term-blue/40 bg-term-blue/10 text-term-blue'}`}
+            >
+              {playMode ? 'Play mode' : 'Inspect mode'}
+            </button>
+            <button onClick={onClose} className="hud-control flex h-9 w-9 items-center justify-center rounded-lg border border-white/15 text-ui-md font-bold text-term-text" aria-label="Close hand view">×</button>
+          </div>
+        </div>
         {cards.length === 0 ? (
           <div className="text-ui-md italic text-term-faint">[ HAND EMPTY ]</div>
         ) : (
@@ -91,12 +107,11 @@ export default function HandView({ cards, onSelectCard, onClose }) {
           >
             {cards.map((card, index) => (
               <div key={card.id || index} className="shrink-0 transition-[transform,opacity] duration-150 ease-out" style={{ scrollSnapAlign: 'center', transformOrigin: 'center' }}>
-                <Card card={card} size="large" onClick={() => selectCard(card)} />
+                <Card card={card} size="handView" onClick={() => selectCard(card)} />
               </div>
             ))}
           </div>
         )}
-        <button onClick={onClose} className="mt-6 rounded border border-term-green/30 px-6 py-2 text-ui-sm font-bold text-term-green">CLOSE</button>
       </div>
     </div>
   );
