@@ -10,6 +10,7 @@ const SIZES = {
   normal: { box: 'game-card-normal w-28 h-40', name: 'text-[15px]', body: 'text-[11px]', cat: 'text-[9px]', label: 'text-[12px]' },
   large: { box: 'game-card-large w-32 h-48', name: 'text-[17px]', body: 'text-[12px]', cat: 'text-[10px]', label: 'text-[13px]' },
   xlarge: { box: 'game-card-xlarge w-60 h-full max-h-[18rem]', name: 'text-[22px]', body: 'text-[16px]', cat: 'text-[12px]', label: 'text-[16px]' },
+  flank: { box: 'game-card-flank w-24 h-36', name: 'text-[12px]', body: 'text-[9px]', cat: 'text-[8px]', label: 'text-[10px]' },
   // Compact tier for the in-board domain card — smaller body text so the
   // full description fits without overflow.
   domain: { box: 'game-card-domain w-56 h-full max-h-[17rem]', name: 'text-[18px]', body: 'text-[10px]', cat: 'text-[9px]', label: 'text-[12px]' }

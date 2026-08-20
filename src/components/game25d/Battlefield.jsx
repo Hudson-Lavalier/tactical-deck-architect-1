@@ -18,7 +18,7 @@ export default function Battlefield({
       </div>
 
       <div className="game-battlefield-stage grid w-full grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-8 px-32">
-        <div className="game-board-side flex min-w-0 flex-col items-center justify-center gap-3">
+        <div className="game-board-side game-board-side-left flex w-full min-w-0 flex-col items-center justify-center gap-3">
           <PersistentRow
             slots={opponentSlots}
             onSlotClick={onPersistentClick}
@@ -37,7 +37,7 @@ export default function Battlefield({
           domainPlacedBy={domainPlacedBy}
         />
 
-        <div className="game-board-side flex min-w-0 flex-col items-center justify-center gap-3">
+        <div className="game-board-side game-board-side-right flex w-full min-w-0 flex-col items-center justify-center gap-3">
           <QueueLane queuedCards={playerQueue} isActive={isPlayerTurn} accent="#00ff41" label="PLAYER QUEUE" onCardClick={onQueueCardClick} />
           <PersistentRow
             slots={playerSlots}
