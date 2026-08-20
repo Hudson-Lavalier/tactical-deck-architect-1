@@ -24,7 +24,7 @@ export default function DomainCenter({ domain, modifiers, onDomainClick, domainA
   }
 
   return (
-    <div className="game-domain-center flex h-full min-h-0 w-[32rem] max-w-full shrink-0 flex-col items-center gap-1.5 relative">
+    <div className="flex flex-col items-center gap-1.5 relative shrink-0 h-full min-h-0">
       {domain && (
         <div
           className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[26rem] h-[26rem] rounded-full pointer-events-none -z-10"
