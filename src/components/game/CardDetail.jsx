@@ -38,7 +38,7 @@ export default function CardDetail({
       <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/90 p-4 font-mono" onClick={onClose}>
         <div className="glass-panel grid w-full max-w-3xl grid-cols-[auto_1fr] gap-7 p-7" style={{ borderColor: `${accent}45` }} onClick={(event) => event.stopPropagation()}>
           <button className="self-center" onClick={() => setShowViewer(true)} aria-label={`Open full details for ${card.name}`}>
-            <Card card={card} size="xlarge" />
+            <Card card={card} size="detail" />
           </button>
           <div className="flex min-w-0 flex-col">
             <div className="text-2xl font-bold leading-tight" style={{ color: accent }}>{card.name || 'UNNAMED CARD'}</div>
