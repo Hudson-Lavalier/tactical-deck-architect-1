@@ -28,19 +28,30 @@ const EVENT_LABELS = {
 };
 
 // GameLog — collapsible glass panel on the right side.
-export default function GameLog({ log }) {
+export default function GameLog({ log, testMode = false, onOpenTest }) {
   const [open, setOpen] = useState(false);
 
   return (
     <>
-      <button
-        onClick={() => setOpen(!open)}
-        className="fixed right-0 top-1/2 -translate-y-1/2 z-30 px-2 py-6 glass-panel rounded-l-lg hover:border-term-green/40 transition-colors"
-        style={{ borderRadius: '8px 0 0 8px' }}
-        title="Game Log"
-      >
-        <ScrollText className={`w-5 h-5 ${open ? 'text-term-green' : 'text-term-dim'}`} />
-      </button>
+      <div className="fixed right-0 top-1/2 z-30 flex -translate-y-1/2 flex-col items-end gap-2">
+        <button
+          onClick={() => setOpen(!open)}
+          className="rounded-l-lg px-2 py-6 glass-panel transition-colors hover:border-term-green/40"
+          style={{ borderRadius: '8px 0 0 8px' }}
+          title="Game Log"
+        >
+          <ScrollText className={`h-5 w-5 ${open ? 'text-term-green' : 'text-term-dim'}`} />
+        </button>
+        {testMode && (
+          <button
+            onClick={onOpenTest}
+            className="rounded-l-lg px-3 py-2 glass-panel transition-[border-color,box-shadow] hover:border-term-purple/40"
+            style={{ borderRadius: '8px 0 0 8px' }}
+          >
+            <span className="font-mono text-ui-xs font-bold tracking-[0.15em] text-term-purple">TEST</span>
+          </button>
+        )}
+      </div>
 
       {open && (
         <div className="fixed right-0 top-0 bottom-0 w-80 max-w-[85vw] z-30 glass-panel flex flex-col"

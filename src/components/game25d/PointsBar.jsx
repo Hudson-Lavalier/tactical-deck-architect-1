@@ -16,9 +16,9 @@ export default function PointsBar({ player, isOpponent = false, handCount }) {
   const overallPct = totalTarget > 0 ? Math.min(100, (totalEarned / totalTarget) * 100) : 0;
 
   return (
-    <div className={`flex w-full min-w-0 flex-wrap items-center justify-center gap-x-4 gap-y-2 font-mono ${isOpponent ? 'text-ui-sm' : 'text-ui-md'}`}>
+    <div className={`grid w-full min-w-0 grid-cols-[minmax(0,1fr)_auto_auto_auto] items-center justify-center gap-4 font-mono ${isOpponent ? 'text-ui-sm' : 'text-ui-md'}`}>
       {/* Victory Standard */}
-      <div className="flex flex-col gap-1">
+      <div className="flex w-full min-w-0 flex-col gap-1">
         <div className="text-term-text tracking-[0.2em] text-[12px] font-bold">
           {isOpponent ? 'OPPONENT' : 'YOU'} · VICTORY STANDARD
         </div>
@@ -27,32 +27,32 @@ export default function PointsBar({ player, isOpponent = false, handCount }) {
           const cur = points[key] || 0;
           const pct = Math.min(100, (cur / target) * 100);
           return (
-            <div key={key} className="flex min-w-0 items-center gap-1.5" style={{ '--accent-color': info.glow }}>
-              <span style={{ color: info.glow }} className="accent-text-glow w-14 shrink-0 font-bold text-[12px]">
+            <div key={key} className="grid w-full min-w-0 grid-cols-[auto_1fr_auto] items-center gap-2" style={{ '--accent-color': info.glow }}>
+              <span style={{ color: info.glow }} className="accent-text-glow min-w-0 max-w-[7rem] truncate text-left text-[12px] font-bold">
                 {info.name}
               </span>
-              <div className="h-1.5 w-[clamp(5rem,8vw,9rem)] min-w-0 overflow-hidden rounded bg-term-purple/10">
+              <div className="h-1.5 w-full min-w-0 overflow-hidden rounded bg-term-purple/10">
                 <div
                   className="h-full transition-[width,box-shadow] duration-300"
                   style={{ width: `${pct}%`, background: info.glow, boxShadow: '0 0 6px color-mix(in srgb, var(--accent-color) 50%, transparent)' }}
                 />
               </div>
-              <span style={{ color: info.glow }} className="font-bold text-[12px] w-9">
+              <span style={{ color: info.glow }} className="text-right text-[12px] font-bold tabular-nums">
                 {cur}/{target}
               </span>
             </div>
           );
         })}
         {/* Weighted overall */}
-        <div className="flex items-center gap-1.5 mt-0.5">
-          <span className="text-term-text text-[12px] font-bold tracking-[0.15em] w-14">WEIGHTED</span>
-          <div className="h-2 w-[clamp(5rem,8vw,9rem)] min-w-0 overflow-hidden rounded bg-term-purple/10">
+        <div className="mt-0.5 grid w-full min-w-0 grid-cols-[auto_1fr_auto] items-center gap-2">
+          <span className="min-w-0 max-w-[7rem] truncate text-left text-[12px] font-bold tracking-[0.15em] text-term-text">WEIGHTED</span>
+          <div className="h-2 w-full min-w-0 overflow-hidden rounded bg-term-purple/10">
             <div
               className="h-full transition-[width,box-shadow] duration-300"
               style={{ width: `${overallPct}%`, background: 'linear-gradient(90deg, #00ff41, #00ffff, #a855f7)', boxShadow: '0 0 8px rgba(168,85,247,0.4)' }}
             />
           </div>
-          <span className="text-term-text text-[12px] font-bold w-9">{totalEarned}/{totalTarget}</span>
+          <span className="text-right text-[12px] font-bold tabular-nums text-term-text">{totalEarned}/{totalTarget}</span>
         </div>
       </div>
 

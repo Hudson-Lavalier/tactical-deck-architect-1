@@ -604,17 +604,7 @@ export default function GameBoard() {
         </div>
       )}
 
-      <GameLog log={state.log} />
-
-      {testMode && (
-        <button
-          onClick={() => setShowTestPanel(true)}
-          className="fixed right-0 bottom-4 z-30 px-3 py-2 glass-panel rounded-l-lg transition-[border-color,box-shadow] hover:border-term-purple/40"
-          style={{ borderRadius: '8px 0 0 8px' }}
-        >
-          <span className="text-term-purple text-ui-xs font-bold tracking-[0.15em] font-mono">TEST</span>
-        </button>
-      )}
+      <GameLog log={state.log} testMode={testMode} onOpenTest={() => setShowTestPanel(true)} />
 
       {testMode && showTestPanel && (
         <TestPanel

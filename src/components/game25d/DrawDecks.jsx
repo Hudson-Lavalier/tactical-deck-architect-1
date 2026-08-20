@@ -9,18 +9,18 @@ export default function DrawDecks({ piles, onDraw, disabled }) {
   ];
 
   return (
-    <div className="game-draw-decks mx-auto flex w-full min-w-0 max-w-24 shrink flex-col items-center justify-center gap-3 overflow-visible md:gap-5">
+    <div className="game-draw-decks mx-auto flex w-full min-w-0 max-w-28 shrink flex-col items-center justify-center gap-3 overflow-visible md:max-w-32 md:gap-5">
       <div className="hud-kicker text-center font-mono text-[11px] font-bold uppercase tracking-[0.25em] text-term-text">Archives</div>
       {decks.map((d) => (
         <div
           key={d.id}
           onClick={() => !disabled && onDraw?.(d.id)}
-          className={`game-draw-deck accent-border relative z-20 flex aspect-[5/7] w-full max-w-24 flex-col items-center justify-center rounded-xl glass-card cosmic-sheen transition-all duration-300 ease-out ${
+          className={`game-draw-deck accent-border relative z-20 flex aspect-[5/7] w-full max-w-28 flex-col items-center justify-center rounded-xl p-2.5 glass-card cosmic-sheen transition-all duration-300 ease-out md:max-w-32 md:p-3 ${
             disabled ? 'cursor-not-allowed opacity-40' : 'cursor-pointer opacity-100 hover:-translate-y-2 active:translate-y-0 active:scale-95'
           }`}
           style={{ '--accent-color': d.color }}
         >
-          <div className="font-mono text-[10px] font-bold tracking-[0.1em] text-center leading-tight" style={{ color: d.color }}>
+          <div className="max-w-full truncate text-center font-mono text-[10px] font-bold leading-tight tracking-[0.18em]" style={{ color: d.color }}>
             {d.label}
           </div>
           <div className="text-term-text font-mono text-base font-bold mt-2">{d.count}</div>
