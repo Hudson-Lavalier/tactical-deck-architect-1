@@ -18,7 +18,7 @@
 import { logEvent } from './gameState';
 import { resolveCard } from './queueSystem';
 import { proceedWithTurn, endTurn } from './turnManager';
-import { dispatchPlace, dispatchRemove } from './effects/dispatcher';
+import { dispatchPlace, dispatchRemove, dispatchRhetoric } from './effects/dispatcher';
 import { emit, emitBefore } from './effects/eventBus';
 import { discardCard } from './effects/primitives';
 
@@ -66,6 +66,10 @@ export function playRhetoricResponse(state, playerId, rhetoricCardId, action) {
   window.chain.push({ playerId, card, action });
   window.respondingPlayerId = playerId === 'player' ? 'opponent' : 'player';
 
+  // Dispatch the rhetoric card's own effect (protect / delay / counter / etc.).
+  // The 'cancel' action also flags the active card as cancelled below.
+  dispatchRhetoric(state, playerId, card, window.activeCard, action);
+
   // If action is 'cancel', mark the active card as cancelled
   if (action === 'cancel') {
     window.cancelled = true;
@@ -111,8 +115,12 @@ export function closeResponseWindow(state) {
     clearWindow(state);
   }
 
-  // Remove from pending resolutions
-  state.pendingResolutions.shift();
+  // Remove from pending resolutions — only queue resolutions are stacked there.
+  // Action / board_dev / domain windows are not pushed to pendingResolutions,
+  // so shifting them would drop an unrelated queued card.
+  if (source === 'queue') {
+    state.pendingResolutions.shift();
+  }
 
   logEvent(state, { type: 'response_window_close', cancelled });
 

@@ -1,31 +1,52 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { ALIGNMENT_COLORS } from './terminalTheme';
 import RichText from '@/components/RichText';
 
 // ItemViewer — full-screen overlay presenting a single card exactly as it
-// appears in the Card Info screen (large glass frame, full RichText body),
-// with a 3D tilt that follows the cursor for an "item viewer" feel.
+// appears in Card Info (large glass frame, full RichText body).
+// Tilt follows the cursor via requestAnimationFrame + direct style mutation
+// (no per-mousemove React state → no re-render storm / jank).
 export default function ItemViewer({ card, onClose }) {
   const ref = useRef(null);
-  const [transform, setTransform] = useState('perspective(1200px) rotateX(0deg) rotateY(0deg)');
+  const rafRef = useRef(0);
+  const targetRef = useRef({ rx: 0, ry: 0 });
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    const apply = () => {
+      rafRef.current = 0;
+      const { rx, ry } = targetRef.current;
+      el.style.transform = `perspective(1200px) rotateX(${rx.toFixed(2)}deg) rotateY(${ry.toFixed(2)}deg)`;
+    };
+
+    const onMove = (e) => {
+      const rect = el.getBoundingClientRect();
+      const px = (e.clientX - rect.left) / rect.width;
+      const py = (e.clientY - rect.top) / rect.height;
+      targetRef.current = { rx: -(py - 0.5) * 14, ry: (px - 0.5) * 14 };
+      if (!rafRef.current) rafRef.current = requestAnimationFrame(apply);
+    };
+
+    const onLeave = () => {
+      targetRef.current = { rx: 0, ry: 0 };
+      if (!rafRef.current) rafRef.current = requestAnimationFrame(apply);
+    };
+
+    el.addEventListener('mousemove', onMove);
+    el.addEventListener('mouseleave', onLeave);
+    return () => {
+      el.removeEventListener('mousemove', onMove);
+      el.removeEventListener('mouseleave', onLeave);
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    };
+  }, []);
 
   if (!card) return null;
 
   const alignmentInfo = card.alignment ? ALIGNMENT_COLORS[card.alignment] : null;
   const accent = alignmentInfo?.glow || '#a855f7';
-
-  const handleMove = (e) => {
-    const el = ref.current;
-    if (!el) return;
-    const rect = el.getBoundingClientRect();
-    const px = (e.clientX - rect.left) / rect.width;  // 0..1
-    const py = (e.clientY - rect.top) / rect.height;  // 0..1
-    const rotY = (px - 0.5) * 18;   // -9..9
-    const rotX = -(py - 0.5) * 18;  // -9..9
-    setTransform(`perspective(1200px) rotateX(${rotX.toFixed(2)}deg) rotateY(${rotY.toFixed(2)}deg)`);
-  };
-
-  const handleLeave = () => setTransform('perspective(1200px) rotateX(0deg) rotateY(0deg)');
 
   return (
     <div
@@ -34,15 +55,13 @@ export default function ItemViewer({ card, onClose }) {
     >
       <div
         ref={ref}
-        onMouseMove={handleMove}
-        onMouseLeave={handleLeave}
         onClick={(e) => e.stopPropagation()}
-        className="w-[min(62vw,560px)] h-[min(74vh,660px)] p-6 rounded glass-card cosmic-sheen flex flex-col relative overflow-hidden transition-[transform,box-shadow] duration-150 ease-out cursor-default"
+        className="w-[min(62vw,560px)] h-[min(74vh,660px)] p-6 rounded glass-card cosmic-sheen flex flex-col relative overflow-hidden"
         style={{
           borderColor: `${accent}30`,
           boxShadow: `0 0 44px ${accent}26, inset 0 1px 0 rgba(255,255,255,0.05)`,
-          transform,
           transformStyle: 'preserve-3d',
+          willChange: 'transform',
         }}
       >
         {/* Header */}
@@ -52,9 +71,7 @@ export default function ItemViewer({ card, onClose }) {
               {card.name || 'UNNAMED'}
             </div>
             {alignmentInfo && (
-              <div className="text-ui-sm font-bold mt-0.5" style={{ color: accent }}>
-                {alignmentInfo.name}
-              </div>
+              <div className="text-ui-sm font-bold mt-0.5" style={{ color: accent }}>{alignmentInfo.name}</div>
             )}
           </div>
           {card.subcategory && (
@@ -62,10 +79,8 @@ export default function ItemViewer({ card, onClose }) {
           )}
         </div>
 
-        {/* Divider */}
         <div className="border-t my-2 relative" style={{ borderColor: `${accent}20` }} />
 
-        {/* Full card text — scrollable */}
         <div className="flex-1 overflow-y-auto pr-1 min-h-0 relative">
           {card.text ? (
             <RichText text={card.text} alignment={card.alignment} />
@@ -74,7 +89,6 @@ export default function ItemViewer({ card, onClose }) {
           )}
         </div>
 
-        {/* Category footer */}
         {card.category && (
           <div className="text-term-faint text-ui-xs mt-2 pt-2 border-t relative" style={{ borderColor: `${accent}15` }}>
             {card.category.replace(/_/g, ' ').toUpperCase()}

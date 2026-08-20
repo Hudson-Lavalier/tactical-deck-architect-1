@@ -17,9 +17,9 @@ export default function BoardSurface({ children, accent = '#00ffff' }) {
           gridTemplateRows: 'auto auto auto auto 1fr auto auto auto',
           gridTemplateAreas:
             '"topbar" "help" "opp-points" "opp-persistent" "battlefield" "player-persistent" "hand" "player-points"',
-          background: 'linear-gradient(160deg, rgba(16,12,26,0.90), rgba(8,8,16,0.85))',
+          background: 'linear-gradient(160deg, rgba(24,18,38,0.92), rgba(12,12,22,0.88))',
           border: `1px solid ${accent}40`,
-          boxShadow: `0 0 24px ${accent}18, inset 0 0 40px rgba(0,0,0,0.45)`,
+          boxShadow: `0 0 24px ${accent}22, inset 0 0 40px rgba(0,0,0,0.38), inset 0 1px 0 rgba(255,255,255,0.05)`,
         }}
       >
         {/* Thin glowing edge trace */}

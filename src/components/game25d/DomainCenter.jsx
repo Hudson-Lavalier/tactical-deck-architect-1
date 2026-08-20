@@ -1,11 +1,27 @@
 import React from 'react';
 import Card from '@/components/game/Card';
 import { ALIGNMENT_COLORS } from '@/components/game/terminalTheme';
+import TwofoldDomain from './TwofoldDomain';
 
 // DomainCenter — the shared domain as the tilted board's centerpiece.
 // Radial alignment bloom + faint circuit-node texture behind the card.
-export default function DomainCenter({ domain, modifiers, onDomainClick }) {
+// Twofold Reality renders as a small center card flanked by its two
+// attached domains with a switch control.
+export default function DomainCenter({ domain, modifiers, onDomainClick, domainAttached, onSwitchTwofold, isPlayerTurn, domainPlacedBy }) {
   const accent = domain ? ALIGNMENT_COLORS[domain.alignment]?.glow : '#a855f7';
+
+  if (domain && domain.id === 'twofold_reality') {
+    return (
+      <TwofoldDomain
+        domain={domain}
+        domainAttached={domainAttached}
+        onDomainClick={onDomainClick}
+        onSwitch={onSwitchTwofold}
+        isPlayerTurn={isPlayerTurn}
+        domainPlacedBy={domainPlacedBy}
+      />
+    );
+  }
 
   return (
     <div className="flex flex-col items-center gap-1.5 relative shrink-0 h-full min-h-0">
@@ -27,7 +43,6 @@ export default function DomainCenter({ domain, modifiers, onDomainClick }) {
 
         {domain ? (
           <div className="relative">
-            {/* Circuit-node texture peeking around the card edges */}
             <div
               className="absolute -inset-2 rounded pointer-events-none opacity-25"
               style={{
@@ -35,7 +50,7 @@ export default function DomainCenter({ domain, modifiers, onDomainClick }) {
                 backgroundSize: '12px 12px',
               }}
             />
-            <Card card={domain} size="xlarge" onClick={onDomainClick} />
+            <Card card={domain} size="domain" onClick={onDomainClick} />
           </div>
         ) : (
           <div
@@ -60,7 +75,7 @@ export default function DomainCenter({ domain, modifiers, onDomainClick }) {
         <div className="text-term-text font-mono text-[12px] font-bold">
           ACTIVE:{' '}
           <span style={{ color: accent, textShadow: `0 0 8px ${accent}60` }}>
-            {ALIGNMENT_COLORS[domain.alignment]?.name}
+            {ALIGNMENT_COLORS[domain.alignment]?.name || 'SPECIAL'}
           </span>
         </div>
       )}

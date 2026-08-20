@@ -114,6 +114,11 @@ export function startTurn(state) {
   // Reset once-per-turn ability usage for this player
   resetTurnUsage(state, state.currentPlayer);
 
+  // Reset the Twofold Reality switch counter at the start of the placing player's turn.
+  if (state.domainAttached && state.domainPlacedBy === state.currentPlayer) {
+    state.domainAttached.switchesThisTurn = 0;
+  }
+
   // Emit turn_start so domain/persistent effects can react (Black Hole, Bridge).
   emit(state, 'turn_start', { playerId: state.currentPlayer });
 

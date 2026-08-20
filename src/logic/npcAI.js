@@ -1,9 +1,11 @@
 // NPC AI — hardcoded logic with randomness (no AI models).
 //
-// Per user specification:
-//   - Single-player game (multiplayer canceled)
-//   - NPC follows hardcoded logic with randomness
-//   - No AI/LLM integration
+// Single-player NPC. Difficulty (1–5) meaningfully scales:
+//   - action play probability & allowance usage
+//   - rhetoric counter chance
+//   - draw-pile heuristics (smart vs random)
+//   - action selection (best-fit vs random)
+//   - respect for the test-mode opponent domain lock
 //
 // The NPC makes decisions based on simple heuristics:
 //   1. Draw from the pile that best matches its victory profile needs
@@ -16,16 +18,23 @@ import { drawCard, placePersistent, changeDomain, endTurn } from '../engine/turn
 import { determinePlayMode, getActionAllowance, canPlayActionCard } from '../engine/resolutionEngine';
 import { enqueueCard } from '../engine/queueSystem';
 
-// Pick a draw pile based on victory profile needs
+// ── Difficulty-scaled thresholds ────────────────────────────────────
+// d1 = easy (passive, rarely counters), d5 = hard (aggressive, smart).
+function actionPlayProb(difficulty) { return 0.3 + (difficulty - 1) * 0.17; }   // 0.30 → 0.98
+function rhetoricCounterProb(difficulty) { return 0.05 + (difficulty - 1) * 0.11; } // 0.05 → 0.49
+function smartDrawChance(difficulty) { return 0.3 + (difficulty - 1) * 0.17; }   // 0.30 → 0.98
+function smartActionChance(difficulty) { return 0.3 + (difficulty - 1) * 0.17; } // 0.30 → 0.98
+function allowanceUseMin(difficulty) { return Math.max(1, Math.round(difficulty / 2)); } // d1→1, d5→3 (uses full allowance at high diff)
+
+// Pick a draw pile based on victory profile needs (smart) or random (easy).
 function pickDrawPile(state) {
   const player = state.players[state.currentPlayer];
   const profile = player.victoryProfile;
 
-  if (!profile) {
+  if (!profile || Math.random() > smartDrawChance(state.difficulty)) {
     return Math.random() < 0.5 ? DRAW_PILES.METAPHYSICS : DRAW_PILES.META_ETHICS;
   }
 
-  // Determine which alignment the NPC needs most
   const needed = { A: profile.A - player.points.A, B: profile.B - player.points.B, C: profile.C - player.points.C };
   const maxNeeded = Math.max(needed.A, needed.B, needed.C);
 
@@ -33,19 +42,11 @@ function pickDrawPile(state) {
     return Math.random() < 0.5 ? DRAW_PILES.METAPHYSICS : DRAW_PILES.META_ETHICS;
   }
 
-  // Metaphysics pile: Domain (A/B/C), Theory of Time, Universals
-  // Meta-Ethics pile: Moral Reality, Moral Grounding, Moral Judgment
-  // Simple heuristic: if needing more points, draw from Meta-Ethics (action cards)
-  // If needing board control, draw from Metaphysics (domain/time)
   const hasDomain = state.domain !== null;
   const hasAllPersistents = Object.values(player.persistentSlots).every((s) => s !== null);
 
-  if (!hasAllPersistents && Math.random() < 0.6) {
-    return DRAW_PILES.METAPHYSICS;
-  }
-  if (!hasDomain && Math.random() < 0.4) {
-    return DRAW_PILES.METAPHYSICS;
-  }
+  if (!hasAllPersistents && Math.random() < 0.6) return DRAW_PILES.METAPHYSICS;
+  if (!hasDomain && Math.random() < 0.4) return DRAW_PILES.METAPHYSICS;
 
   return DRAW_PILES.META_ETHICS;
 }
@@ -54,24 +55,17 @@ function pickDrawPile(state) {
 function decideBoardDevelopment(state) {
   const player = state.players[state.currentPlayer];
 
-  // Check if we have persistent cards to place
   const emptySlots = Object.entries(player.persistentSlots)
     .filter(([_, card]) => card === null)
     .map(([slot, _]) => slot);
 
   if (emptySlots.length > 0) {
-    // Look for persistent cards in hand
     const persistentCard = player.hand.find((c) =>
       c && c.category && ['theory_of_time', 'moral_reality', 'moral_grounding'].includes(c.category)
     );
 
     if (persistentCard && Math.random() < 0.7) {
-      // Map card category to slot
-      const slotMap = {
-        theory_of_time: 'left',
-        moral_reality: 'middle',
-        moral_grounding: 'right',
-      };
+      const slotMap = { theory_of_time: 'left', moral_reality: 'middle', moral_grounding: 'right' };
       const slot = slotMap[persistentCard.category];
       if (slot && emptySlots.includes(slot)) {
         placePersistent(state, persistentCard.id, slot);
@@ -80,7 +74,9 @@ function decideBoardDevelopment(state) {
     }
   }
 
-  // Maybe change domain if we have a domain card
+  // Maybe change domain — but never when the test-mode opponent domain lock is on.
+  if (state.opponentDomainLock) return false;
+
   if (!state.domain || Math.random() < 0.2) {
     const domainCard = player.hand.find((c) => c && c.category === 'domain');
     if (domainCard && Math.random() < 0.5) {
@@ -89,50 +85,50 @@ function decideBoardDevelopment(state) {
     }
   }
 
-  return false; // no board development
+  return false;
 }
 
-// decideActions is replaced by npcPlayNextAction (step-by-step action phase).
+// Pick the best action card to advance the victory profile (smart) or random (easy).
+function pickActionCard(state, player, playableCards) {
+  if (Math.random() > smartActionChance(state.difficulty)) {
+    return playableCards[Math.floor(Math.random() * playableCards.length)];
+  }
+  const profile = player.victoryProfile || { A: 4, B: 4, C: 4 };
+  const needed = { A: profile.A - player.points.A, B: profile.B - player.points.B, C: profile.C - player.points.C };
+  // Prefer cards whose alignment matches the most-needed point type.
+  let best = null;
+  let bestScore = -Infinity;
+  for (const c of playableCards) {
+    const score = (needed[c.alignment] || 0) + Math.random() * 0.5;
+    if (score > bestScore) { bestScore = score; best = c; }
+  }
+  return best || playableCards[0];
+}
 
 // Main NPC turn execution.
-// Draws, does board development, and starts the action phase.
-// The action phase is step-by-step: npcPlayNextAction plays actions one at a time.
-// If a response window opens (advantaged card), execution pauses until the window closes.
 export function executeNPCTurn(state) {
-  // Phase 1: Draw
   const pileId = pickDrawPile(state);
   drawCard(state, pileId);
 
-  // Phase 2: Board Development (limit 1)
   const didBoardDev = decideBoardDevelopment(state);
   if (didBoardDev && state.phase === 'game_over') return;
-
-  // If domain was changed (turn ended or response window opened for domain)
   if (state.currentPlayer !== 'opponent') return;
 
-  // Set up action phase
   state.npcActionCount = 0;
-
-  // If a response window opened (persistent card placed), pause execution.
-  // The UI will call npcPlayNextAction when the window closes.
   if (state.responseWindow?.active) return;
 
-  // Phase 3: Action Phase (start)
   state.phase = 'action';
   npcPlayNextAction(state);
 }
 
 // Play the next NPC action or end turn.
-// Called by executeNPCTurn (to start the action phase) and by the UI
-// (after a response window closes, to continue the action phase).
 export function npcPlayNextAction(state) {
   if (state.currentPlayer !== 'opponent') return;
   if (state.responseWindow?.active) return;
 
   const player = state.players[state.currentPlayer];
   const allowance = getActionAllowance(state, state.currentPlayer);
-
-  // Try to play actions up to the allowance
+  const minActions = allowanceUseMin(state.difficulty);
   const triedCards = new Set();
 
   while (state.npcActionCount < allowance) {
@@ -140,31 +136,28 @@ export function npcPlayNextAction(state) {
       c && c.category === 'moral_judgment' && !triedCards.has(c.id)
     );
     const playableCards = actionCards.filter((c) => canPlayActionCard(state, state.currentPlayer, c));
-
     if (playableCards.length === 0) break;
 
-    const card = playableCards[Math.floor(Math.random() * playableCards.length)];
+    // At low difficulty, sometimes stop before using the full allowance.
+    if (state.npcActionCount >= minActions && Math.random() > actionPlayProb(state.difficulty)) break;
+
+    const card = pickActionCard(state, player, playableCards);
     triedCards.add(card.id);
 
-    if (Math.random() < 0.3 + (state.difficulty * 0.12)) {
-      const playMode = determinePlayMode(state, card);
-      enqueueCard(state, state.currentPlayer, card, playMode.speed);
-      const idx = player.hand.findIndex((c) => c.id === card.id);
-      if (idx !== -1) player.hand.splice(idx, 1);
-      state.npcActionCount++;
+    const playMode = determinePlayMode(state, card);
+    enqueueCard(state, state.currentPlayer, card, playMode.speed);
+    const idx = player.hand.findIndex((c) => c.id === card.id);
+    if (idx !== -1) player.hand.splice(idx, 1);
+    state.npcActionCount++;
 
-      // If a response window opened (advantaged card), pause execution
-      if (state.responseWindow?.active) return;
-    }
+    if (state.responseWindow?.active) return;
   }
 
-  // No more actions or allowance reached, end turn
   state.npcActionCount = 0;
   endTurn(state);
 }
 
 // NPC reactive rhetoric decision.
-// Decides whether to counter the active card during a response window.
 export function npcDecideRhetoric(state) {
   if (!state.responseWindow?.active) return null;
   if (state.responseWindow.respondingPlayerId !== 'opponent') return null;
@@ -172,8 +165,7 @@ export function npcDecideRhetoric(state) {
   const player = state.players.opponent;
   if (player.rhetoricHand.length === 0) return null;
 
-  // Simple heuristic: counter chance scales with difficulty
-  if (Math.random() < 0.1 + (state.difficulty * 0.08)) {
+  if (Math.random() < rhetoricCounterProb(state.difficulty)) {
     const card = player.rhetoricHand[0];
     return { cardId: card.id, action: 'counter' };
   }

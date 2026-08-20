@@ -40,7 +40,15 @@ export function removeDomainModifier(state, playerId, modifierId) {
   logEvent(state, { type: 'domain_modifier_removed', playerId, modifierId });
 }
 
-// Get the active domain alignment
+// Get the active domain alignment.
+// For Twofold Reality, the active flank's alignment governs resolution;
+// falls back to Twofold's own C alignment if no flank is active.
 export function getDomainAlignment(state) {
-  return state.domain?.alignment || null;
+  if (!state.domain) return null;
+  if (state.domain.id === 'twofold_reality' && state.domainAttached) {
+    const side = state.domainAttached.activeSide;
+    const attached = side ? state.domainAttached[side] : null;
+    return attached?.alignment ?? state.domain.alignment;
+  }
+  return state.domain.alignment || null;
 }

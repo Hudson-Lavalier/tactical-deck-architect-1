@@ -25,20 +25,22 @@
 //   does not end a player's turn.
 // ════════════════════════════════════════════════════════════════
 
+import { discardCard } from '../primitives';
+
 export default {
   // No point generation.
 
+  // Initialize the Twofold structure. The flanking domains are selected
+  // by the player via the attach modal (twofoldSystem.attachTwofoldDomains).
   onPlace(state, playerId, card) {
-    // Initialize Twofold Reality structure. The attached domains are
-    // selected by the player via UI; stored on state.domainAttached.
-    if (!state.domainAttached) state.domainAttached = { left: null, right: null, activeSide: null };
+    state.domainAttached = { left: null, right: null, activeSide: null, switchesThisTurn: 0 };
   },
 
+  // All three Domains are discarded when Twofold Reality is removed.
   onRemove(state, playerId, card) {
-    // All three Domains are discarded when Twofold Reality is removed.
     if (state.domainAttached) {
-      if (state.domainAttached.left) state.discardPiles.metaphysics.push(state.domainAttached.left);
-      if (state.domainAttached.right) state.discardPiles.metaphysics.push(state.domainAttached.right);
+      if (state.domainAttached.left) discardCard(state, state.domainAttached.left, playerId);
+      if (state.domainAttached.right) discardCard(state, state.domainAttached.right, playerId);
       state.domainAttached = null;
     }
   },

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Trophy } from 'lucide-react';
 
@@ -9,12 +9,18 @@ import { enqueueCard } from '@/engine/queueSystem';
 import { determinePlayMode, canPlayActionCard, getActionAllowance } from '@/engine/resolutionEngine';
 import { playRhetoricResponse, passResponse } from '@/engine/responseSystem';
 import { executeNPCTurn, npcPlayNextAction, npcDecideRhetoric } from '@/logic/npcAI';
+import { attachTwofoldDomains, switchTwofoldDomain } from '@/engine/twofoldSystem';
+import { sfx, setMuted, isMuted } from '@/lib/audio';
 
 // Reused modal/overlay + strip components (rendered flat above the tilted board)
 import ResponseWindow from '@/components/game/ResponseWindow';
 import GameLog from '@/components/game/GameLog';
 import CardDetail from '@/components/game/CardDetail';
 import HelpPanel from '@/components/game/HelpPanel';
+import HandView from '@/components/game/HandView';
+import TwofoldAttachModal from '@/components/game/TwofoldAttachModal';
+import TwofoldSwitchModal from '@/components/game/TwofoldSwitchModal';
+import TestPanel from '@/components/game/TestPanel';
 
 // Fresh 2.5D presentational components (on the tilted plane)
 import BoardSurface from '@/components/game25d/BoardSurface';
@@ -25,9 +31,20 @@ import Battlefield from '@/components/game25d/Battlefield';
 import HandFan from '@/components/game25d/HandFan';
 import { EPISTEMOLOGIES } from '@/data/epistemologies';
 
+// Map engine log events to sound effects.
+const EVENT_SFX = {
+  draw: 'draw',
+  place_persistent: 'place',
+  domain_change: 'domain',
+  enqueue: 'enqueue',
+  card_resolved: 'resolve',
+  rhetoric_response: 'counter',
+  response_window_open: 'responseOpen',
+  twofold_switch: 'switch',
+  turn_end: 'endTurn',
+};
+
 // GameBoard (2.5D) — single forced-perspective tilted plane.
-// All game logic/engine is reused unchanged from the classic version; only the
-// presentational surface is new. Modals/overlays render flat above the board.
 export default function GameBoard() {
   const navigate = useNavigate();
   const [state, setState] = useState(null);
@@ -37,6 +54,16 @@ export default function GameBoard() {
   const [boardDevUsed, setBoardDevUsed] = useState(false);
   const [showCardDetail, setShowCardDetail] = useState(null);
   const [showEndTurnDialog, setShowEndTurnDialog] = useState(false);
+  const [showEndGameDialog, setShowEndGameDialog] = useState(false);
+  const [showHandView, setShowHandView] = useState(false);
+  const [showTwofoldSwitch, setShowTwofoldSwitch] = useState(false);
+  const [twofoldAttachDismissed, setTwofoldAttachDismissed] = useState(false);
+  const [showTestPanel, setShowTestPanel] = useState(false);
+  const [muted, setMutedState] = useState(isMuted());
+  const [testMode] = useState(() => sessionStorage.getItem('testMode') === 'true');
+
+  const lastLogLenRef = useRef(0);
+  const prevWinnerRef = useRef(null);
 
   useEffect(() => {
     const stored = sessionStorage.getItem('selectedBuild');
@@ -60,6 +87,29 @@ export default function GameBoard() {
     startTurn(initialState);
     setState(cloneState(initialState));
   }, []);
+
+  // Drive SFX from new log events.
+  useEffect(() => {
+    if (!state) return;
+    const log = state.log || [];
+    const prev = lastLogLenRef.current;
+    if (log.length > prev) {
+      for (let i = prev; i < log.length; i++) {
+        const ev = log[i];
+        const name = EVENT_SFX[ev.type];
+        if (name) sfx(name);
+      }
+    }
+    lastLogLenRef.current = log.length;
+  }, [state?.log]);
+
+  // Victory / defeat stinger.
+  useEffect(() => {
+    if (state?.winner && prevWinnerRef.current !== state.winner) {
+      prevWinnerRef.current = state.winner;
+      sfx(state.winner === 'player' ? 'victory' : 'defeat');
+    }
+  }, [state?.winner]);
 
   useEffect(() => {
     if (!state || state.winner) return;
@@ -209,6 +259,61 @@ export default function GameBoard() {
     setShowEndTurnDialog(false);
   }, [state]);
 
+  const handleEndGame = useCallback(() => setShowEndGameDialog(true), []);
+  const handleConfirmEndGame = useCallback(() => navigate('/'), [navigate]);
+
+  const handleToggleMute = useCallback(() => {
+    const next = !muted;
+    setMuted(next);
+    setMutedState(next);
+    if (!next) sfx('click');
+  }, [muted]);
+
+  // Twofold attach — auto-prompt when Twofold is placed with no flanks.
+  const handleTwofoldAttach = useCallback((leftId, rightId) => {
+    if (!state || state.domainPlacedBy !== 'player') return;
+    const newState = cloneState(state);
+    attachTwofoldDomains(newState, 'player', leftId, rightId);
+    setState(newState);
+    setTwofoldAttachDismissed(true);
+  }, [state]);
+
+  // Reset the attach-dismiss flag whenever a non-Twofold domain is active,
+  // so a future Twofold placement can prompt again.
+  useEffect(() => {
+    if (state && state.domain?.id !== 'twofold_reality') {
+      setTwofoldAttachDismissed(false);
+    }
+  }, [state?.domain?.id]);
+
+  const handleTwofoldSwitch = useCallback((side) => {
+    if (!state) return;
+    const newState = cloneState(state);
+    const ok = switchTwofoldDomain(newState, 'player', side);
+    setState(newState);
+    if (ok) setShowTwofoldSwitch(false);
+  }, [state]);
+
+  // Test-mode grants + opponent domain lock.
+  const handleGrantCard = useCallback((target, card) => {
+    if (!state) return;
+    const newState = cloneState(state);
+    const p = newState.players[target];
+    if (p && p.hand.length < p.handLimit) {
+      p.hand.push({ ...card, id: `${card.id}_${Date.now()}_${Math.random().toString(36).slice(2, 6)}` });
+    }
+    setState(newState);
+    sfx('draw');
+  }, [state]);
+
+  const handleToggleOpponentLock = useCallback(() => {
+    if (!state) return;
+    const newState = cloneState(state);
+    newState.opponentDomainLock = !newState.opponentDomainLock;
+    setState(newState);
+    sfx('click');
+  }, [state]);
+
   if (!state) {
     return (
       <div className="min-h-screen cosmic-shell flex items-center justify-center text-term-green font-mono relative overflow-hidden">
@@ -224,6 +329,10 @@ export default function GameBoard() {
   const inResponseWindow = state.responseWindow?.active;
   const accent = isPlayerTurn ? '#00ff41' : '#a855f7';
 
+  const isTwofold = state.domain?.id === 'twofold_reality';
+  const twofoldNeedsAttach = isTwofold && state.domainAttached && !state.domainAttached.left && !state.domainAttached.right && isPlayerTurn && state.domainPlacedBy === 'player' && !twofoldAttachDismissed;
+  const switchesLeft = state.domainAttached ? Math.max(0, 2 - (state.domainAttached.switchesThisTurn || 0)) : 0;
+
   return (
     <div className="h-screen cosmic-shell text-term-text font-mono relative overflow-hidden">
       <CosmicBackground density={15} />
@@ -235,7 +344,9 @@ export default function GameBoard() {
             turn={state.turn + 1}
             isPlayerTurn={isPlayerTurn}
             inResponseWindow={inResponseWindow}
-            onBack={() => navigate('/')}
+            onEndGame={handleEndGame}
+            muted={muted}
+            onToggleMute={handleToggleMute}
           />
         </div>
 
@@ -258,11 +369,7 @@ export default function GameBoard() {
           }}
           className="px-3 py-1.5 rounded-lg glass-card cosmic-sheen flex items-center justify-center transition-[box-shadow,border-color]"
         >
-          <PointsBar
-            player={opponent}
-            isOpponent
-            handCount={opponent.hand.length + opponent.rhetoricHand.length}
-          />
+          <PointsBar player={opponent} isOpponent handCount={opponent.hand.length + opponent.rhetoricHand.length} />
         </div>
 
         {/* opp-persistent */}
@@ -286,6 +393,9 @@ export default function GameBoard() {
             modifiers={state.domainModifiers}
             onDomainClick={handleInspectDomain}
             onQueueCardClick={handleInspectQueue}
+            domainAttached={state.domainAttached}
+            onSwitchTwofold={() => setShowTwofoldSwitch(true)}
+            domainPlacedBy={state.domainPlacedBy}
           />
         </div>
 
@@ -314,13 +424,22 @@ export default function GameBoard() {
         >
           <PointsBar player={player} handCount={player.hand.length + player.rhetoricHand.length} />
           {phase === 'main' && isPlayerTurn && !inResponseWindow && (
-            <button
-              onClick={handleEndTurn}
-              className="absolute right-3 top-1/2 -translate-y-1/2 px-4 py-2 rounded text-ui-md font-bold glass-card cosmic-sheen transition-[transform,box-shadow] hover:scale-105"
-              style={{ borderColor: '#00ff4140', color: '#00ff41' }}
-            >
-              END TURN
-            </button>
+            <>
+              <button
+                onClick={() => setShowHandView(true)}
+                className="absolute left-3 top-1/2 -translate-y-1/2 px-4 py-2 rounded text-ui-md font-bold glass-card cosmic-sheen transition-[transform,box-shadow] hover:scale-105"
+                style={{ borderColor: '#00ffff40', color: '#00ffff' }}
+              >
+                HAND VIEW
+              </button>
+              <button
+                onClick={handleEndTurn}
+                className="absolute right-3 top-1/2 -translate-y-1/2 px-4 py-2 rounded text-ui-md font-bold glass-card cosmic-sheen transition-[transform,box-shadow] hover:scale-105"
+                style={{ borderColor: '#00ff4140', color: '#00ff41' }}
+              >
+                END TURN
+              </button>
+            </>
           )}
         </div>
       </BoardSurface>
@@ -344,6 +463,31 @@ export default function GameBoard() {
         />
       )}
 
+      {showHandView && (
+        <HandView
+          cards={player.hand}
+          onSelectCard={(card) => { setShowHandView(false); setShowCardDetail({ card, readOnly: false }); }}
+          onClose={() => setShowHandView(false)}
+        />
+      )}
+
+      {twofoldNeedsAttach && (
+        <TwofoldAttachModal
+          hand={player.hand}
+          onConfirm={(leftId, rightId) => handleTwofoldAttach(leftId, rightId)}
+          onClose={() => setTwofoldAttachDismissed(true)}
+        />
+      )}
+
+      {showTwofoldSwitch && state.domainAttached && (
+        <TwofoldSwitchModal
+          domainAttached={state.domainAttached}
+          switchesLeft={switchesLeft}
+          onSwitch={handleTwofoldSwitch}
+          onClose={() => setShowTwofoldSwitch(false)}
+        />
+      )}
+
       {showEndTurnDialog && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-40 font-mono">
           <div className="glass-panel glass-blur cosmic-sheen p-6 max-w-sm text-center" style={{ borderColor: '#00ff4140' }}>
@@ -351,14 +495,39 @@ export default function GameBoard() {
             <div className="flex gap-3 justify-center">
               <button
                 onClick={handleConfirmEndTurn}
-                className="px-6 py-2 rounded text-ui-sm glass-card cosmic-sheen transition-all hover:scale-105"
+                className="px-6 py-2 rounded text-ui-sm glass-card cosmic-sheen transition-[transform,box-shadow] hover:scale-105"
                 style={{ borderColor: '#00ff4140', color: '#00ff41' }}
               >
                 CONFIRM
               </button>
               <button
                 onClick={() => setShowEndTurnDialog(false)}
-                className="px-6 py-2 rounded text-ui-sm glass-card transition-all hover:scale-105"
+                className="px-6 py-2 rounded text-ui-sm glass-card transition-[transform,box-shadow] hover:scale-105"
+                style={{ borderColor: '#33333340', color: '#888888' }}
+              >
+                CANCEL
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showEndGameDialog && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 font-mono">
+          <div className="glass-panel glass-blur cosmic-sheen p-6 max-w-sm text-center" style={{ borderColor: '#ff444480' }}>
+            <div className="text-[#ff6666] text-ui-md tracking-[0.15em] mb-2">END THE GAME?</div>
+            <div className="text-term-faint text-ui-xs mb-4">All progress in this match will be lost.</div>
+            <div className="flex gap-3 justify-center">
+              <button
+                onClick={handleConfirmEndGame}
+                className="px-6 py-2 rounded text-ui-sm glass-card cosmic-sheen transition-[transform,box-shadow] hover:scale-105"
+                style={{ borderColor: '#ff444480', color: '#ff6666' }}
+              >
+                END GAME
+              </button>
+              <button
+                onClick={() => setShowEndGameDialog(false)}
+                className="px-6 py-2 rounded text-ui-sm glass-card transition-[transform,box-shadow] hover:scale-105"
                 style={{ borderColor: '#33333340', color: '#888888' }}
               >
                 CANCEL
@@ -369,6 +538,25 @@ export default function GameBoard() {
       )}
 
       <GameLog log={state.log} />
+
+      {testMode && (
+        <button
+          onClick={() => setShowTestPanel(true)}
+          className="fixed right-0 bottom-4 z-30 px-3 py-2 glass-panel rounded-l-lg transition-[border-color,box-shadow] hover:border-term-purple/40"
+          style={{ borderRadius: '8px 0 0 8px' }}
+        >
+          <span className="text-term-purple text-ui-xs font-bold tracking-[0.15em] font-mono">TEST</span>
+        </button>
+      )}
+
+      {testMode && showTestPanel && (
+        <TestPanel
+          onGrant={handleGrantCard}
+          opponentLocked={!!state.opponentDomainLock}
+          onToggleOpponentLock={handleToggleOpponentLock}
+          onClose={() => setShowTestPanel(false)}
+        />
+      )}
 
       {inResponseWindow && state.responseWindow.respondingPlayerId === 'player' && (
         <ResponseWindow
@@ -403,7 +591,7 @@ export default function GameBoard() {
             <div className="text-term-faint text-ui-xs mb-6">[ FINAL BOARD STATE VISIBLE BEHIND ]</div>
             <button
               onClick={() => navigate('/')}
-              className="px-6 py-2 rounded text-ui-sm glass-card cosmic-sheen transition-all hover:scale-105"
+              className="px-6 py-2 rounded text-ui-sm glass-card cosmic-sheen transition-[transform,box-shadow] hover:scale-105"
               style={{ borderColor: '#00ff4140', color: '#00ff41' }}
             >
               RETURN TO MENU

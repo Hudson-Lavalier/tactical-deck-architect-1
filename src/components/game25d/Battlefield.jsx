@@ -17,6 +17,9 @@ export default function Battlefield({
   modifiers,
   onDomainClick,
   onQueueCardClick,
+  domainAttached,
+  onSwitchTwofold,
+  domainPlacedBy,
 }) {
   return (
     <div className="relative flex items-center justify-center gap-5 min-h-0 overflow-hidden w-full h-full">
@@ -24,7 +27,15 @@ export default function Battlefield({
         <DrawDecks piles={drawPiles} onDraw={onDraw} disabled={drawDisabled} />
       </div>
       <QueueLane queuedCards={opponentQueue} isActive={!isPlayerTurn} accent="#888888" label="OPPONENT QUEUE" hidden />
-      <DomainCenter domain={domain} modifiers={modifiers} onDomainClick={onDomainClick} />
+      <DomainCenter
+        domain={domain}
+        modifiers={modifiers}
+        onDomainClick={onDomainClick}
+        domainAttached={domainAttached}
+        onSwitchTwofold={onSwitchTwofold}
+        isPlayerTurn={isPlayerTurn}
+        domainPlacedBy={domainPlacedBy}
+      />
       <QueueLane queuedCards={playerQueue} isActive={isPlayerTurn} accent="#00ff41" label="PLAYER QUEUE" onCardClick={onQueueCardClick} />
     </div>
   );

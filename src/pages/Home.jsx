@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Terminal, Play, Settings, BookOpen, Layers, User, X, FlaskConical } from 'lucide-react';
+import { Terminal, Play, Settings, BookOpen, Layers, User, X } from 'lucide-react';
 
 import CosmicBackground from '@/components/CosmicBackground';
 import GlassPanel from '@/components/GlassPanel';
@@ -13,9 +13,16 @@ import { getParadigmsByIds } from '@/data/epistemologies';
 export default function Home() {
   const navigate = useNavigate();
   const [difficulty, setDifficulty] = useState(() => parseInt(sessionStorage.getItem('gameDifficulty') || '3'));
+  const [testMode, setTestMode] = useState(() => sessionStorage.getItem('testMode') === 'true');
   const [showBuildSelect, setShowBuildSelect] = useState(false);
 
   const handlePlayMatch = () => setShowBuildSelect(true);
+
+  const handleToggleTestMode = () => {
+    const next = !testMode;
+    setTestMode(next);
+    sessionStorage.setItem('testMode', String(next));
+  };
 
   const handleSelectBuild = (build) => {
     sessionStorage.setItem('gameDifficulty', difficulty.toString());
@@ -25,7 +32,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen cosmic-shell text-term-text font-mono relative overflow-hidden">
+    <div className="min-h-screen cosmic-shell bg-cosmic-deep text-term-text font-mono relative overflow-hidden">
       <CosmicBackground density={90} />
 
       <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-4 py-8">
@@ -58,7 +65,7 @@ export default function Home() {
                 <button
                   key={level}
                   onClick={() => setDifficulty(level)}
-                  className={`flex-1 py-2 rounded text-ui-sm font-bold transition-all ${
+                  className={`flex-1 py-2 rounded text-ui-sm font-bold transition-[color,background-color,border-color] ${
                     difficulty === level
                       ? 'text-term-green bg-term-green/10 border border-term-green/40'
                       : 'text-term-faint border border-transparent hover:text-term-dim'
@@ -70,9 +77,22 @@ export default function Home() {
             </div>
           </GlassPanel>
 
+          <GlassPanel className="p-3 mb-1">
+            <button
+              onClick={handleToggleTestMode}
+              className={`w-full py-2 rounded text-ui-sm font-bold tracking-[0.15em] transition-[color,background-color,border-color] ${
+                testMode
+                  ? 'text-term-purple bg-term-purple/10 border border-term-purple/40'
+                  : 'text-term-faint border border-transparent hover:text-term-dim'
+              }`}
+            >
+              TEST MODE: {testMode ? 'ON' : 'OFF'}
+            </button>
+          </GlassPanel>
+
           <button
             onClick={handlePlayMatch}
-            className="group flex items-center gap-3 px-6 py-3.5 rounded transition-all duration-200 hover:scale-[1.02] glass-panel cosmic-sheen"
+            className="group flex items-center gap-3 px-6 py-3.5 rounded transition-[transform,box-shadow] duration-200 hover:scale-[1.02] glass-panel cosmic-sheen"
             style={{ borderColor: 'rgba(0,255,65,0.35)', boxShadow: '0 0 24px rgba(0,255,65,0.12), inset 0 1px 0 rgba(255,255,255,0.04)' }}
           >
             <Play className="w-5 h-5 text-term-green" style={{ filter: 'drop-shadow(0 0 6px rgba(0,255,65,0.5))' }} />
@@ -82,7 +102,6 @@ export default function Home() {
           <MenuButton to="/build" icon={Layers} label="PHILOSOPHY BUILD" color="#a855f7" />
           <MenuButton to="/cards" icon={BookOpen} label="CARD INFO" color="#c084fc" />
           <MenuButton to="/profile" icon={User} label="PLAYER PROFILE" color="#00ff41" />
-          <MenuButton to="/test" icon={FlaskConical} label="TEST MODE" color="#c084fc" />
           <MenuButton to="/settings" icon={Settings} label="SETTINGS" color="#888888" />
         </div>
 
@@ -102,7 +121,7 @@ function MenuButton({ to, icon: Icon, label, color }) {
   return (
     <Link
       to={to}
-      className="group flex items-center gap-3 px-6 py-3.5 rounded transition-all duration-200 hover:scale-[1.02] glass-panel cosmic-sheen"
+      className="group flex items-center gap-3 px-6 py-3.5 rounded transition-[transform,box-shadow] duration-200 hover:scale-[1.02] glass-panel cosmic-sheen"
       style={{ borderColor: `${color}30` }}
     >
       <Icon className="w-5 h-5" style={{ color, filter: `drop-shadow(0 0 5px ${color}80)` }} />

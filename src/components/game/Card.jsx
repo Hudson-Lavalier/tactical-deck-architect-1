@@ -9,7 +9,10 @@ const SIZES = {
   medium: { box: 'w-24 h-36', name: 'text-[13px]', body: 'text-[10px]', cat: 'text-[9px]', label: 'text-[11px]' },
   normal: { box: 'w-28 h-40', name: 'text-[15px]', body: 'text-[11px]', cat: 'text-[9px]', label: 'text-[12px]' },
   large: { box: 'w-32 h-48', name: 'text-[17px]', body: 'text-[12px]', cat: 'text-[10px]', label: 'text-[13px]' },
-  xlarge: { box: 'w-60 h-full max-h-[18rem]', name: 'text-[22px]', body: 'text-[16px]', cat: 'text-[12px]', label: 'text-[16px]' }
+  xlarge: { box: 'w-60 h-full max-h-[18rem]', name: 'text-[22px]', body: 'text-[16px]', cat: 'text-[12px]', label: 'text-[16px]' },
+  // Compact tier for the in-board domain card — smaller body text so the
+  // full description fits without overflow.
+  domain: { box: 'w-56 h-full max-h-[17rem]', name: 'text-[18px]', body: 'text-[10px]', cat: 'text-[9px]', label: 'text-[12px]' }
 };
 
 export default function Card({ card, faceDown = false, size = 'normal', onClick, selected = false, disabled = false }) {
@@ -60,7 +63,7 @@ export default function Card({ card, faceDown = false, size = 'normal', onClick,
 
         <div className="border-t my-1 relative" style={{ borderColor: `${accent}20` }} />
 
-        <div className={`text-term-text ${s.body} font-semibold leading-tight flex-1 overflow-hidden break-words`}>
+        <div className={`text-term-text ${s.body} font-semibold leading-tight flex-1 overflow-y-auto break-words`}>
           {card.text || ''}
         </div>
 
