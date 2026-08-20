@@ -397,6 +397,7 @@ export default function GameBoard() {
             turn={state.turn + 1}
             isPlayerTurn={isPlayerTurn}
             inResponseWindow={inResponseWindow}
+            phase={phase}
             onEndGame={handleEndGame}
             muted={muted}
             onToggleMute={handleToggleMute}

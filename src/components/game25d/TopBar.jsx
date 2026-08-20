@@ -6,6 +6,7 @@ export default function TopBar({
   turn,
   isPlayerTurn,
   inResponseWindow,
+  phase,
   onEndGame,
   muted,
   onToggleMute,
@@ -19,14 +20,14 @@ export default function TopBar({
   const controlClass = 'hud-control shrink-0 rounded-md border border-white/10 bg-cosmic-deep/75 px-2 py-1 text-[10px] font-bold uppercase tracking-[0.1em] transition-all hover:-translate-y-0.5 active:translate-y-0';
 
   return (
-    <header className="game-topbar mx-auto grid w-full grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-3 rounded-xl border border-white/10 bg-cosmic-deep/80 px-3 py-2 shadow-[0_10px_30px_rgba(0,0,0,0.45)] backdrop-blur-xl">
+    <header className="game-topbar mx-auto grid min-h-[90px] w-full grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-4 rounded-xl border border-white/10 bg-cosmic-deep/80 px-3.5 py-2.5 shadow-[0_10px_30px_rgba(0,0,0,0.45)] backdrop-blur-xl">
       <div className="min-w-0">
         <PointsBar player={opponent} isOpponent />
       </div>
 
-      <div className="flex min-w-max flex-col items-center gap-1">
+      <div className="flex w-[clamp(18rem,22vw,26rem)] flex-col items-center gap-1.5">
         <div className="hud-title text-center text-[10px] font-bold uppercase tracking-[0.16em] text-term-text xl:text-xs">
-          Turn {turn} — {isPlayerTurn ? 'Your turn' : 'Opponent turn'}
+          Turn {turn} · {inResponseWindow ? 'Response' : phase || 'Draw'} — {isPlayerTurn ? 'Your turn' : 'Opponent turn'}
           {!isPlayerTurn && !inResponseWindow && <span className="ml-1 animate-pulse text-term-purple">[Thinking]</span>}
         </div>
         <div className="flex items-center justify-center gap-1.5">
