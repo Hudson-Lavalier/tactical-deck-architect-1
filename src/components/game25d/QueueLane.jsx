@@ -54,5 +54,4 @@ export default function QueueLane({ queuedCards, isActive, accent = '#888888', l
       </div>
     </div>
   );
-
 }
