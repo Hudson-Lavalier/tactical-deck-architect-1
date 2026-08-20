@@ -122,7 +122,7 @@ export default function Carousel3D({
   if (!count) return null;
 
   return (
-    <div className="relative flex w-full select-none flex-col items-center">
+    <div className="relative flex w-full select-none flex-col items-center antialiased">
       <div
         className={`relative mx-auto flex h-[500px] w-full max-w-[1800px] items-center justify-center overflow-hidden px-2 py-4 ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
         style={{ perspective: '1400px', transformStyle: 'preserve-3d', touchAction: 'pan-y' }}
@@ -137,10 +137,10 @@ export default function Carousel3D({
           const angle = offset * angleStep;
           const radians = angle * (Math.PI / 180);
 
-          // Triangular / cylindrical 3D arc math
           const translateX = Math.sin(radians) * radius;
-          const translateZ = Math.cos(radians) * radius - radius + (distance < 0.001 ? 30 : 0);
-          const scale = Math.max(0.84, 1 - distance * 0.07);
+          // Locked active card to 0 Z-depth to keep text on 1:1 pixel grid
+          const translateZ = Math.cos(radians) * radius - radius;
+          const scale = distance < 0.001 ? 1 : Math.max(0.84, 1 - distance * 0.07);
           const zIndex = Math.round(100 - distance * 10);
           const isActive = Math.abs(relativeOffset(index)) < 0.001;
           const isVisible = Math.abs(angle) <= 95;
@@ -150,7 +150,7 @@ export default function Carousel3D({
               key={item.id || index}
               data-carousel-index={index}
               className={`absolute left-1/2 top-1/2 overflow-hidden break-words opacity-100 ${
-                isDragging ? 'transition-none' : 'transition-[transform,filter] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]'
+                isDragging ? 'transition-none' : 'transition-[transform] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]'
               } ${isVisible ? 'pointer-events-auto visible' : 'pointer-events-none invisible'}`}
               style={{
                 width: `${width}px`,
@@ -161,7 +161,9 @@ export default function Carousel3D({
                 transform: `translate(-50%, -50%) translateX(${translateX}px) translateZ(${translateZ}px) rotateY(${angle}deg) scale(${scale})`,
                 transformStyle: 'preserve-3d',
                 backfaceVisibility: 'hidden',
-                filter: isActive ? 'brightness(1.08) saturate(1.05)' : `brightness(${Math.max(0.80, 0.94 - distance * 0.04)})`,
+                WebkitFontSmoothing: 'antialiased',
+                // Stripped filter on active card to stop offscreen bitmap rasterization
+                filter: isActive ? 'none' : `brightness(${Math.max(0.80, 0.94 - distance * 0.04)})`,
                 backgroundColor: '#0c0a14',
                 borderRadius: '1rem',
               }}
