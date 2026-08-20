@@ -24,15 +24,15 @@ export default function QueueLane({ queuedCards, isActive, accent = '#888888', l
         {label} [{queuedCards.length}/{QUEUE_LIMIT}]
       </div>
       <div className="accent-border relative z-10 mx-auto w-full min-w-0 rounded-xl border bg-cosmic-deep/60 p-1.5 backdrop-blur-sm md:p-2">
-        <div className="grid min-w-0 grid-cols-4 place-items-center items-center justify-center gap-1 overflow-visible md:gap-2">
+        <div className="grid min-w-0 grid-cols-4 items-start justify-center gap-1 overflow-hidden md:gap-2">
           {rows.map((row) => (
-            <div key={row} className="grid w-full min-w-0 grid-rows-3 place-items-center items-center justify-center gap-1 overflow-visible md:gap-2">
+            <div key={row} className="grid w-full min-w-0 grid-rows-3 place-items-center gap-1 overflow-hidden md:gap-2">
               {slots.map((col) => {
                 const cards = cardsByRow[row] || [];
                 const queued = cards[col];
                 if (queued) {
                   return (
-                    <div key={col} className="game-queue-cell relative z-20 mx-auto flex aspect-[5/7] w-full max-w-20 items-center justify-center overflow-visible opacity-100">
+                    <div key={col} className="game-queue-cell relative z-20 mx-auto flex h-auto aspect-[5/7] w-full max-w-20 flex-shrink-0 items-center justify-center overflow-hidden rounded-lg opacity-100 [&>*]:max-h-full [&>*]:max-w-full">
                       <Card card={queued.card} faceDown={hidden} size="small" onClick={!hidden ? () => onCardClick?.(queued.card) : undefined} />
                       {queued.faceDown && (
                         <div className="absolute -right-1 -top-1 rounded bg-cosmic-deep px-1 font-mono text-[10px]" style={{ color: accent }}>
@@ -43,7 +43,7 @@ export default function QueueLane({ queuedCards, isActive, accent = '#888888', l
                   );
                 }
                 return (
-                  <div key={col} className="game-queue-cell game-queue-empty holo-slot mx-auto flex aspect-[5/7] w-full max-w-20 items-center justify-center rounded-lg px-1">
+                  <div key={col} className="game-queue-cell game-queue-empty holo-slot mx-auto flex h-auto aspect-[5/7] w-full max-w-20 flex-shrink-0 items-center justify-center overflow-hidden rounded-lg px-1">
                     <span className="holo-slot-core font-mono text-[9px] font-bold uppercase tracking-[0.12em]">{row}T socket</span>
                   </div>
                 );
