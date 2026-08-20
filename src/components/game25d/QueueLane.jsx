@@ -14,7 +14,7 @@ export default function QueueLane({ queuedCards, isActive, accent = '#888888', l
   }
 
   return (
-    <div className={`flex flex-col gap-1 min-w-0 ${isActive ? '' : 'opacity-55'}`}>
+    <div className={`game-queue-lane flex flex-col gap-1 min-w-0 ${isActive ? '' : 'opacity-55'}`}>
       <div className="text-term-text font-mono text-[12px] font-bold tracking-[0.15em] text-center">
         {label} [{queuedCards.length}/6]
       </div>
@@ -27,7 +27,7 @@ export default function QueueLane({ queuedCards, isActive, accent = '#888888', l
               const queued = cards[col];
               if (queued) {
                 return (
-                  <div key={col} className="relative flex items-center justify-center w-20 h-28">
+                  <div key={col} className="game-queue-cell relative flex items-center justify-center w-20 h-28">
                       <Card card={queued.card} faceDown={hidden} size="small" onClick={!hidden ? () => onCardClick?.(queued.card) : undefined} />
                       {queued.faceDown &&
                     <div className="absolute -top-1 -right-1 text-[10px] font-mono bg-cosmic-deep px-1 rounded" style={{ color: accent }}>
@@ -38,7 +38,7 @@ export default function QueueLane({ queuedCards, isActive, accent = '#888888', l
 
               }
               return (
-                <div key={col} className="w-20 h-28 rounded glass-card flex items-center justify-center mx-8 my-3 px-1" style={{ borderColor: `${accent}15` }}>
+                <div key={col} className="game-queue-cell game-queue-empty w-20 h-28 rounded glass-card flex items-center justify-center mx-8 my-3 px-1" style={{ borderColor: `${accent}15` }}>
                     <span className="text-term-faint font-mono text-[10px]">{row}T</span>
                   </div>);
 

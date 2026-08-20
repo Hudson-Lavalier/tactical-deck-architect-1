@@ -11,7 +11,7 @@ export default function HandFan({ cards, onSelectCard, selectedCardId, disabled 
   const midPoint = (Math.min(handCount, HAND_LIMIT) - 1) / 2;
 
   return (
-    <div className="flex items-end justify-center gap-1.5 pb-2 min-h-[10rem]">
+    <div className="game-hand-fan flex items-end justify-center gap-1.5 pb-2 min-h-[10rem]">
       {visible.map((card, index) => {
         const offset = index - midPoint;
         const angle = midPoint !== 0 ? (offset / midPoint) * fanAngle : 0;

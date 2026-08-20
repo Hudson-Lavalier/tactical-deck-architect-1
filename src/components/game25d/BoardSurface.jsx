@@ -7,7 +7,7 @@ export default function BoardSurface({ children, accent = '#00ffff' }) {
   return (
     <div className="absolute inset-0 flex items-center justify-center" style={{ perspective: '2000px' }}>
       <div
-        className="relative grid gap-2 p-3 rounded-2xl cosmic-sheen"
+        className="game-board-surface relative grid gap-2 p-3 rounded-2xl cosmic-sheen"
         style={{
           width: '92%',
           height: '100%',

@@ -203,4 +203,47 @@
       radial-gradient(ellipse 70% 50% at 85% 100%, rgba(10, 22, 40, 0.5), transparent 55%),
       var(--cosmic-deep);
   }
+
+  /* Desktop board fitting: preserve the full composition without shrinking text globally. */
+  @media (max-width: 2199px), (max-height: 1199px) {
+    .game-board-surface {
+      width: calc(100% - 32px) !important;
+      height: calc(100% - 24px) !important;
+      transform: rotateX(4deg) translateY(-8px) !important;
+      grid-template-rows: auto auto auto auto minmax(0, 1fr) auto auto auto !important;
+      gap: 0.25rem !important;
+      padding: 0.5rem !important;
+    }
+    .game-card-small { width: 4rem !important; height: 5.5rem !important; }
+    .game-card-medium, .game-persistent-empty { width: 5rem !important; height: 7rem !important; }
+    .game-card-normal { width: 5.5rem !important; height: 7.75rem !important; }
+    .game-card-domain { width: 11rem !important; max-height: 14rem !important; }
+    .game-queue-cell, .game-draw-deck { width: 4rem !important; height: 5.5rem !important; }
+    .game-queue-empty { margin: 0.25rem !important; }
+    .game-slot-label { padding-left: 1rem !important; padding-right: 1rem !important; }
+    .game-hand-fan { min-height: 8rem !important; padding-bottom: 0.25rem !important; }
+    .game-battlefield { gap: 0.75rem !important; }
+  }
+
+  @media (max-width: 1499px), (max-height: 849px) {
+    .game-board-surface {
+      width: calc(100% - 16px) !important;
+      height: calc(100% - 12px) !important;
+      transform: none !important;
+      gap: 0.125rem !important;
+      padding: 0.375rem !important;
+    }
+    .game-card-small { width: 3.5rem !important; height: 4.875rem !important; }
+    .game-card-medium, .game-persistent-empty { width: 4rem !important; height: 5.75rem !important; }
+    .game-card-normal { width: 4.5rem !important; height: 6.5rem !important; }
+    .game-card-domain { width: 7rem !important; max-height: 10rem !important; }
+    .game-queue-cell, .game-draw-deck { width: 3.5rem !important; height: 4.875rem !important; }
+    .game-queue-empty { margin: 0.125rem !important; }
+    .game-persistent-row { gap: 0.5rem !important; }
+    .game-slot-label { padding: 0 !important; font-size: 0.625rem !important; }
+    .game-hand-fan { min-height: 6.75rem !important; gap: 0.25rem !important; padding-bottom: 0 !important; }
+    .game-battlefield { gap: 0.375rem !important; }
+    .game-draw-decks { gap: 0.25rem !important; }
+    .game-domain-empty { width: 7rem !important; height: 10rem !important; }
+  }
 }

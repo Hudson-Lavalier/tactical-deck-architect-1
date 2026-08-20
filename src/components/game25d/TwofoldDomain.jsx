@@ -33,7 +33,7 @@ export default function TwofoldDomain({ domain, domainAttached, onDomainClick, o
               <Card card={attached.left} size="medium" onClick={() => onDomainClick(attached.left)} />
             </div>
           ) : (
-            <div className="w-24 h-36 rounded glass-card flex items-center justify-center" style={{ borderColor: 'rgba(0,255,65,0.2)', borderStyle: 'dashed' }}>
+            <div className="game-persistent-empty w-24 h-36 rounded glass-card flex items-center justify-center" style={{ borderColor: 'rgba(0,255,65,0.2)', borderStyle: 'dashed' }}>
               <span className="text-term-faint font-mono text-[10px]">[ A ]</span>
             </div>
           )}
@@ -56,7 +56,7 @@ export default function TwofoldDomain({ domain, domainAttached, onDomainClick, o
               <Card card={attached.right} size="medium" onClick={() => onDomainClick(attached.right)} />
             </div>
           ) : (
-            <div className="w-24 h-36 rounded glass-card flex items-center justify-center" style={{ borderColor: 'rgba(0,255,255,0.2)', borderStyle: 'dashed' }}>
+            <div className="game-persistent-empty w-24 h-36 rounded glass-card flex items-center justify-center" style={{ borderColor: 'rgba(0,255,255,0.2)', borderStyle: 'dashed' }}>
               <span className="text-term-faint font-mono text-[10px]">[ B ]</span>
             </div>
           )}

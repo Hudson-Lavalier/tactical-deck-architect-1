@@ -9,13 +9,13 @@ export default function DrawDecks({ piles, onDraw, disabled }) {
   ];
 
   return (
-    <div className="flex flex-col gap-2 shrink-0">
+    <div className="game-draw-decks flex flex-col gap-2 shrink-0">
       <div className="text-term-text font-mono text-[12px] font-bold tracking-[0.2em] text-center">DRAW</div>
       {decks.map((d) => (
         <div
           key={d.id}
           onClick={() => !disabled && onDraw?.(d.id)}
-          className={`relative w-20 h-28 rounded-lg glass-card cosmic-sheen flex flex-col items-center justify-center transition-[transform,box-shadow] ${
+          className={`game-draw-deck relative w-20 h-28 rounded-lg glass-card cosmic-sheen flex flex-col items-center justify-center transition-[transform,box-shadow] ${
             disabled ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'
           }`}
           style={{
