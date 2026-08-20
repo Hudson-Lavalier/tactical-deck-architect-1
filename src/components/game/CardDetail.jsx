@@ -36,15 +36,15 @@ export default function CardDetail({
   return (
     <>
       <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/90 p-4 font-mono" onClick={onClose}>
-        <div className="glass-panel grid w-full max-w-3xl grid-cols-[auto_1fr] gap-7 p-7" style={{ borderColor: `${accent}45` }} onClick={(event) => event.stopPropagation()}>
-          <button className="self-center" onClick={() => setShowViewer(true)} aria-label={`Open full details for ${card.name}`}>
-            <Card card={card} size="xlarge" />
+        <div className="glass-panel grid h-[92vh] w-[96vw] max-w-none grid-cols-1 gap-8 overflow-y-auto p-8 md:grid-cols-[minmax(24rem,32rem)_minmax(0,1fr)] md:gap-10 md:p-10" style={{ borderColor: `${accent}45` }} onClick={(event) => event.stopPropagation()}>
+          <button className="flex items-center justify-center self-stretch" onClick={() => setShowViewer(true)} aria-label={`Open full details for ${card.name}`}>
+            <Card card={card} size="detail" />
           </button>
-          <div className="flex min-w-0 flex-col">
-            <div className="text-2xl font-bold leading-tight" style={{ color: accent }}>{card.name || 'UNNAMED CARD'}</div>
-            <div className="mt-1 text-ui-xs font-bold tracking-[0.18em] text-term-faint">{card.category?.replace(/_/g, ' ').toUpperCase()}</div>
-            <div className="my-4 h-px" style={{ background: `${accent}30` }} />
-            <div className="max-h-52 flex-1 overflow-y-auto whitespace-pre-line pr-2 text-ui-sm font-semibold leading-relaxed text-term-text">{card.text || card.description || '[ NO DESCRIPTION ]'}</div>
+          <div className="flex min-h-0 min-w-0 flex-col py-2">
+            <div className="text-4xl font-bold leading-tight" style={{ color: accent }}>{card.name || 'UNNAMED CARD'}</div>
+            <div className="mt-2 text-ui-sm font-bold tracking-[0.18em] text-term-faint">{card.category?.replace(/_/g, ' ').toUpperCase()}</div>
+            <div className="my-6 h-px" style={{ background: `${accent}30` }} />
+            <div className="min-h-0 flex-1 overflow-y-auto whitespace-pre-line pr-4 text-ui-lg font-semibold leading-relaxed text-term-text">{card.text || card.description || '[ NO DESCRIPTION ]'}</div>
             {timing && <div className="mt-4 rounded border px-3 py-2 text-ui-xs" style={{ borderColor: `${accent}30`, color: accent }}>RESOLUTION TIMING: {timing}</div>}
             <div className="mt-5 flex flex-col gap-2">
               {!readOnly && isDomain && twofoldActive && (

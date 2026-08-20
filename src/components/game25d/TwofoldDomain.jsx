@@ -13,7 +13,7 @@ export default function TwofoldDomain({ domain, domainAttached, onDomainClick, o
   const canSwitch = isPlayerTurn && domainPlacedBy === 'player' && switchesLeft > 0;
 
   return (
-    <div className="flex flex-col items-center gap-1.5 relative shrink-0 h-full min-h-0">
+    <div className="game-domain-center flex h-full min-h-0 shrink-0 flex-col items-center gap-1.5 relative">
       <div
         className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[24rem] h-[24rem] rounded-full pointer-events-none -z-10"
         style={{ background: `radial-gradient(circle, ${accent}28, transparent 70%)` }}
@@ -21,7 +21,7 @@ export default function TwofoldDomain({ domain, domainAttached, onDomainClick, o
 
       <div className="text-term-text font-mono text-[14px] font-bold tracking-[0.2em]">── TWOFOLD DOMAIN ──</div>
 
-      <div className="flex items-center justify-center gap-3 flex-1 min-h-0">
+      <div className="flex min-h-0 flex-1 items-center justify-center gap-2">
         {/* Left attached (Grounding) */}
         <div className="flex flex-col items-center gap-1">
           <div className="text-term-faint font-mono text-[9px] tracking-[0.15em]">LEFT · GROUNDING</div>
@@ -30,19 +30,19 @@ export default function TwofoldDomain({ domain, domainAttached, onDomainClick, o
               {attached.activeSide === 'left' && (
                 <div className="absolute -inset-1 rounded pointer-events-none" style={{ boxShadow: `0 0 14px ${ALIGNMENT_COLORS.A.glow}80` }} />
               )}
-              <Card card={attached.left} size="medium" onClick={() => onDomainClick(attached.left)} />
+              <Card card={attached.left} size="small" onClick={() => onDomainClick(attached.left)} />
             </div>
           ) : (
-            <div className="game-persistent-empty w-24 h-36 rounded glass-card flex items-center justify-center" style={{ borderColor: 'rgba(0,255,65,0.2)', borderStyle: 'dashed' }}>
+            <div className="game-twofold-flank-empty flex h-28 w-20 items-center justify-center rounded glass-card" style={{ borderColor: 'rgba(0,255,65,0.2)', borderStyle: 'dashed' }}>
               <span className="text-term-faint font-mono text-[10px]">[ A ]</span>
             </div>
           )}
         </div>
 
-        {/* Center — small Twofold card */}
+        {/* Center — unchanged full-size domain card */}
         <div className="flex flex-col items-center gap-1">
           <div className="text-term-faint font-mono text-[9px] tracking-[0.15em]">TWOFOLD</div>
-          <Card card={domain} size="small" onClick={() => onDomainClick(domain)} />
+          <Card card={domain} size="domain" onClick={() => onDomainClick(domain)} />
         </div>
 
         {/* Right attached (System) */}
@@ -53,10 +53,10 @@ export default function TwofoldDomain({ domain, domainAttached, onDomainClick, o
               {attached.activeSide === 'right' && (
                 <div className="absolute -inset-1 rounded pointer-events-none" style={{ boxShadow: `0 0 14px ${ALIGNMENT_COLORS.B.glow}80` }} />
               )}
-              <Card card={attached.right} size="medium" onClick={() => onDomainClick(attached.right)} />
+              <Card card={attached.right} size="small" onClick={() => onDomainClick(attached.right)} />
             </div>
           ) : (
-            <div className="game-persistent-empty w-24 h-36 rounded glass-card flex items-center justify-center" style={{ borderColor: 'rgba(0,255,255,0.2)', borderStyle: 'dashed' }}>
+            <div className="game-twofold-flank-empty flex h-28 w-20 items-center justify-center rounded glass-card" style={{ borderColor: 'rgba(0,255,255,0.2)', borderStyle: 'dashed' }}>
               <span className="text-term-faint font-mono text-[10px]">[ B ]</span>
             </div>
           )}
