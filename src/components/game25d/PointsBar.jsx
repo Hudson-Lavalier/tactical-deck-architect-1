@@ -14,67 +14,65 @@ export default function PointsBar({ player, isOpponent = false, handCount }) {
   const overallPct = totalTarget > 0 ? Math.min(100, (totalEarned / totalTarget) * 100) : 0;
 
   return (
-    <div className="flex w-auto min-w-[13rem] max-w-xs flex-col gap-1 rounded-xl border border-white/10 bg-cosmic-deep/85 p-2 backdrop-blur-md shadow-md">
-      {/* Header Row */}
-      <div className="flex items-center justify-between border-b border-white/10 pb-1 gap-2">
-        <div className="text-term-text tracking-[0.14em] text-[10px] font-bold">
-          {isOpponent ? 'OPPONENT' : 'YOU'} · VICTORY
+    <div className={`grid w-full min-w-0 grid-cols-[minmax(0,1fr)_auto_auto_auto] items-center justify-center gap-4 font-mono ${isOpponent ? 'text-ui-sm' : 'text-ui-md'}`}>
+      <div className="flex w-full min-w-0 flex-col gap-1">
+        <div className="text-term-text tracking-[0.2em] text-[12px] font-bold">
+          {isOpponent ? 'OPPONENT' : 'YOU'} · VICTORY STANDARD
         </div>
-
-        <div className="flex items-center gap-1">
-          {Object.entries(ALIGNMENT_COLORS).map(([key, info]) => (
-            <div
-              key={key}
-              className="flex h-4 w-4 items-center justify-center rounded-full border"
-              style={{ borderColor: `${info.glow}60`, backgroundColor: `${info.glow}15` }}
-            >
-              <span style={{ color: info.glow }} className="text-[9px] font-bold">
-                {points[key] || 0}
-              </span>
-            </div>
-          ))}
-
-          {!isOpponent && handCount != null && (
-            <div className="ml-1 border-l border-white/10 pl-1.5 text-[9px] font-bold text-term-faint">
-              HAND: <span className="text-term-blue">{handCount}</span>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Progress Bars */}
-      <div className="flex flex-col gap-0.5 pt-0.5">
         {required.map(([key, target]) => {
           const info = ALIGNMENT_COLORS[key];
           const cur = points[key] || 0;
           const pct = Math.min(100, (cur / target) * 100);
           return (
-            <div key={key} className="grid w-full grid-cols-[auto_1fr_auto] items-center gap-1.5">
-              <span style={{ color: info.glow }} className="min-w-0 max-w-[5rem] truncate text-left text-[9px] font-bold">
+            <div key={key} className="grid w-full min-w-0 grid-cols-[auto_1fr_auto] items-center gap-2" style={{ '--accent-color': info.glow }}>
+              <span style={{ color: info.glow }} className="accent-text-glow min-w-0 max-w-[7rem] truncate text-left text-[12px] font-bold">
                 {info.name}
               </span>
-              <div className="h-1 w-full overflow-hidden rounded-full bg-slate-900 border border-white/5">
-                <div className="h-full rounded-full transition-all duration-300" style={{ width: `${pct}%`, backgroundColor: info.glow }} />
+              <div className="h-1.5 w-full min-w-0 overflow-hidden rounded bg-term-purple/10">
+                <div
+                  className="h-full transition-[width,box-shadow] duration-300"
+                  style={{ width: `${pct}%`, background: info.glow, boxShadow: '0 0 6px color-mix(in srgb, var(--accent-color) 50%, transparent)' }}
+                />
               </div>
-              <span style={{ color: info.glow }} className="text-right text-[9px] font-bold tabular-nums">
+              <span style={{ color: info.glow }} className="text-right text-[12px] font-bold tabular-nums">
                 {cur}/{target}
               </span>
             </div>
           );
         })}
-
-        <div className="mt-0.5 grid w-full grid-cols-[auto_1fr_auto] items-center gap-1.5">
-          <span className="min-w-0 max-w-[5rem] truncate text-left text-[9px] font-bold tracking-[0.1em] text-term-text">
-            WEIGHTED
-          </span>
-          <div className="h-1 w-full overflow-hidden rounded-full bg-slate-900 border border-white/5">
-            <div className="h-full rounded-full transition-all duration-300" style={{ width: `${overallPct}%`, background: 'linear-gradient(90deg, #00ff41, #00ffff, #a855f7)' }} />
+        <div className="mt-0.5 grid w-full min-w-0 grid-cols-[auto_1fr_auto] items-center gap-2">
+          <span className="min-w-0 max-w-[7rem] truncate text-left text-[12px] font-bold tracking-[0.15em] text-term-text">WEIGHTED</span>
+          <div className="h-2 w-full min-w-0 overflow-hidden rounded bg-term-purple/10">
+            <div
+              className="h-full transition-[width,box-shadow] duration-300"
+              style={{ width: `${overallPct}%`, background: 'linear-gradient(90deg, #00ff41, #00ffff, #a855f7)', boxShadow: '0 0 8px rgba(168,85,247,0.4)' }}
+            />
           </div>
-          <span className="text-right text-[9px] font-bold tabular-nums text-term-text">
-            {totalEarned}/{totalTarget}
-          </span>
+          <span className="text-right text-[12px] font-bold tabular-nums text-term-text">{totalEarned}/{totalTarget}</span>
         </div>
       </div>
+
+      <div className="h-12 w-px bg-term-purple/20" />
+
+      <div className="flex flex-col gap-1">
+        <div className="text-term-text tracking-[0.2em] text-[12px] font-bold">GENERAL TALLY</div>
+        <div className="flex gap-2">
+          {Object.entries(ALIGNMENT_COLORS).map(([key, info]) => (
+            <div key={key} className="flex flex-col items-center gap-0.5" style={{ '--accent-color': info.glow }}>
+              <div className="accent-border accent-bg-subtle accent-glow flex aspect-square w-7 items-center justify-center rounded-full border">
+                <span style={{ color: info.glow }} className="accent-text-glow text-[13px] font-bold">
+                  {points[key]}
+                </span>
+              </div>
+              <span style={{ color: info.glow }} className="text-[10px] font-bold">{info.label}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {handCount != null && (
+        <div className="ml-1 text-term-text text-[12px] font-bold tracking-[0.15em]">HAND: {handCount}</div>
+      )}
     </div>
   );
 }
