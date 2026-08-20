@@ -108,8 +108,6 @@ export function createInitialState(playerSelection, opponentSelection, difficult
     domainPlacedBy: null, // who placed the current domain ('player' | 'opponent')
     domainDuration: 0,    // full rounds since the domain was last changed (Growing-Block)
     domainLock: null,     // { type, playerId } — prevents domain changes
-    domainAttached: null, // Twofold Reality flank state
-    pendingTwofoldAttach: null,
     domainModifiers: {
       player: [],         // effects to the right of domain
       opponent: [],       // effects to the left of domain

@@ -13,7 +13,7 @@ export default function TestPanel({ onGrant, opponentLocked, onToggleOpponentLoc
   const cards = ALL_CARDS[activeCat] || [];
 
   return (
-    <div className="fixed right-0 top-0 bottom-0 w-96 max-w-[90vw] z-40 layered-panel flex flex-col" style={{ borderRadius: '16px 0 0 16px', borderRight: 'none' }}>
+    <div className="fixed right-0 top-0 bottom-0 w-96 max-w-[90vw] z-40 glass-panel flex flex-col" style={{ borderRadius: '16px 0 0 16px', borderRight: 'none' }}>
       <div className="flex justify-between items-center p-3 border-b border-term-purple/15">
         <span className="text-term-purple text-ui-sm tracking-[0.15em] font-bold font-mono">TEST PANEL</span>
         <button onClick={onClose} className="text-term-dim hover:text-term-purple transition-colors">

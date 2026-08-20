@@ -7,19 +7,19 @@ export default function BoardSurface({ children, accent = '#00ffff' }) {
   return (
     <div className="absolute inset-0 flex items-center justify-center" style={{ perspective: '2000px' }}>
       <div
-        className="game-board-plane relative grid gap-2 p-3 rounded-2xl cosmic-sheen"
+        className="relative grid gap-2 p-3 rounded-2xl cosmic-sheen"
         style={{
-          width: '96%',
-          height: '96%',
-          transform: 'rotateX(4deg) translateY(-8px)',
+          width: '92%',
+          height: '100%',
+          transform: 'rotateX(8deg) translateY(-30px)',
           transformOrigin: 'center 55%',
           gridTemplateColumns: '1fr',
-          gridTemplateRows: '28px 34px 74px 140px minmax(220px,1fr) 140px 130px 74px',
+          gridTemplateRows: 'auto auto auto auto 1fr auto auto auto',
           gridTemplateAreas:
             '"topbar" "help" "opp-points" "opp-persistent" "battlefield" "player-persistent" "hand" "player-points"',
-          background: 'linear-gradient(155deg, color-mix(in srgb, var(--surface-raised) 94%, transparent), var(--surface-base))',
-          border: `1px solid ${accent}55`,
-          boxShadow: `0 0 30px ${accent}1f, inset 0 0 0 3px rgba(0,0,0,.28), inset 0 0 54px rgba(0,0,0,.48), inset 0 1px 0 rgba(255,255,255,.07)`,
+          background: 'linear-gradient(160deg, rgba(24,18,38,0.92), rgba(12,12,22,0.88))',
+          border: `1px solid ${accent}40`,
+          boxShadow: `0 0 24px ${accent}22, inset 0 0 40px rgba(0,0,0,0.38), inset 0 1px 0 rgba(255,255,255,0.05)`,
         }}
       >
         {/* Thin glowing edge trace */}

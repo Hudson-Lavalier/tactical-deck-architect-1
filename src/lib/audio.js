@@ -63,10 +63,6 @@ function noise(c, { dur = 0.12, gain = 0.05, filterFreq = 1200, delay = 0 }) {
 
 const SOUNDS = {
   click: (c) => tone(c, { freq: 660, type: 'square', dur: 0.05, gain: 0.035 }),
-  hover: (c) => tone(c, { freq: 410, type: 'sine', dur: 0.035, gain: 0.012 }),
-  effect: (c) => { tone(c, { freq: 350, type: 'triangle', dur: 0.09, gain: 0.04 }); tone(c, { freq: 520, type: 'sine', dur: 0.1, gain: 0.035, delay: 0.05 }); },
-  discard: (c) => { noise(c, { dur: 0.11, gain: 0.03, filterFreq: 650 }); tone(c, { freq: 240, type: 'triangle', dur: 0.12, gain: 0.035, slideTo: 130 }); },
-  error: (c) => tone(c, { freq: 130, type: 'sawtooth', dur: 0.13, gain: 0.045, slideTo: 90 }),
   draw: (c) => { tone(c, { freq: 440, type: 'triangle', dur: 0.1, gain: 0.06, slideTo: 660 }); noise(c, { dur: 0.06, gain: 0.025, filterFreq: 2000 }); },
   place: (c) => { tone(c, { freq: 220, type: 'sawtooth', dur: 0.14, gain: 0.06, slideTo: 330 }); noise(c, { dur: 0.1, gain: 0.035, filterFreq: 800 }); },
   domain: (c) => { tone(c, { freq: 110, type: 'sine', dur: 0.55, gain: 0.14, slideTo: 48 }); tone(c, { freq: 220, type: 'triangle', dur: 0.4, gain: 0.08, delay: 0.08 }); noise(c, { dur: 0.42, gain: 0.07, filterFreq: 420 }); },

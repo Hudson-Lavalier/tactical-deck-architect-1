@@ -39,15 +39,15 @@ import { EPISTEMOLOGIES } from '@/data/epistemologies';
 
 // Map engine log events to sound effects.
 const EVENT_SFX = {
-  draw: 'draw', rhetoric_draw: 'draw', draw_typed: 'draw', draw_failed: 'error',
-  place_persistent: 'place', domain_change: 'domain', domain_change_blocked: 'error',
-  enqueue: 'enqueue', queue_advance: 'effect', queue_collect: 'effect', queue_delay: 'effect',
-  queue_paused: 'effect', queue_resumed: 'effect', queue_removed: 'discard', queue_bounce: 'effect',
-  card_resolved: 'resolve', card_discarded: 'discard', effect_noop: 'error',
-  points_added: 'effect', points_removed: 'effect', points_converted: 'effect', points_blocked: 'error', points_protected: 'effect',
-  rhetoric_response: 'counter', response_window_open: 'responseOpen', response_pass: 'click',
-  twofold_switch: 'switch', twofold_attach: 'attach', domain_modifier_added: 'attach',
-  shield_added: 'effect', slot_disabled: 'effect', victory_reduced: 'effect', distinct_point: 'effect',
+  draw: 'draw',
+  place_persistent: 'place',
+  domain_change: 'domain',
+  enqueue: 'enqueue',
+  card_resolved: 'resolve',
+  rhetoric_response: 'counter',
+  response_window_open: 'responseOpen',
+  twofold_switch: 'switch',
+  twofold_attach: 'attach',
   turn_end: 'endTurn',
 };
 
@@ -204,9 +204,8 @@ export default function GameBoard() {
     setShowCardDetail({ card, readOnly: true });
   }, []);
 
-  const handleInspectDomain = useCallback((card) => {
-    const inspected = card?.id ? card : state?.domain;
-    if (inspected) setShowCardDetail({ card: inspected, readOnly: true });
+  const handleInspectDomain = useCallback(() => {
+    if (state?.domain) setShowCardDetail({ card: state.domain, readOnly: true });
   }, [state?.domain]);
 
   const handleInspectQueue = useCallback((card) => {
@@ -245,9 +244,9 @@ export default function GameBoard() {
     if (!success) return;
     setBoardDevUsed(true);
     if (!newState.responseWindow?.active) {
-      setPhase(newState.pendingTwofoldAttach === 'player' ? 'main' : 'draw');
+      setPhase('draw');
       setActionsPlayed(0);
-      setBoardDevUsed(newState.pendingTwofoldAttach === 'player');
+      setBoardDevUsed(false);
     }
   }, [state, phase, selectedCardId, boardDevUsed, actionsPlayed]);
 
@@ -307,25 +306,8 @@ export default function GameBoard() {
   const handleTwofoldAttach = useCallback((leftId, rightId) => {
     if (!state || state.domainPlacedBy !== 'player') return;
     const newState = cloneState(state);
-    const attached = attachTwofoldDomains(newState, 'player', leftId, rightId);
-    if (!attached) return;
-    endTurn(newState);
+    attachTwofoldDomains(newState, 'player', leftId, rightId);
     setState(newState);
-    setPhase('draw');
-    setActionsPlayed(0);
-    setBoardDevUsed(false);
-    setTwofoldAttachDismissed(true);
-  }, [state]);
-
-  const handleSkipTwofoldAttach = useCallback(() => {
-    if (!state || state.pendingTwofoldAttach !== 'player') return;
-    const newState = cloneState(state);
-    newState.pendingTwofoldAttach = null;
-    endTurn(newState);
-    setState(newState);
-    setPhase('draw');
-    setActionsPlayed(0);
-    setBoardDevUsed(false);
     setTwofoldAttachDismissed(true);
   }, [state]);
 
@@ -366,7 +348,7 @@ export default function GameBoard() {
     const newState = cloneState(state);
     const p = newState.players[target];
     if (p && p.hand.length < p.handLimit) {
-      p.hand.push({ ...card, instanceId: `${card.id}_${Date.now()}_${Math.random().toString(36).slice(2, 6)}` });
+      p.hand.push({ ...card, id: `${card.id}_${Date.now()}_${Math.random().toString(36).slice(2, 6)}` });
     }
     setState(newState);
     sfx('draw');
@@ -396,11 +378,11 @@ export default function GameBoard() {
   const accent = isPlayerTurn ? '#00ff41' : '#a855f7';
 
   const isTwofold = state.domain?.id === 'twofold_reality';
-  const twofoldNeedsAttach = isTwofold && state.pendingTwofoldAttach === 'player' && state.domainAttached && isPlayerTurn && state.domainPlacedBy === 'player' && !twofoldAttachDismissed;
+  const twofoldNeedsAttach = isTwofold && state.domainAttached && !state.domainAttached.left && !state.domainAttached.right && isPlayerTurn && state.domainPlacedBy === 'player' && !twofoldAttachDismissed;
   const switchesLeft = state.domainAttached ? Math.max(0, 2 - (state.domainAttached.switchesThisTurn || 0)) : 0;
 
   return (
-    <div className="h-screen cosmic-shell layered-page text-term-text font-mono relative overflow-hidden">
+    <div className="h-screen cosmic-shell text-term-text font-mono relative overflow-hidden">
       <CosmicBackground density={15} />
 
       <BoardSurface accent={accent}>
@@ -560,7 +542,7 @@ export default function GameBoard() {
         <TwofoldAttachModal
           hand={player.hand}
           onConfirm={(leftId, rightId) => handleTwofoldAttach(leftId, rightId)}
-          onClose={handleSkipTwofoldAttach}
+          onClose={() => setTwofoldAttachDismissed(true)}
         />
       )}
 

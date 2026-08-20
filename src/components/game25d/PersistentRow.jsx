@@ -10,19 +10,22 @@ const SLOT_LABELS = {
 
 export default function PersistentRow({ slots, onSlotClick, placementEffect }) {
   return (
-    <div className="flex gap-3 justify-center rounded-xl border border-term-purple/15 bg-black/20 px-4 py-1 shadow-[inset_0_0_20px_rgba(0,0,0,.45)]">
+    <div className="flex gap-3 justify-center">
       {Object.entries(slots).map(([slot, card]) =>
       <div key={slot} className="flex flex-col items-center gap-1">
           <div className="text-term-text font-mono text-[12px] font-bold tracking-[0.15em] px-10 py-1">{SLOT_LABELS[slot]}</div>
-          <div className="inset-well flex h-28 w-48 items-center justify-center" style={{ borderColor: card ? 'rgba(168,85,247,.28)' : 'rgba(168,85,247,.15)', borderStyle: card ? 'solid' : 'dashed' }}>
-            {card ? (
-              <div className={placementEffect?.slot === slot ? 'animate-card-place' : ''} key={`${card.id}-${placementEffect?.slot === slot ? placementEffect.key : 0}`}>
-                <Card card={card} size="small" onClick={() => onSlotClick?.(slot, card)} />
-              </div>
-            ) : (
-              <span className="text-term-faint font-mono text-[10px] font-bold tracking-[.18em]">EMPTY SLOT</span>
-            )}
-          </div>
+          {card ?
+        <div className={placementEffect?.slot === slot ? 'animate-card-place' : ''} key={`${card.id}-${placementEffect?.slot === slot ? placementEffect.key : 0}`}>
+          <Card card={card} size="medium" onClick={() => onSlotClick?.(slot, card)} />
+        </div> :
+
+        <div
+          className="w-24 h-36 rounded glass-card flex items-center justify-center"
+          style={{ borderColor: 'rgba(168,85,247,0.15)', borderStyle: 'dashed' }}>
+          
+              <span className="text-term-text font-mono text-[11px] font-bold">[ ]</span>
+            </div>
+        }
         </div>
       )}
     </div>);

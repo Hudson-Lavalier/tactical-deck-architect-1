@@ -1,6 +1,5 @@
 import React from 'react';
 import { ALIGNMENT_COLORS, ALIGNMENT_GLOW, ALIGNMENT_TEXT } from './terminalTheme';
-import { needsWork } from '@/engine/cardAudit';
 
 // Card — renders a single card in the cosmic terminal style.
 // Glass frame with alignment-tinted depth + top sheen.
@@ -23,7 +22,7 @@ export default function Card({ card, faceDown = false, size = 'normal', onClick,
 
   if (faceDown) {
     return (
-      <div className={`${s.box} game-card game-card--back rounded glass-card flex items-center justify-center relative overflow-hidden`}
+      <div className={`${s.box} rounded glass-card flex items-center justify-center relative overflow-hidden`}
       style={{ borderColor: 'rgba(168,85,247,0.2)' }}>
         
         <div className="absolute inset-0 opacity-15"
@@ -38,14 +37,13 @@ export default function Card({ card, faceDown = false, size = 'normal', onClick,
   const glowClass = card.alignment ? ALIGNMENT_GLOW[card.alignment] : '';
   const textClass = card.alignment ? ALIGNMENT_TEXT[card.alignment] : '';
   const accent = alignment?.glow || '#a855f7';
-  const showNeedsWork = needsWork(card) && !card.test;
 
   return (
     <div
       onClick={onClick}
       data-card-interactive={onClick ? 'true' : undefined}
       aria-disabled={disabled}
-      className={`${s.box} game-card rounded glass-card cosmic-sheen relative overflow-hidden cursor-pointer transition-[transform,box-shadow] duration-200 hover:scale-105 ${glowClass} ${selected ? 'ring-2 ring-offset-2 ring-offset-[#050308] scale-105' : ''} ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+      className={`${s.box} rounded glass-card cosmic-sheen relative overflow-hidden cursor-pointer transition-[transform,box-shadow] duration-200 hover:scale-105 ${glowClass} ${selected ? 'ring-2 ring-offset-2 ring-offset-[#050308] scale-105' : ''} ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
       style={{ borderColor: `${accent}40` }}>
       
       <div className="absolute inset-0 pointer-events-none opacity-[0.06]"
@@ -76,7 +74,6 @@ export default function Card({ card, faceDown = false, size = 'normal', onClick,
           </div>
         }
       </div>
-      {showNeedsWork && <div className="effect-badge">NEEDS WORK</div>}
     </div>);
 
 }

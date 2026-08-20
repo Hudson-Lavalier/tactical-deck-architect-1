@@ -11,7 +11,7 @@ export default function BuildInfoPanel({ selectedIds, buildName, onNameChange, o
   const orientationParadigm = paradigms.find((p) => p.family === 'orientation');
 
   return (
-    <div className="layered-panel p-5 flex flex-col gap-5 relative">
+    <div className="glass-panel cosmic-sheen p-5 flex flex-col gap-5 relative">
       {/* Victory Profile */}
       <div>
         <div className="text-term-faint text-ui-xs tracking-[0.15em] mb-2 font-bold">VICTORY PROFILE</div>

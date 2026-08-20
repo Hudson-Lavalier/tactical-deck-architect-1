@@ -10,7 +10,6 @@ import { CARD_OVERVIEWS } from '@/data/cardOverviews';
 import Carousel3D from '@/components/Carousel3D';
 import RichText from '@/components/RichText';
 import { ALIGNMENT_COLORS } from '@/components/game/terminalTheme';
-import { needsWork } from '@/engine/cardAudit';
 
 // Card Info — large carousel with viewport-capped card sizing.
 export default function CardInfo() {
@@ -33,12 +32,12 @@ export default function CardInfo() {
   }, []);
 
   return (
-    <div className="min-h-screen cosmic-shell layered-page text-term-text font-mono p-4 md:p-6 flex flex-col relative overflow-hidden">
-      <CosmicBackground density={36} />
+    <div className="min-h-screen cosmic-shell text-term-text font-mono p-4 md:p-6 flex flex-col relative overflow-hidden">
+      <CosmicBackground density={60} />
 
       <div className="relative z-10 flex flex-col flex-1">
         {/* Header */}
-        <div className="page-heading flex items-center gap-3 mb-4">
+        <div className="flex items-center gap-3 mb-4">
           <button onClick={() => navigate('/')} className="text-term-dim hover:text-term-green transition-colors">
             <ArrowLeft className="w-6 h-6" />
           </button>
@@ -73,14 +72,13 @@ export default function CardInfo() {
         </div>
 
         {/* Active category label */}
-        <div className="mb-3 flex items-center justify-center gap-4 text-term-faint text-ui-sm tracking-[0.15em] font-bold">
-          <span>── {activeCategory.name.toUpperCase()} — {activeCategory.system.toUpperCase()} SYSTEM ──</span>
-          <span className="rounded border border-red-400/30 bg-red-950/30 px-2 py-1 text-[9px] tracking-[.12em] text-red-300">NEEDS WORK = PARTIAL OR UNWIRED EFFECT</span>
+        <div className="text-term-faint text-ui-sm tracking-[0.15em] mb-3 font-bold text-center">
+          ── {activeCategory.name.toUpperCase()} — {activeCategory.system.toUpperCase()} SYSTEM ──
         </div>
 
         {/* Category overview / summary (verbatim from the card-type document) */}
         {overview && (
-          <div className="mb-3 layered-panel p-4 max-h-[160px] overflow-y-auto">
+          <div className="mb-3 glass-card cosmic-sheen p-3 max-h-[160px] overflow-y-auto">
             <div className="text-term-faint text-ui-xs tracking-[0.15em] mb-2 font-bold">── OVERVIEW ──</div>
             <RichText text={overview} />
           </div>
@@ -129,7 +127,6 @@ function computeDims() {
 function CardCarouselCard({ card, isCenter }) {
   const alignmentInfo = card.alignment ? ALIGNMENT_COLORS[card.alignment] : null;
   const accent = alignmentInfo?.glow || '#a855f7';
-  const showNeedsWork = needsWork(card);
 
   return (
     <div
@@ -139,7 +136,6 @@ function CardCarouselCard({ card, isCenter }) {
         boxShadow: isCenter ? `0 0 28px ${accent}1a, inset 0 1px 0 rgba(255,255,255,0.04)` : 'inset 0 1px 0 rgba(255,255,255,0.03)',
       }}
     >
-      {showNeedsWork && <div className="effect-badge">NEEDS WORK</div>}
       {/* Header */}
       <div className="flex justify-between items-start mb-2 relative">
         <div>

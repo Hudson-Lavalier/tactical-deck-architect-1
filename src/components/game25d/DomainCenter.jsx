@@ -50,7 +50,7 @@ export default function DomainCenter({ domain, modifiers, onDomainClick, domainA
                 backgroundSize: '12px 12px',
               }}
             />
-            <Card card={domain} size="domain" onClick={() => onDomainClick?.(domain)} />
+            <Card card={domain} size="domain" onClick={onDomainClick} />
           </div>
         ) : (
           <div

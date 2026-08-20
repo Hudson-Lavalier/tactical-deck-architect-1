@@ -18,7 +18,7 @@ export default function PointsBar({ player, isOpponent = false, handCount }) {
   const barW = isOpponent ? 'w-20' : 'w-28';
 
   return (
-    <div className={`flex items-center gap-4 font-mono rounded-lg border border-term-purple/10 bg-black/10 px-3 py-1 ${isOpponent ? 'text-ui-sm' : 'text-ui-md'}`}>
+    <div className={`flex items-center gap-4 font-mono ${isOpponent ? 'text-ui-sm' : 'text-ui-md'}`}>
       {/* Victory Standard */}
       <div className="flex flex-col gap-1">
         <div className="text-term-text tracking-[0.2em] text-[12px] font-bold">

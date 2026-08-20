@@ -20,8 +20,7 @@ import { resolveCard } from './queueSystem';
 import { proceedWithTurn, endTurn } from './turnManager';
 import { dispatchPlace, dispatchRemove, dispatchRhetoric } from './effects/dispatcher';
 import { emit, emitBefore } from './effects/eventBus';
-import { discardCard, clearDomainLock } from './effects/primitives';
-import { attachTwofoldDomains } from './twofoldSystem';
+import { discardCard } from './effects/primitives';
 
 // Open a response window for a card that is becoming active.
 // `extra` carries source-specific context (e.g. slot for board_dev, oldDomain for domain).
@@ -104,7 +103,7 @@ export function closeResponseWindow(state) {
     if (before.cancelled) {
       // Cancellation overridden — resolve/place normally.
       clearWindow(state);
-      handleResolve(state, source, activeCard, activePlayerId, slot, oldDomain, oldDomainPlacedBy);
+      handleResolve(state, source, activeCard, activePlayerId, slot);
     } else {
       clearWindow(state);
       handleCancel(state, source, activeCard, activePlayerId, slot, oldDomain, oldDomainPlacedBy);
@@ -134,8 +133,7 @@ export function closeResponseWindow(state) {
     if (source === 'queue') {
       proceedWithTurn(state);
     } else if (source === 'domain') {
-      if (state.pendingTwofoldAttach === 'player') state.phase = 'action';
-      else endTurn(state);
+      endTurn(state);
     } else {
       // 'action' or 'board_dev' → return to action phase
       state.phase = 'action';
@@ -157,23 +155,11 @@ function clearWindow(state) {
 }
 
 // Card resolved successfully — dispatch its effect/placement.
-function handleResolve(state, source, card, playerId, slot, oldDomain, oldDomainPlacedBy) {
+function handleResolve(state, source, card, playerId, slot) {
   if (source === 'board_dev') {
     dispatchPlace(state, playerId, card, slot);
   } else if (source === 'domain') {
-    if (oldDomain) dispatchRemove(state, oldDomainPlacedBy, oldDomain);
-    clearDomainLock(state);
     dispatchPlace(state, playerId, card, 'domain');
-    if (card.id === 'twofold_reality') {
-      if (playerId === 'opponent') {
-        const hand = state.players.opponent.hand;
-        const left = hand.find((item) => item.category === 'domain' && item.alignment === 'A');
-        const right = hand.find((item) => item.category === 'domain' && item.alignment === 'B');
-        attachTwofoldDomains(state, 'opponent', left?.id || null, right?.id || null);
-      } else {
-        state.pendingTwofoldAttach = 'player';
-      }
-    }
   } else {
     // 'queue' or 'action' — resolve as a one-time-use action card
     resolveCard(state, playerId, card);

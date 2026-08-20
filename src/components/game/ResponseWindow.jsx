@@ -19,7 +19,7 @@ export default function ResponseWindow({ activeCard, rhetoricCards, onCounter, o
 
   return (
     <div className="fixed inset-0 bg-black/85 flex items-center justify-center z-40 font-mono">
-      <div className="layered-panel p-6 max-w-2xl" style={{ borderColor: 'rgba(168,85,247,0.4)', boxShadow: '0 0 32px rgba(168,85,247,0.2)' }}>
+      <div className="glass-panel p-6 max-w-2xl" style={{ borderColor: 'rgba(168,85,247,0.4)', boxShadow: '0 0 32px rgba(168,85,247,0.2)' }}>
         <div className="text-term-purple text-sm tracking-[0.15em] mb-4 text-center">
           ── RESPONSE WINDOW ── {timeLeft.toFixed(1)}s
         </div>
