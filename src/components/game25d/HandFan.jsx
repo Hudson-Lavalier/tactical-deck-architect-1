@@ -2,6 +2,8 @@ import React from 'react';
 import Card from '@/components/game/Card';
 import { HAND_LIMIT } from '@/data/gameConstants';
 
+// HandFan — player's hand fanned in an arc, emerging from the bottom edge
+// of the tilted plane. No nested perspective (the board tilt handles depth).
 export default function HandFan({ cards, onSelectCard, selectedCardId, disabled }) {
   const handCount = cards.length;
   const fanAngle = Math.min(handCount * 3, 22);
