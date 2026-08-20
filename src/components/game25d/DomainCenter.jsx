@@ -5,8 +5,8 @@ import TwofoldDomain from './TwofoldDomain';
 
 // DomainCenter — the shared domain as the tilted board's centerpiece.
 // Radial alignment bloom + faint circuit-node texture behind the card.
-// Twofold Reality keeps the full-size center card and renders two smaller
-// attached domains beside it with a switch control.
+// Twofold Reality renders as a small center card flanked by its two
+// attached domains with a switch control.
 export default function DomainCenter({ domain, modifiers, onDomainClick, domainAttached, onSwitchTwofold, isPlayerTurn, domainPlacedBy }) {
   const accent = domain ? ALIGNMENT_COLORS[domain.alignment]?.glow : '#a855f7';
 
