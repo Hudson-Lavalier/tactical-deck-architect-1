@@ -35,7 +35,7 @@ export default function Home() {
     <div className="min-h-screen cosmic-shell bg-cosmic-deep text-term-text font-mono relative overflow-hidden">
       <CosmicBackground density={90} />
 
-      <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-4 py-8">
+      <div className="relative z-10 flex min-h-screen flex-col items-center justify-center px-4 py-8">
         {/* Title with orbital motif */}
         <div className="mb-12 text-center relative">
           <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 rounded-full border border-term-purple/10 animate-cosmic-float pointer-events-none" />
@@ -58,7 +58,7 @@ export default function Home() {
 
         {/* Menu */}
         <div className="flex flex-col gap-3 w-full max-w-sm">
-          <GlassPanel className="p-3 mb-1" sheen={false}>
+          <GlassPanel className="cyber-panel mb-1 border-t border-t-white/20 bg-cosmic-deep/80 p-3 backdrop-blur-xl" sheen={false}>
             <div className="text-term-faint text-ui-xs tracking-[0.2em] mb-2 text-center font-bold">DIFFICULTY</div>
             <div className="flex gap-1.5">
               {[1, 2, 3, 4, 5].map((level) => (
@@ -77,7 +77,7 @@ export default function Home() {
             </div>
           </GlassPanel>
 
-          <GlassPanel className="p-3 mb-1" sheen={false}>
+          <GlassPanel className="cyber-panel mb-1 border-t border-t-white/20 bg-cosmic-deep/80 p-3 backdrop-blur-xl" sheen={false}>
             <button
               onClick={handleToggleTestMode}
               className={`w-full py-2 rounded text-ui-sm font-bold tracking-[0.15em] transition-[color,background-color,border-color] ${
@@ -92,7 +92,7 @@ export default function Home() {
 
           <button
             onClick={handlePlayMatch}
-            className="group flex items-center gap-3 px-6 py-3.5 rounded border bg-cosmic-deep/90 transition-transform duration-200 hover:scale-[1.02]"
+            className="cyber-panel hud-control group flex items-center gap-3 rounded-xl border border-t-white/20 bg-cosmic-deep/80 px-6 py-3.5 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:scale-[1.01]"
             style={{ borderColor: 'rgba(0,255,65,0.35)' }}
           >
             <Play className="w-5 h-5 text-term-green" style={{ filter: 'drop-shadow(0 0 6px rgba(0,255,65,0.5))' }} />
@@ -121,7 +121,7 @@ function MenuButton({ to, icon: Icon, label, color }) {
   return (
     <Link
       to={to}
-      className="group flex items-center gap-3 px-6 py-3.5 rounded border bg-cosmic-deep/90 transition-transform duration-200 hover:scale-[1.02]"
+      className="cyber-panel hud-control group flex items-center gap-3 rounded-xl border border-t-white/20 bg-cosmic-deep/80 px-6 py-3.5 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:scale-[1.01]"
       style={{ borderColor: `${color}30` }}
     >
       <Icon className="w-5 h-5" style={{ color, filter: `drop-shadow(0 0 5px ${color}80)` }} />

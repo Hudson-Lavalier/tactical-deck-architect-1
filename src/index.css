@@ -364,6 +364,42 @@
     filter: drop-shadow(0 16px 20px rgba(0,0,0,.82)) drop-shadow(0 0 9px color-mix(in srgb, var(--accent-color) 42%, transparent));
   }
 
+  .cyber-panel {
+    box-shadow: 0 24px 70px rgba(0,0,0,.72), inset 0 1px 0 rgba(255,255,255,.1), inset 0 -24px 60px rgba(0,0,0,.3);
+  }
+
+  .holo-frame::before {
+    content: '';
+    position: absolute;
+    inset: 8px;
+    z-index: 20;
+    pointer-events: none;
+    background:
+      linear-gradient(var(--accent-color, #a855f7), var(--accent-color, #a855f7)) left top / 14px 1px no-repeat,
+      linear-gradient(var(--accent-color, #a855f7), var(--accent-color, #a855f7)) left top / 1px 14px no-repeat,
+      linear-gradient(var(--accent-color, #a855f7), var(--accent-color, #a855f7)) right top / 14px 1px no-repeat,
+      linear-gradient(var(--accent-color, #a855f7), var(--accent-color, #a855f7)) right top / 1px 14px no-repeat,
+      linear-gradient(var(--accent-color, #a855f7), var(--accent-color, #a855f7)) left bottom / 14px 1px no-repeat,
+      linear-gradient(var(--accent-color, #a855f7), var(--accent-color, #a855f7)) left bottom / 1px 14px no-repeat,
+      linear-gradient(var(--accent-color, #a855f7), var(--accent-color, #a855f7)) right bottom / 14px 1px no-repeat,
+      linear-gradient(var(--accent-color, #a855f7), var(--accent-color, #a855f7)) right bottom / 1px 14px no-repeat;
+    opacity: .48;
+  }
+
+  .cyber-richtext { color: var(--term-text); }
+  .cyber-richtext > div > div { letter-spacing: .025em; }
+  .card-overview-copy > div { line-height: 1.7; letter-spacing: .035em; }
+  .card-overview-copy > div::first-letter { color: var(--term-blue); }
+  .cyber-richtext > div > div:first-child { text-shadow: 0 0 8px color-mix(in srgb, var(--accent-color, #a855f7) 30%, transparent); }
+
+  .animate-selection-pulse { animation: selection-pulse 760ms ease-out; }
+
+  @keyframes selection-pulse {
+    0% { filter: drop-shadow(0 0 0 transparent); }
+    38% { filter: drop-shadow(0 0 22px color-mix(in srgb, var(--accent-color) 75%, transparent)); }
+    100% { filter: drop-shadow(0 10px 16px rgba(0,0,0,.72)); }
+  }
+
   @keyframes holo-socket-pulse {
     0%, 100% { border-color: color-mix(in srgb, var(--accent-color, #a855f7) 14%, transparent); opacity: .72; }
     50% { border-color: color-mix(in srgb, var(--accent-color, #a855f7) 28%, transparent); opacity: 1; }

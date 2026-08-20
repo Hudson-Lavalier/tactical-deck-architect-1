@@ -24,6 +24,7 @@ export default function CardDetail({
   const canChangeDomain = isPlayerTurn && phase === 'main' && !boardDevUsed && actionsPlayed === 0;
   const canPlace = isPlayerTurn && phase === 'main' && !boardDevUsed;
   const canAction = isPlayerTurn && phase === 'main' && actionsPlayed < actionAllowance;
+  const actionClass = 'hud-control accent-border rounded-lg border bg-cosmic-deep/75 px-4 py-2 text-ui-xs font-bold uppercase tracking-[0.14em] backdrop-blur-md transition-all duration-300 ease-out hover:-translate-y-0.5 hover:shadow-[0_0_16px_color-mix(in_srgb,var(--accent-color)_25%,transparent)] active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-40';
 
   let timing = null;
   if (isAction) {
@@ -35,30 +36,31 @@ export default function CardDetail({
 
   return (
     <>
-      <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/90 p-4 font-mono" onClick={onClose}>
-        <div className="glass-panel grid h-[90vh] max-h-[calc(100vh-2rem)] w-full max-w-3xl grid-cols-[auto_1fr] items-center gap-7 p-7 text-center" style={{ borderColor: `${accent}45` }} onClick={(event) => event.stopPropagation()}>
+      <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/90 p-4 font-mono backdrop-blur-sm" onClick={onClose}>
+        <div className="cyber-panel accent-border grid h-[90vh] max-h-[calc(100vh-2rem)] w-full max-w-3xl grid-cols-[auto_1fr] items-center gap-7 rounded-2xl border border-t-white/20 bg-cosmic-deep/85 p-7 text-center backdrop-blur-xl" style={{ '--accent-color': accent }} onClick={(event) => event.stopPropagation()}>
           <button className="justify-self-center" onClick={() => setShowViewer(true)} aria-label={`Open full details for ${card.name}`}>
             <Card card={card} size="inspection" />
           </button>
           <div className="flex h-full min-w-0 w-full flex-col items-center">
-            <div className="text-2xl font-bold leading-tight" style={{ color: accent }}>{card.name || 'UNNAMED CARD'}</div>
-            <div className="mt-1 text-ui-xs font-bold tracking-[0.18em] text-term-faint">{card.category?.replace(/_/g, ' ').toUpperCase()}</div>
-            <div className="my-4 h-px w-full" style={{ background: `${accent}30` }} />
+            <div className="hud-kicker text-ui-xs font-bold uppercase tracking-[0.24em] text-term-faint">{alignment?.name || 'Unaligned'} construct</div>
+            <div className="accent-text-glow mt-2 text-2xl font-bold uppercase leading-tight tracking-[0.06em]" style={{ color: accent }}>{card.name || 'UNNAMED CARD'}</div>
+            <div className="mt-1 text-ui-xs font-bold uppercase tracking-[0.18em] text-term-faint">{card.category?.replace(/_/g, ' ')}</div>
+            <div className="accent-border-soft my-4 h-px w-full border-t" />
             <div className="flex min-h-0 w-full flex-1 items-center justify-center overflow-y-auto whitespace-pre-line px-2 text-ui-sm font-semibold leading-relaxed text-term-text">{card.text || card.description || '[ NO DESCRIPTION ]'}</div>
-            {timing && <div className="mt-4 w-full max-w-md rounded border px-3 py-2 text-ui-xs" style={{ borderColor: `${accent}30`, color: accent }}>RESOLUTION TIMING: {timing}</div>}
+            {timing && <div className="accent-border accent-bg-subtle mt-4 w-full max-w-md rounded-lg border px-3 py-2 text-ui-xs font-bold uppercase tracking-[0.12em]" style={{ color: accent }}>Resolution timing · {timing}</div>}
             <div className="mt-auto flex w-full max-w-md flex-col gap-2">
               {!readOnly && isDomain && twofoldActive && (
                 <>
-                  {canAttachTwofold && <button onClick={() => onAttachTwofold?.(card)} disabled={!canChangeDomain} className="rounded border px-4 py-2 text-ui-xs font-bold disabled:cursor-not-allowed disabled:opacity-40" style={{ borderColor: `${accent}55`, color: accent }}>ATTACH AS {card.alignment === 'A' ? 'LEFT' : 'RIGHT'} FLANK</button>}
-                  <button onClick={() => onChangeDomain?.(card, { replaceTwofold: true })} disabled={!canChangeDomain} className="rounded border px-4 py-2 text-ui-xs font-bold disabled:cursor-not-allowed disabled:opacity-40" style={{ borderColor: '#ff666655', color: '#ff8888' }}>REPLACE DOMAIN</button>
+                  {canAttachTwofold && <button onClick={() => onAttachTwofold?.(card)} disabled={!canChangeDomain} className={actionClass} style={{ color: accent }}>ATTACH AS {card.alignment === 'A' ? 'LEFT' : 'RIGHT'} FLANK</button>}
+                  <button onClick={() => onChangeDomain?.(card, { replaceTwofold: true })} disabled={!canChangeDomain} className="hud-control rounded-lg border border-red-400/35 bg-cosmic-deep/75 px-4 py-2 text-ui-xs font-bold uppercase tracking-[0.14em] text-red-300 backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-40">REPLACE DOMAIN</button>
                 </>
               )}
               {!readOnly && isDomain && !twofoldActive && (
-                <button onClick={() => onChangeDomain?.(card)} disabled={!canChangeDomain} className="rounded border px-4 py-2 text-ui-xs font-bold disabled:cursor-not-allowed disabled:opacity-40" style={{ borderColor: `${accent}55`, color: accent }}>CHANGE DOMAIN</button>
+                <button onClick={() => onChangeDomain?.(card)} disabled={!canChangeDomain} className={actionClass} style={{ color: accent }}>CHANGE DOMAIN</button>
               )}
-              {!readOnly && persistentSlot && <button onClick={() => onPlacePersistent?.(card, persistentSlot)} disabled={!canPlace} className="rounded border px-4 py-2 text-ui-xs font-bold disabled:cursor-not-allowed disabled:opacity-40" style={{ borderColor: `${accent}55`, color: accent }}>PLACE IN SLOT</button>}
-              {!readOnly && isAction && <button onClick={() => onPlayAction?.(card)} disabled={!canAction} className="rounded border px-4 py-2 text-ui-xs font-bold disabled:cursor-not-allowed disabled:opacity-40" style={{ borderColor: `${accent}55`, color: accent }}>PLAY TO QUEUE ({actionsPlayed}/{actionAllowance})</button>}
-              <button onClick={onClose} className="rounded border border-term-border px-4 py-2 text-ui-xs font-bold text-term-faint">CLOSE</button>
+              {!readOnly && persistentSlot && <button onClick={() => onPlacePersistent?.(card, persistentSlot)} disabled={!canPlace} className={actionClass} style={{ color: accent }}>PLACE IN SLOT</button>}
+              {!readOnly && isAction && <button onClick={() => onPlayAction?.(card)} disabled={!canAction} className={actionClass} style={{ color: accent }}>PLAY TO QUEUE ({actionsPlayed}/{actionAllowance})</button>}
+              <button onClick={onClose} className="hud-control rounded-lg border border-white/10 bg-cosmic-deep/70 px-4 py-2 text-ui-xs font-bold uppercase tracking-[0.16em] text-term-faint transition-all duration-300 hover:-translate-y-0.5 hover:text-term-text">Close</button>
             </div>
           </div>
         </div>

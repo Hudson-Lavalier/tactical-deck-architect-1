@@ -57,19 +57,19 @@ export default function ItemViewer({ card, onClose }) {
   const accent = alignment?.glow || '#a855f7';
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/90 p-5 font-mono" onClick={onClose}>
-      <div ref={cardRef} onClick={(event) => event.stopPropagation()} className="relative flex h-[min(78vh,720px)] w-[min(68vw,620px)] flex-col overflow-hidden rounded-xl border bg-cosmic-deep p-8" style={{ borderColor: `${accent}55`, boxShadow: `0 0 36px ${accent}20`, transformStyle: 'preserve-3d' }}>
-        <div className="flex items-start justify-between border-b pb-4" style={{ borderColor: `${accent}25` }}>
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/90 p-5 font-mono backdrop-blur-sm" onClick={onClose}>
+      <div ref={cardRef} onClick={(event) => event.stopPropagation()} className="holo-frame cyber-panel accent-border relative flex h-[min(78vh,720px)] w-[min(68vw,620px)] flex-col overflow-hidden rounded-2xl border border-t-white/20 bg-cosmic-deep/90 p-8 backdrop-blur-xl" style={{ '--accent-color': accent, transformStyle: 'preserve-3d' }}>
+        <div className="accent-border-soft flex items-start justify-between border-b pb-4">
           <div>
-            <div className="text-2xl font-bold leading-tight" style={{ color: accent }}>{card.name || 'UNNAMED'}</div>
-            {alignment && <div className="mt-1 text-ui-sm font-bold" style={{ color: accent }}>{alignment.name}</div>}
+            {alignment && <div className="hud-kicker text-ui-xs font-bold uppercase tracking-[0.22em] text-term-faint">{alignment.name} construct</div>}
+            <div className="accent-text-glow mt-2 text-2xl font-bold uppercase leading-tight tracking-[0.06em]" style={{ color: accent }}>{card.name || 'UNNAMED'}</div>
           </div>
-          <div className="text-right text-ui-xs font-bold text-term-faint">{card.category?.replace(/_/g, ' ').toUpperCase()}</div>
+          <div className="pr-12 text-right text-ui-xs font-bold uppercase tracking-[0.14em] text-term-faint">{card.category?.replace(/_/g, ' ')}</div>
         </div>
-        <div className="min-h-0 flex-1 overflow-y-auto py-6 pr-2">
-          {card.text ? <RichText text={card.text} alignment={card.alignment} /> : <div className="text-ui-md italic text-term-faint">[ NO TEXT DEFINED ]</div>}
+        <div className="cyber-richtext min-h-0 flex-1 overflow-y-auto py-6 pr-2">
+          {card.text ? <RichText text={card.text} alignment={card.alignment} className="text-[15px]" /> : <div className="text-ui-md italic text-term-faint">[ NO TEXT DEFINED ]</div>}
         </div>
-        <button onClick={onClose} className="absolute right-4 top-4 text-ui-sm font-bold text-term-faint hover:text-term-text">✕</button>
+        <button onClick={onClose} className="hud-control absolute right-4 top-4 flex aspect-square w-8 items-center justify-center rounded-lg border border-white/10 bg-cosmic-deep/80 text-ui-sm font-bold text-term-faint transition-all hover:-translate-y-0.5 hover:text-term-text">✕</button>
       </div>
     </div>
   );

@@ -12,18 +12,13 @@ export default function ParadigmCarouselCard({ paradigm, isCenter, isSelected, o
   return (
     <div
       onClick={isCenter ? onClick : undefined}
-      className={`w-full h-full p-5 rounded glass-card cosmic-sheen flex flex-col transition-all duration-300 relative overflow-hidden ${
-        isCenter ? 'cursor-pointer' : ''
-      }`}
-      style={{
-        borderColor: isSelected ? `${accent}60` : isCenter ? `${accent}25` : 'rgba(168,85,247,0.12)',
-        boxShadow: isSelected ? `0 0 28px ${accent}30, inset 0 1px 0 rgba(255,255,255,0.04)` : 'inset 0 1px 0 rgba(255,255,255,0.03)',
-      }}
+      className={`game-card-premium holo-frame accent-border relative flex h-full w-full flex-col overflow-hidden rounded-2xl border border-t-white/20 bg-cosmic-deep/85 p-5 backdrop-blur-xl transition-all duration-300 ${isCenter ? 'cursor-pointer' : ''} ${isSelected ? 'animate-selection-pulse' : ''}`}
+      style={{ '--accent-color': accent }}
     >
       {/* Header */}
       <div className="flex justify-between items-start mb-2 relative">
         <div>
-          <div className="font-bold text-ui-lg leading-tight" style={{ color: accent, textShadow: `0 0 10px ${accent}40` }}>
+          <div className="accent-text-glow text-ui-lg font-bold uppercase leading-tight tracking-[0.05em]" style={{ color: accent }}>
             {paradigm.name}
           </div>
           <div className="text-term-faint text-ui-sm mt-0.5">{paradigm.category}</div>
@@ -36,7 +31,7 @@ export default function ParadigmCarouselCard({ paradigm, isCenter, isSelected, o
         )}
       </div>
 
-      <div className="mb-2 pb-2 border-b relative" style={{ borderColor: `${accent}20` }}>
+      <div className="accent-border-soft relative mb-2 border-b pb-2">
         <span className="font-bold text-ui-md" style={{ color: accent }}>{alignmentInfo.name}</span>
       </div>
 

@@ -462,33 +462,23 @@ export default function GameBoard() {
           />
         </div>
 
+        {/* player actions — independently layered above the points HUD */}
+        {phase === 'main' && isPlayerTurn && !inResponseWindow && (
+          <div style={{ gridArea: 'player-points', alignSelf: 'start', transform: 'translateY(calc(-100% - 0.4rem))' }} className="pointer-events-none z-30 flex w-full items-center justify-between px-3">
+            <button onClick={() => setShowHandView(true)} className="hud-control pointer-events-auto rounded-lg border border-t-white/20 border-term-blue/40 bg-cosmic-deep/80 px-4 py-2 text-ui-sm font-bold tracking-[0.16em] text-term-blue backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_0_18px_rgba(0,255,255,0.24)] active:translate-y-0">HAND VIEW</button>
+            <button onClick={handleEndTurn} className="hud-control pointer-events-auto rounded-lg border border-t-white/20 border-term-green/40 bg-cosmic-deep/80 px-4 py-2 text-ui-sm font-bold tracking-[0.16em] text-term-green backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_0_18px_rgba(0,255,65,0.24)] active:translate-y-0">END TURN</button>
+          </div>
+        )}
+
         {/* player-points */}
         <div
           style={{
             gridArea: 'player-points',
             borderColor: isPlayerTurn && !inResponseWindow ? 'rgba(0,255,65,0.3)' : 'rgba(168,85,247,0.12)',
           }}
-          className="px-3 py-1.5 rounded-lg glass-card cosmic-sheen flex items-center justify-center relative transition-[box-shadow,border-color]"
+          className="relative flex items-center justify-center rounded-lg px-3 py-1.5 glass-card cosmic-sheen transition-[box-shadow,border-color]"
         >
           <PointsBar player={player} handCount={player.hand.length + player.rhetoricHand.length} />
-          {phase === 'main' && isPlayerTurn && !inResponseWindow && (
-            <>
-              <button
-                onClick={() => setShowHandView(true)}
-                className="absolute left-3 top-1/2 -translate-y-1/2 px-4 py-2 rounded text-ui-md font-bold glass-card cosmic-sheen transition-[transform,box-shadow] hover:scale-105"
-                style={{ borderColor: '#00ffff40', color: '#00ffff' }}
-              >
-                HAND VIEW
-              </button>
-              <button
-                onClick={handleEndTurn}
-                className="absolute right-3 top-1/2 -translate-y-1/2 px-4 py-2 rounded text-ui-md font-bold glass-card cosmic-sheen transition-[transform,box-shadow] hover:scale-105"
-                style={{ borderColor: '#00ff4140', color: '#00ff41' }}
-              >
-                END TURN
-              </button>
-            </>
-          )}
         </div>
       </BoardSurface>
 

@@ -6,9 +6,7 @@ export default function FamilyCarouselCard({ family, paradigms, selectedParadigm
   const selected = selectedParadigmId ? paradigms.find((p) => p.id === selectedParadigmId) : null;
 
   return (
-    <div className="w-full h-full p-5 rounded glass-card cosmic-sheen flex flex-col relative overflow-hidden"
-      style={{ borderColor: isCenter ? 'rgba(0,255,255,0.25)' : 'rgba(168,85,247,0.12)' }}
-    >
+    <div className="game-card-premium holo-frame relative flex h-full w-full flex-col overflow-hidden rounded-2xl border border-t-white/20 bg-cosmic-deep/85 p-5 backdrop-blur-xl" style={{ '--accent-color': isCenter ? '#00ffff' : '#a855f7' }}>
       <div className="text-term-blue font-bold text-ui-lg text-center tracking-[0.15em] mb-4 relative"
         style={{ textShadow: '0 0 12px rgba(0,255,255,0.3)' }}
       >
@@ -24,8 +22,8 @@ export default function FamilyCarouselCard({ family, paradigms, selectedParadigm
           </div>
         </div>
       ) : (
-        <div className="mb-4 p-3 border border-dashed border-term-purple/20 rounded text-center">
-          <span className="text-term-faint text-ui-sm">— NONE SELECTED —</span>
+        <div className="holo-slot mb-4 rounded-lg p-3 text-center" style={{ '--accent-color': '#a855f7' }}>
+          <span className="holo-slot-core text-ui-sm font-bold uppercase tracking-[0.14em]">None selected</span>
         </div>
       )}
 

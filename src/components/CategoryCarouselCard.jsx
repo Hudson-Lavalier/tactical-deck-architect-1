@@ -4,7 +4,7 @@ import React from 'react';
 // Shows the category name, system, role, and mechanics.
 export default function CategoryCarouselCard({ category, cardCount, isCenter }) {
   return (
-    <div className="w-full h-full p-5 border-2 border-term-border rounded bg-term-card flex flex-col">
+    <div className="game-card-premium holo-frame relative flex h-full w-full flex-col overflow-hidden rounded-2xl border border-t-white/20 bg-cosmic-deep/85 p-5 backdrop-blur-xl" style={{ '--accent-color': isCenter ? '#a855f7' : '#888888' }}>
       {/* System badge */}
       <div className="flex justify-between items-start mb-3">
         <span className="text-term-faint text-ui-xs font-bold tracking-wider">
@@ -14,7 +14,7 @@ export default function CategoryCarouselCard({ category, cardCount, isCenter }) 
       </div>
 
       {/* Category name */}
-      <div className="text-term-purple font-bold text-ui-lg mb-2 tracking-wide">
+      <div className="accent-text-glow mb-2 text-ui-lg font-bold uppercase tracking-[0.08em] text-term-purple">
         {category.name}
       </div>
 

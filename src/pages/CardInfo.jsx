@@ -11,20 +11,21 @@ import Carousel3D from '@/components/Carousel3D';
 import RichText from '@/components/RichText';
 import { ALIGNMENT_COLORS } from '@/components/game/terminalTheme';
 
-// Card Info — large carousel with viewport-capped card sizing.
 export default function CardInfo() {
   const navigate = useNavigate();
   const [activeCategoryId, setActiveCategoryId] = useState(null);
-
   const categories = Object.values(CARD_CATEGORIES);
-  const activeCategory = categories.find((c) => c.id === activeCategoryId) || categories[0];
+  const activeCategory = categories.find((category) => category.id === activeCategoryId) || categories[0];
   const cards = ALL_CARDS[activeCategory?.id] || [];
   const overview = CARD_OVERVIEWS[activeCategory?.id];
+  const alignmentCounts = cards.reduce((counts, card) => {
+    if (card.alignment) counts[card.alignment] = (counts[card.alignment] || 0) + 1;
+    return counts;
+  }, {});
+  const [dims, setDims] = useState(() => computeDims());
 
   const handleTabClick = useCallback((id) => setActiveCategoryId(id), []);
 
-  // Viewport-capped card dimensions so the full card always fits on screen.
-  const [dims, setDims] = useState(() => computeDims());
   useEffect(() => {
     const onResize = () => setDims(computeDims());
     window.addEventListener('resize', onResize);
@@ -32,78 +33,65 @@ export default function CardInfo() {
   }, []);
 
   return (
-    <div className="min-h-screen cosmic-shell text-term-text font-mono p-4 md:p-6 flex flex-col relative overflow-hidden">
+    <div className="cosmic-shell relative flex min-h-screen flex-col overflow-x-hidden p-4 font-mono text-term-text md:p-6">
       <CosmicBackground density={60} />
-
-      <div className="relative z-10 flex flex-col flex-1">
-        {/* Header */}
-        <div className="flex items-center gap-3 mb-4">
-          <button onClick={() => navigate('/')} className="text-term-dim hover:text-term-green transition-colors">
-            <ArrowLeft className="w-6 h-6" />
+      <div className="relative z-10 flex flex-1 flex-col">
+        <div className="mb-4 flex items-center gap-3">
+          <button onClick={() => navigate('/')} className="hud-control rounded-lg p-1 text-term-dim transition-all hover:-translate-y-0.5 hover:text-term-green">
+            <ArrowLeft className="h-6 w-6" />
           </button>
-          <h1
-            className="text-ui-xl text-term-blue font-bold tracking-[0.2em]"
-            style={{ textShadow: '0 0 16px rgba(0,255,255,0.4)' }}
-          >
-            CARD INFO
-          </h1>
+          <h1 className="text-ui-xl font-bold uppercase tracking-[0.2em] text-term-blue drop-shadow-[0_0_8px_rgba(0,255,255,0.45)]">Card Info</h1>
         </div>
 
-        {/* Category tabs — compact glass pill bar */}
-        <div className="flex flex-wrap justify-center gap-2 mb-4">
-          {categories.map((cat) => {
-            const count = (ALL_CARDS[cat.id] || []).length;
-            const isActive = cat.id === activeCategory.id;
+        <div className="cyber-panel mb-4 flex flex-wrap justify-center gap-2 rounded-2xl border border-white/10 border-t-white/20 bg-cosmic-deep/75 p-2 backdrop-blur-xl">
+          {categories.map((category) => {
+            const count = (ALL_CARDS[category.id] || []).length;
+            const isActive = category.id === activeCategory.id;
             return (
               <button
-                key={cat.id}
-                onClick={() => handleTabClick(cat.id)}
-                className={`px-4 py-2 rounded text-ui-sm font-bold tracking-[0.1em] transition-all ${
-                  isActive
-                    ? 'text-term-blue bg-term-blue/10 border border-term-blue/40'
-                    : 'text-term-faint border border-transparent hover:text-term-dim glass-card'
-                }`}
+                key={category.id}
+                onClick={() => handleTabClick(category.id)}
+                className={`hud-control relative rounded-lg border-t border-t-white/10 px-4 py-2 text-ui-sm font-bold uppercase tracking-[0.12em] backdrop-blur-md transition-all duration-300 ${isActive ? 'border border-term-blue/40 bg-term-blue/10 text-term-blue shadow-[inset_0_-2px_0_rgba(0,255,255,0.8),0_0_14px_rgba(0,255,255,0.12)]' : 'border border-transparent text-term-faint glass-card hover:-translate-y-0.5 hover:text-term-text'}`}
               >
-                {cat.name.toUpperCase()}
-                <span className="ml-1.5 text-ui-xs opacity-60">[{count}]</span>
+                {category.name}<span className="ml-1.5 text-ui-xs opacity-70">[{count}]</span>
               </button>
             );
           })}
         </div>
 
-        {/* Active category label */}
-        <div className="text-term-faint text-ui-sm tracking-[0.15em] mb-3 font-bold text-center">
-          ── {activeCategory.name.toUpperCase()} — {activeCategory.system.toUpperCase()} SYSTEM ──
+        <div className="hud-kicker mb-3 text-center text-ui-sm font-bold uppercase tracking-[0.2em] text-term-faint">
+          {activeCategory.name} · {activeCategory.system} system
         </div>
 
-        {/* Category overview / summary (verbatim from the card-type document) */}
         {overview && (
-          <div className="mb-3 glass-card cosmic-sheen p-3 max-h-[160px] overflow-y-auto">
-            <div className="text-term-faint text-ui-xs tracking-[0.15em] mb-2 font-bold">── OVERVIEW ──</div>
-            <RichText text={overview} />
+          <div className="cyber-panel mb-4 grid gap-5 rounded-2xl border border-white/10 border-t-white/20 bg-cosmic-deep/80 p-4 backdrop-blur-xl lg:grid-cols-[minmax(0,1fr)_auto] lg:p-5">
+            <div className="min-w-0">
+              <div className="mb-3 text-ui-xs font-bold uppercase tracking-[0.22em] text-term-blue">Category overview</div>
+              <RichText text={overview} className="card-overview-copy" />
+            </div>
+            <div className="grid grid-cols-2 gap-2 self-start sm:grid-cols-4 lg:grid-cols-2">
+              <MetaTag label="Cards" value={cards.length} color="#00ffff" />
+              <MetaTag label="System" value={activeCategory.system} color="#a855f7" />
+              {Object.entries(ALIGNMENT_COLORS).map(([key, info]) => (
+                <MetaTag key={key} label={info.name} value={alignmentCounts[key] || 0} color={info.glow} />
+              ))}
+            </div>
           </div>
         )}
 
-        {/* Cards carousel OR empty state */}
         {cards.length === 0 ? (
-          <div className="flex-1 flex items-center justify-center">
-            <GlassPanel className="p-12 text-center max-w-xl">
-              <div className="text-term-faint text-ui-lg italic mb-3">
-                [ AWAITING USER DEFINITION — NO CARDS INVENTED ]
-              </div>
-              <div className="text-term-dim text-ui-md">
-                Cards will appear here as they are defined per the master doc.
-              </div>
+          <div className="flex flex-1 items-center justify-center">
+            <GlassPanel className="cyber-panel max-w-xl border-t border-t-white/20 p-12 text-center backdrop-blur-xl">
+              <div className="mb-3 text-ui-lg italic text-term-faint">Awaiting card definitions</div>
+              <div className="text-ui-md text-term-dim">Cards will appear here as they are defined.</div>
             </GlassPanel>
           </div>
         ) : (
-          <div className="flex-1 flex items-center">
+          <div className="flex min-h-[28rem] flex-1 items-center overflow-visible py-2">
             <Carousel3D
               key={activeCategory.id}
               items={cards}
-              renderItem={(card, isCenter) => (
-                <CardCarouselCard card={card} isCenter={isCenter} />
-              )}
+              renderItem={(card, isCenter) => <CardCarouselCard card={card} isCenter={isCenter} />}
               itemWidth={dims.cardW}
               itemHeight={dims.cardH}
             />
@@ -114,65 +102,40 @@ export default function CardInfo() {
   );
 }
 
-function computeDims() {
-  const vh = typeof window !== 'undefined' ? window.innerHeight : 900;
-  const vw = typeof window !== 'undefined' ? window.innerWidth : 1200;
-  // Cap card to ~55% viewport height; constrain width so 3 cards always fit.
-  const cardH = Math.min(Math.round(vh * 0.55), 560);
-  const cardW = Math.min(Math.round(cardH * 0.72), Math.round((vw - 120) / 3));
-  return { cardW: Math.max(280, cardW), cardH: Math.max(320, cardH) };
+function MetaTag({ label, value, color }) {
+  return (
+    <div className="holo-frame relative min-w-28 rounded-lg border border-white/10 bg-cosmic-deep/60 px-3 py-2" style={{ '--accent-color': color }}>
+      <div className="text-[9px] font-bold uppercase tracking-[0.18em] text-term-faint">{label}</div>
+      <div className="mt-1 max-w-36 truncate text-ui-sm font-bold uppercase" style={{ color }}>{value}</div>
+    </div>
+  );
 }
 
-// Card carousel item — glass frame with alignment-tinted depth.
 function CardCarouselCard({ card, isCenter }) {
   const alignmentInfo = card.alignment ? ALIGNMENT_COLORS[card.alignment] : null;
   const accent = alignmentInfo?.glow || '#a855f7';
-
   return (
-    <div
-      className="w-full h-full p-5 rounded glass-card cosmic-sheen flex flex-col relative overflow-hidden"
-      style={{
-        borderColor: `${accent}30`,
-        boxShadow: isCenter ? `0 0 28px ${accent}1a, inset 0 1px 0 rgba(255,255,255,0.04)` : 'inset 0 1px 0 rgba(255,255,255,0.03)',
-      }}
-    >
-      {/* Header */}
-      <div className="flex justify-between items-start mb-2 relative">
-        <div>
-          <div className="font-bold text-ui-lg leading-tight" style={{ color: accent, textShadow: `0 0 10px ${accent}40` }}>
-            {card.name || 'UNNAMED'}
-          </div>
-          {alignmentInfo && (
-            <div className="text-ui-sm font-bold mt-0.5" style={{ color: accent }}>
-              {alignmentInfo.name}
-            </div>
-          )}
-        </div>
-        {card.subcategory && (
-          <div className="text-term-faint text-ui-xs text-right shrink-0">
-            {card.subcategory}
-          </div>
-        )}
+    <div className={`game-card-premium holo-frame relative flex h-full w-full flex-col overflow-hidden rounded-2xl border border-t-white/20 bg-cosmic-deep/90 p-4 backdrop-blur-xl transition-all duration-500 ${isCenter ? 'opacity-100' : 'opacity-70'}`} style={{ '--accent-color': accent }}>
+      <div className="flex min-w-0 items-start justify-between gap-2">
+        <span className="accent-border accent-bg-subtle max-w-[65%] truncate rounded-md border px-2 py-1 text-ui-xs font-bold uppercase tracking-[0.14em]" style={{ color: accent }}>{alignmentInfo?.name || 'Unaligned'}</span>
+        <span className="max-w-[35%] truncate text-right text-[10px] font-bold uppercase tracking-[0.12em] text-term-faint">{card.subcategory || card.category?.replace(/_/g, ' ')}</span>
       </div>
-
-      {/* Divider */}
-      <div className="border-t my-2 relative" style={{ borderColor: `${accent}20` }} />
-
-      {/* Card text — scrollable, hidden scrollbar */}
-      <div className="flex-1 overflow-y-auto pr-1 min-h-0 relative">
-        {card.text ? (
-          <RichText text={card.text} alignment={card.alignment} />
-        ) : (
-          <div className="text-term-faint text-ui-md italic">[ NO TEXT DEFINED ]</div>
-        )}
+      <div className="game-card-concept relative my-3 flex min-h-24 items-center justify-center overflow-hidden rounded-xl border border-white/10 bg-cosmic-deep/80 px-3 py-4 text-center">
+        <div className="game-card-grid pointer-events-none absolute inset-0 opacity-40" />
+        <div className="accent-text-glow relative z-10 text-ui-lg font-bold uppercase leading-tight tracking-[0.06em]" style={{ color: accent }}>{card.name || 'UNNAMED'}</div>
       </div>
-
-      {/* Category footer */}
-      {card.category && (
-        <div className="text-term-faint text-ui-xs mt-2 pt-2 border-t relative" style={{ borderColor: `${accent}15` }}>
-          {card.category.replace(/_/g, ' ').toUpperCase()}
-        </div>
-      )}
+      <div className="cyber-richtext min-h-0 flex-1 overflow-y-auto rounded-xl border border-white/10 bg-cosmic-deep/55 p-3 pr-2">
+        {card.text ? <RichText text={card.text} alignment={card.alignment} /> : <div className="text-ui-md italic text-term-faint">No text defined</div>}
+      </div>
+      {card.category && <div className="holo-slot-core mt-3 truncate border-t border-white/10 pt-2 text-ui-xs font-bold uppercase tracking-[0.16em]">{card.category.replace(/_/g, ' ')}</div>}
     </div>
   );
+}
+
+function computeDims() {
+  const vh = typeof window !== 'undefined' ? window.innerHeight : 900;
+  const vw = typeof window !== 'undefined' ? window.innerWidth : 1200;
+  const cardH = Math.min(Math.round(vh * 0.55), 560);
+  const cardW = Math.min(Math.round(cardH * 0.72), Math.round((vw - 120) / 3));
+  return { cardW: Math.max(280, cardW), cardH: Math.max(320, cardH) };
 }

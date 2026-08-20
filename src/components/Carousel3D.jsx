@@ -1,12 +1,7 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-// Carousel3D — 2D slide carousel.
-// Shows the centered card plus its two immediate neighbors (faint); all other
-// items are hidden. A single track translateX animates the slide for smooth,
-// consistent motion — no per-item layout transitions, no 3D perspective clipping.
-// Navigation: prev/next buttons, drag, or click a visible side item.
-// itemWidth/itemHeight accept numbers (px) for viewport-capped sizing.
+// Carousel3D — draggable cylindrical stage with inertial, eased Y-axis rotation.
 export default function Carousel3D({
   items,
   renderItem,
@@ -16,111 +11,121 @@ export default function Carousel3D({
   itemHeight = 300,
 }) {
   const [centerIndex, setCenterIndex] = useState(0);
-  const dragStartX = useRef(null);
-
+  const stageRef = useRef(null);
+  const motionRef = useRef({ current: 0, target: 0, velocity: 0, dragging: false, moved: false, lastX: 0 });
+  const frameRef = useRef(0);
   const n = items.length;
   const wNum = typeof itemWidth === 'number' ? itemWidth : 220;
   const hNum = typeof itemHeight === 'number' ? itemHeight : 300;
+  const angleStep = n ? 360 / n : 0;
+  const radius = n > 1 ? Math.min(wNum * 2.2, Math.max(wNum * 0.75, (wNum / 2) / Math.tan(Math.PI / n))) : 0;
 
-  const goTo = useCallback(
-    (index) => {
-      const clamped = Math.max(0, Math.min(n - 1, index));
-      setCenterIndex(clamped);
-    },
-    [n]
-  );
+  const normalize = useCallback((index) => ((index % n) + n) % n, [n]);
+
+  const goTo = useCallback((index) => {
+    if (!n) return;
+    const wrapped = normalize(index);
+    const desired = -wrapped * angleStep;
+    const nearestTurn = Math.round((motionRef.current.current - desired) / 360);
+    motionRef.current.target = desired + nearestTurn * 360;
+    motionRef.current.velocity = 0;
+    setCenterIndex(wrapped);
+  }, [angleStep, n, normalize]);
+
+  useEffect(() => {
+    const tick = () => {
+      const motion = motionRef.current;
+      motion.current += (motion.target - motion.current) * 0.12;
+      if (stageRef.current) stageRef.current.style.transform = `rotateY(${motion.current}deg)`;
+      frameRef.current = requestAnimationFrame(tick);
+    };
+    frameRef.current = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frameRef.current);
+  }, []);
+
+  useEffect(() => {
+    motionRef.current.current = 0;
+    motionRef.current.target = 0;
+    setCenterIndex(0);
+  }, [n]);
 
   useEffect(() => {
     if (onCenterChange && n > 0) onCenterChange(items[centerIndex], centerIndex);
-  }, [centerIndex]); // eslint-disable-line
+  }, [centerIndex, items, n, onCenterChange]);
 
-  const handlePrev = () => goTo(centerIndex - 1);
-  const handleNext = () => goTo(centerIndex + 1);
-
-  const handleDragStart = (e) => {
-    dragStartX.current = e.clientX ?? e.touches?.[0]?.clientX ?? null;
+  const handlePointerDown = (event) => {
+    const motion = motionRef.current;
+    motion.dragging = true;
+    motion.moved = false;
+    motion.lastX = event.clientX;
+    motion.velocity = 0;
+    event.currentTarget.setPointerCapture?.(event.pointerId);
   };
-  const handleDragEnd = (e) => {
-    if (dragStartX.current === null) return;
-    const endX = e.clientX ?? e.changedTouches?.[0]?.clientX ?? dragStartX.current;
-    const diff = endX - dragStartX.current;
-    if (Math.abs(diff) > 40) {
-      if (diff > 0) handlePrev();
-      else handleNext();
+
+  const handlePointerMove = (event) => {
+    const motion = motionRef.current;
+    if (!motion.dragging) return;
+    const delta = event.clientX - motion.lastX;
+    if (Math.abs(delta) > 2) motion.moved = true;
+    motion.lastX = event.clientX;
+    motion.velocity = delta * 0.22;
+    motion.target += delta * 0.22;
+  };
+
+  const handlePointerUp = (event) => {
+    const motion = motionRef.current;
+    if (!motion.dragging) return;
+    motion.dragging = false;
+    event.currentTarget.releasePointerCapture?.(event.pointerId);
+    if (n === 1) {
+      motion.target = 0;
+      setCenterIndex(0);
+      return;
     }
-    dragStartX.current = null;
+    const rawIndex = Math.round(-(motion.target + motion.velocity * 5) / angleStep);
+    motion.target = -rawIndex * angleStep;
+    motion.velocity = 0;
+    setCenterIndex(normalize(rawIndex));
   };
 
-  if (n === 0) return null;
-
-  const containerHeight = `${hNum + 80}px`;
+  if (!n) return null;
 
   return (
-    <div className="relative w-full flex flex-col items-center select-none">
+    <div className="relative flex w-full select-none flex-col items-center overflow-visible">
       <div
-        className="relative w-full overflow-hidden cursor-grab active:cursor-grabbing"
-        style={{ height: containerHeight }}
-        onMouseDown={handleDragStart}
-        onMouseUp={handleDragEnd}
-        onMouseLeave={handleDragEnd}
-        onTouchStart={handleDragStart}
-        onTouchEnd={handleDragEnd}
+        className="relative w-full cursor-grab overflow-visible active:cursor-grabbing"
+        style={{ height: `${hNum + 92}px`, perspective: '1200px', touchAction: 'none' }}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerUp}
       >
-        <div
-          className="absolute top-0 left-1/2"
-          style={{
-            display: 'flex',
-            transform: `translateX(-${centerIndex * wNum + wNum / 2}px)`,
-            transition: 'transform 0.5s cubic-bezier(0.22, 1, 0.36, 1)',
-          }}
-        >
-          {items.map((item, i) => {
-            const offset = Math.abs(i - centerIndex);
-            const visible = offset <= 1;
-            const isCenter = i === centerIndex;
+        <div ref={stageRef} className="absolute left-1/2 top-4" style={{ width: `${wNum}px`, height: `${hNum}px`, marginLeft: `${-wNum / 2}px`, transformStyle: 'preserve-3d' }}>
+          {items.map((item, index) => {
+            const isCenter = index === centerIndex;
             return (
-              <div
-                key={item.id || i}
-                style={{
-                  width: `${wNum}px`,
-                  height: `${hNum}px`,
-                  flexShrink: 0,
-                  opacity: visible ? (isCenter ? 1 : 0.4) : 0,
-                  pointerEvents: visible ? 'auto' : 'none',
-                  transition: 'opacity 0.5s ease',
-                  cursor: 'pointer',
-                }}
-                onClick={() => {
-                  if (isCenter && onItemClick) onItemClick(item, i);
-                  else goTo(i);
-                }}
-              >
-                {renderItem(item, isCenter)}
+              <div key={item.id || index} className="absolute inset-0" style={{ transform: `rotateY(${index * angleStep}deg) translateZ(${radius}px)`, transformStyle: 'preserve-3d' }}>
+                <div
+                  className="h-full w-full transition-[opacity,transform,filter] duration-500 ease-out"
+                  style={{ opacity: isCenter ? 1 : 0.5, transform: isCenter ? 'translateZ(24px) scale(1.03)' : 'scale(0.82)', filter: isCenter ? 'none' : 'saturate(0.65) brightness(0.7)', cursor: 'pointer', backfaceVisibility: 'hidden' }}
+                  onClick={() => {
+                    if (motionRef.current.moved) return;
+                    if (isCenter) onItemClick?.(item, index);
+                    else goTo(index);
+                  }}
+                >
+                  {renderItem(item, isCenter)}
+                </div>
               </div>
             );
           })}
         </div>
       </div>
 
-      {/* Navigation */}
-      <div className="flex items-center gap-8 mt-1">
-        <button
-          onClick={handlePrev}
-          disabled={centerIndex === 0}
-          className="text-term-dim hover:text-term-green transition-colors disabled:opacity-30 disabled:hover:text-term-dim"
-        >
-          <ChevronLeft className="w-8 h-8" />
-        </button>
-        <div className="text-term-faint text-ui-sm tracking-wider font-mono">
-          {centerIndex + 1} / {n}
-        </div>
-        <button
-          onClick={handleNext}
-          disabled={centerIndex === n - 1}
-          className="text-term-dim hover:text-term-green transition-colors disabled:opacity-30 disabled:hover:text-term-dim"
-        >
-          <ChevronRight className="w-8 h-8" />
-        </button>
+      <div className="mt-1 flex items-center gap-8">
+        <button onClick={() => goTo(centerIndex - 1)} className="hud-control rounded-lg p-1 text-term-dim transition-all hover:-translate-y-0.5 hover:text-term-green"><ChevronLeft className="h-8 w-8" /></button>
+        <div className="font-mono text-ui-sm tracking-[0.18em] text-term-faint">{centerIndex + 1} / {n}</div>
+        <button onClick={() => goTo(centerIndex + 1)} className="hud-control rounded-lg p-1 text-term-dim transition-all hover:-translate-y-0.5 hover:text-term-green"><ChevronRight className="h-8 w-8" /></button>
       </div>
     </div>
   );

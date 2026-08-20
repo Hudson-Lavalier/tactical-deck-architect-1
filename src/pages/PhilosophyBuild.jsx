@@ -96,7 +96,7 @@ export default function PhilosophyBuild() {
         {/* Family Carousel */}
         <div className="mb-8">
           <div className="text-term-faint text-ui-sm tracking-[0.15em] mb-3 font-bold text-center">
-            ── PARADIGM FAMILIES ──
+            PARADIGM FAMILIES
           </div>
           <Carousel3D
             items={families}
