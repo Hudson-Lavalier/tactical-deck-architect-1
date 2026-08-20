@@ -13,15 +13,24 @@ import Carousel3D from '@/components/Carousel3D';
 import FamilyCarouselCard from '@/components/FamilyCarouselCard';
 import ParadigmCarouselCard from '@/components/ParadigmCarouselCard';
 import BuildInfoPanel from '@/components/BuildInfoPanel';
+import ItemViewer from '@/components/game/ItemViewer';
 import { saveBuild, updateBuild, getBuildById } from '@/lib/buildStorage';
 
-// Philosophy Build — drill-down carousel, one-paradigm-per-family.
+function getOverlayColor(family) {
+  const key = (family?.id || family?.name || '').toLowerCase();
+  if (key.includes('knowledge') || key.includes('epistemology')) return '#00ffff';
+  if (key.includes('structure') || key.includes('justification')) return '#00ff41';
+  if (key.includes('orientation') || key.includes('inquiry')) return '#a855f7';
+  return '#00ffff';
+}
+
 export default function PhilosophyBuild() {
   const navigate = useNavigate();
   const [selection, setSelection] = useState({});
   const [buildName, setBuildName] = useState('');
   const [editId, setEditId] = useState(null);
   const [activeFamilyId, setActiveFamilyId] = useState(null);
+  const [inspectingParadigm, setInspectingParadigm] = useState(null);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -47,6 +56,7 @@ export default function PhilosophyBuild() {
 
   const handleParadigmClick = useCallback((paradigm) => {
     setSelection((prev) => ({ ...prev, [paradigm.family]: paradigm.id }));
+    setInspectingParadigm(paradigm);
   }, []);
 
   const handleConfirm = useCallback(() => {
@@ -60,13 +70,14 @@ export default function PhilosophyBuild() {
     navigate('/profile');
   }, [selection, buildName, editId, navigate, allSelected, families]);
 
-  // Viewport-capped carousel sizing
   const [dims, setDims] = useState(() => computeDims());
   useEffect(() => {
     const onResize = () => setDims(computeDims());
     window.addEventListener('resize', onResize);
     return () => window.removeEventListener('resize', onResize);
   }, []);
+
+  const overlayColor = activeFamily ? getOverlayColor(activeFamily) : '#00ffff';
 
   return (
     <div className="min-h-screen cosmic-shell text-term-text font-mono p-4 md:p-8 relative overflow-hidden">
@@ -129,17 +140,20 @@ export default function PhilosophyBuild() {
         <div className="fixed inset-0 cosmic-shell z-50 flex flex-col overflow-hidden">
           <CosmicBackground density={70} />
 
-          {/* Family name — top center */}
+          {/* Family name header dynamically matched to domain theme */}
           <div className="relative z-10 pt-6 md:pt-8 text-center">
             <h2
-              className="text-ui-xl text-term-blue font-bold tracking-[0.2em]"
-              style={{ textShadow: '0 0 16px rgba(0,255,255,0.4)' }}
+              className="text-ui-xl font-bold tracking-[0.2em]"
+              style={{
+                color: overlayColor,
+                textShadow: `0 0 18px ${overlayColor}60`,
+              }}
             >
               {activeFamily.name.toUpperCase()}
             </h2>
           </div>
 
-          {/* Back to Families — left, vertically centered */}
+          {/* Back to Families */}
           <button
             onClick={() => setActiveFamilyId(null)}
             className="absolute left-4 md:left-10 top-1/2 -translate-y-1/2 z-20 flex items-center gap-2 text-term-dim hover:text-term-green transition-colors"
@@ -148,14 +162,14 @@ export default function PhilosophyBuild() {
             <span className="text-ui-md font-bold tracking-[0.15em]">BACK TO FAMILIES</span>
           </button>
 
-          {/* Selected indicator — right, vertically centered (parallel to back button) */}
+          {/* Selected indicator */}
           <div className="absolute right-4 md:right-10 top-1/2 -translate-y-1/2 z-20 text-term-faint text-ui-sm text-right max-w-[24%]">
             {selection[activeFamily.id]
               ? `[ SELECTED: ${EPISTEMOLOGIES[selection[activeFamily.id]].name.toUpperCase()} ]`
               : '[ SELECT A PARADIGM ]'}
           </div>
 
-          {/* Carousel — center */}
+          {/* Carousel */}
           <div className="relative z-10 flex-1 flex flex-col justify-center max-w-6xl mx-auto w-full px-4">
             <Carousel3D
               key={activeFamily.id}
@@ -174,6 +188,11 @@ export default function PhilosophyBuild() {
             />
           </div>
         </div>
+      )}
+
+      {/* 3D Item Viewer Modal triggered on selection */}
+      {inspectingParadigm && (
+        <ItemViewer card={inspectingParadigm} onClose={() => setInspectingParadigm(null)} />
       )}
     </div>
   );
