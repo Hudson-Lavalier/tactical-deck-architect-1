@@ -137,19 +137,32 @@ function CardCarouselCard({ card, isCenter }) {
   const alignmentInfo = card.alignment ? ALIGNMENT_COLORS[card.alignment] : null;
   const accent = alignmentInfo?.glow || '#a855f7';
   return (
-    <div className={`game-card-premium holo-frame relative flex h-full max-h-[460px] w-full max-w-[320px] flex-col overflow-hidden break-words rounded-2xl border border-t-white/20 bg-cosmic-deep/90 p-4 opacity-100 backdrop-blur-xl transition-all duration-500 ${isCenter ? 'pointer-events-auto' : ''}`} style={{ '--accent-color': accent }}>
-      <div className="flex min-w-0 items-start justify-between gap-2">
+    <div
+      className={`group game-card-premium holo-frame relative flex h-full max-h-[460px] w-full max-w-[320px] flex-col overflow-hidden break-words rounded-2xl border border-t-white/20 bg-cosmic-deep/90 p-4 opacity-100 backdrop-blur-xl transition-all duration-300 ${
+        isCenter ? 'pointer-events-auto' : ''
+      }`}
+      style={{ '--accent-color': accent, boxShadow: 'none' }}
+    >
+      {/* Background surface glow on hover (behind all text) */}
+      <div
+        className="absolute inset-0 -z-10 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+        style={{
+          background: `radial-gradient(circle at 50% 35%, ${accent}33 0%, rgba(12, 10, 20, 0.95) 85%)`,
+        }}
+      />
+
+      <div className="relative z-10 flex min-w-0 items-start justify-between gap-2">
         <span className="accent-border accent-bg-subtle max-w-[65%] truncate rounded-md border px-2 py-1 text-[10px] font-bold uppercase tracking-[0.14em] md:text-xs" style={{ color: accent }}>{alignmentInfo?.name || 'Unaligned'}</span>
         <span className="max-w-[35%] truncate text-right text-[10px] font-bold uppercase tracking-[0.12em] text-term-faint md:text-xs">{card.subcategory || card.category?.replace(/_/g, ' ')}</span>
       </div>
-      <div className="game-card-concept relative my-3 flex min-h-24 items-center justify-center overflow-hidden rounded-xl border border-white/10 bg-cosmic-deep/80 px-3 py-4 text-center">
+      <div className="game-card-concept relative z-10 my-3 flex min-h-24 items-center justify-center overflow-hidden rounded-xl border border-white/10 bg-cosmic-deep/80 px-3 py-4 text-center">
         <div className="game-card-grid pointer-events-none absolute inset-0 opacity-40" />
-        <div className="accent-text-glow relative z-10 max-w-full truncate text-base font-bold uppercase leading-tight tracking-[0.06em] md:text-lg" style={{ color: accent }}>{card.name || 'UNNAMED'}</div>
+        <div className="relative z-10 max-w-full truncate text-base font-bold uppercase leading-tight tracking-[0.06em] md:text-lg" style={{ color: accent }}>{card.name || 'UNNAMED'}</div>
       </div>
-      <div className="cyber-richtext min-h-0 max-h-[220px] flex-1 overflow-y-auto break-words rounded-xl border border-white/10 bg-cosmic-deep/55 p-3 pr-2 text-xs leading-normal md:text-sm">
+      <div className="cyber-richtext relative z-10 min-h-0 max-h-[220px] flex-1 overflow-y-auto break-words rounded-xl border border-white/10 bg-cosmic-deep/55 p-3 pr-2 text-xs leading-normal md:text-sm">
         {card.text ? <RichText text={card.text} alignment={card.alignment} /> : <div className="text-ui-md italic text-term-faint">No text defined</div>}
       </div>
-      {card.category && <div className="holo-slot-core mt-3 truncate border-t border-white/10 pt-2 text-ui-xs font-bold uppercase tracking-[0.16em]">{card.category.replace(/_/g, ' ')}</div>}
+      {card.category && <div className="holo-slot-core relative z-10 mt-3 truncate border-t border-white/10 pt-2 text-ui-xs font-bold uppercase tracking-[0.16em]">{card.category.replace(/_/g, ' ')}</div>}
     </div>
   );
 }
