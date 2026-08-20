@@ -4,6 +4,7 @@ import QueueLane from './QueueLane';
 import DomainCenter from './DomainCenter';
 import PersistentRow from './PersistentRow';
 
+// Battlefield — horizontal table matching the physical board composition.
 export default function Battlefield({
   drawPiles, onDraw, drawDisabled, opponentQueue, playerQueue, isPlayerTurn,
   domain, modifiers, onDomainClick, onQueueCardClick, domainAttached,
