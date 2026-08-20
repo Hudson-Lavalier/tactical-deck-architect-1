@@ -1,7 +1,6 @@
 import React from 'react';
 import { ALIGNMENT_COLORS } from '@/components/game/terminalTheme';
 
-// PointsBar — split HUD modules (Left Wing: Victory Standard, Right Wing: Tally & Hand)
 export default function PointsBar({ player, isOpponent = false, handCount }) {
   if (!player) return null;
 
@@ -15,10 +14,10 @@ export default function PointsBar({ player, isOpponent = false, handCount }) {
   const overallPct = totalTarget > 0 ? Math.min(100, (totalEarned / totalTarget) * 100) : 0;
 
   return (
-    <div className={`flex w-full items-center justify-between gap-4 font-mono ${isOpponent ? 'text-ui-sm' : 'text-ui-md'}`}>
-      {/* Left Wing: Victory Standard Progress */}
-      <div className="flex flex-1 max-w-xs md:max-w-sm flex-col gap-1 rounded-xl border border-white/10 bg-cosmic-deep/80 p-2.5 backdrop-blur-md">
-        <div className="text-term-text tracking-[0.2em] text-[11px] font-bold">
+    <div className="flex w-full items-center justify-between gap-2 font-mono">
+      {/* Left Wing: Victory Standard */}
+      <div className="flex flex-1 max-w-[clamp(14rem,25vw,22rem)] flex-col gap-0.5 rounded-lg border border-white/10 bg-cosmic-deep/80 p-2 backdrop-blur-md">
+        <div className="text-term-text tracking-[0.15em] text-[clamp(9px,0.7vw,11px)] font-bold">
           {isOpponent ? 'OPPONENT' : 'YOU'} · VICTORY STANDARD
         </div>
         {required.map(([key, target]) => {
@@ -26,67 +25,61 @@ export default function PointsBar({ player, isOpponent = false, handCount }) {
           const cur = points[key] || 0;
           const pct = Math.min(100, (cur / target) * 100);
           return (
-            <div key={key} className="grid w-full grid-cols-[auto_1fr_auto] items-center gap-2">
+            <div key={key} className="grid w-full grid-cols-[auto_1fr_auto] items-center gap-1.5">
               <span
-                style={{ color: info.glow, textShadow: `0 0 6px ${info.glow}60` }}
-                className="min-w-0 max-w-[6.5rem] truncate text-left text-[11px] font-bold"
+                style={{ color: info.glow }}
+                className="min-w-0 max-w-[5.5rem] truncate text-left text-[clamp(8px,0.65vw,10px)] font-bold"
               >
                 {info.name}
               </span>
-              <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-900/80 border border-white/5">
+              <div className="h-1 w-full overflow-hidden rounded-full bg-slate-900 border border-white/5">
                 <div
                   className="h-full rounded-full transition-all duration-300"
                   style={{ width: `${pct}%`, backgroundColor: info.glow }}
                 />
               </div>
-              <span style={{ color: info.glow }} className="text-right text-[11px] font-bold tabular-nums">
+              <span style={{ color: info.glow }} className="text-right text-[clamp(8px,0.65vw,10px)] font-bold tabular-nums">
                 {cur}/{target}
               </span>
             </div>
           );
         })}
-        {/* Weighted Overall Progress */}
-        <div className="mt-0.5 grid w-full grid-cols-[auto_1fr_auto] items-center gap-2">
-          <span className="min-w-0 max-w-[6.5rem] truncate text-left text-[11px] font-bold tracking-[0.12em] text-term-text">
+        {/* Weighted Overall */}
+        <div className="mt-0.5 grid w-full grid-cols-[auto_1fr_auto] items-center gap-1.5">
+          <span className="min-w-0 max-w-[5.5rem] truncate text-left text-[clamp(8px,0.65vw,10px)] font-bold tracking-[0.1em] text-term-text">
             WEIGHTED
           </span>
-          <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-900/80 border border-white/5">
+          <div className="h-1 w-full overflow-hidden rounded-full bg-slate-900 border border-white/5">
             <div
               className="h-full rounded-full transition-all duration-300"
               style={{ width: `${overallPct}%`, background: 'linear-gradient(90deg, #00ff41, #00ffff, #a855f7)' }}
             />
           </div>
-          <span className="text-right text-[11px] font-bold tabular-nums text-term-text">
+          <span className="text-right text-[clamp(8px,0.65vw,10px)] font-bold tabular-nums text-term-text">
             {totalEarned}/{totalTarget}
           </span>
         </div>
       </div>
 
-      {/* Center Bay Gap: Open space for Hand Cards */}
-      <div className="hidden flex-1 md:block" />
-
-      {/* Right Wing: General Tally & Hand Readout */}
-      <div className="flex items-center gap-4 rounded-xl border border-white/10 bg-cosmic-deep/80 p-2.5 backdrop-blur-md">
-        <div className="flex flex-col gap-1">
-          <div className="text-term-text tracking-[0.18em] text-[11px] font-bold">GENERAL TALLY</div>
-          <div className="flex gap-2">
+      {/* Right Wing: General Tally */}
+      <div className="flex items-center gap-3 rounded-lg border border-white/10 bg-cosmic-deep/80 p-2 backdrop-blur-md">
+        <div className="flex flex-col gap-0.5">
+          <div className="text-term-text tracking-[0.15em] text-[clamp(9px,0.7vw,11px)] font-bold">GENERAL TALLY</div>
+          <div className="flex gap-1.5">
             {Object.entries(ALIGNMENT_COLORS).map(([key, info]) => (
-              <div key={key} className="flex flex-col items-center gap-0.5">
+              <div key={key} className="flex flex-col items-center">
                 <div
-                  className="flex h-7 w-7 items-center justify-center rounded-full border transition-all"
+                  className="flex h-5 w-5 items-center justify-center rounded-full border"
                   style={{
                     borderColor: `${info.glow}60`,
                     backgroundColor: `${info.glow}15`,
                   }}
                 >
-                  <span
-                    style={{ color: info.glow, textShadow: `0 0 6px ${info.glow}80` }}
-                    className="text-[12px] font-bold"
-                  >
+                  <span style={{ color: info.glow }} className="text-[10px] font-bold">
                     {points[key] || 0}
                   </span>
                 </div>
-                <span style={{ color: info.glow }} className="text-[9px] font-bold uppercase tracking-wider">
+                <span style={{ color: info.glow }} className="text-[8px] font-bold uppercase">
                   {info.label}
                 </span>
               </div>
@@ -95,7 +88,7 @@ export default function PointsBar({ player, isOpponent = false, handCount }) {
         </div>
 
         {handCount != null && (
-          <div className="border-l border-white/10 pl-3 text-term-text text-[11px] font-bold tracking-[0.15em]">
+          <div className="border-l border-white/10 pl-2 text-term-text text-[clamp(9px,0.7vw,11px)] font-bold tracking-[0.12em]">
             HAND: <span className="text-term-blue">{handCount}</span>
           </div>
         )}
