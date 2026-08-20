@@ -179,9 +179,8 @@ export default function PhilosophyBuild() {
 
 function computeDims() {
   const vh = typeof window !== 'undefined' ? window.innerHeight : 900;
-  const famH = Math.min(440, Math.max(320, vh - 340));
-  const famW = Math.round(famH * 0.74);
-  const parH = Math.min(540, Math.max(360, vh - 220));
-  const parW = Math.min(Math.round(parH * 0.74), 360);
-  return { famW, famH, parW, parH };
+  const vw = typeof window !== 'undefined' ? window.innerWidth : 1200;
+  const cardH = Math.min(480, Math.max(360, vh - 340));
+  const cardW = Math.min(340, Math.max(280, Math.round(cardH * 0.7), Math.round(vw * 0.22)));
+  return { famW: cardW, famH: cardH, parW: cardW, parH: cardH };
 }

@@ -6,8 +6,8 @@ export default function FamilyCarouselCard({ family, paradigms, selectedParadigm
   const selected = selectedParadigmId ? paradigms.find((p) => p.id === selectedParadigmId) : null;
 
   return (
-    <div className="game-card-premium holo-frame relative flex h-full w-full flex-col overflow-hidden rounded-2xl border border-t-white/20 bg-cosmic-deep/85 p-5 backdrop-blur-xl" style={{ '--accent-color': isCenter ? '#00ffff' : '#a855f7' }}>
-      <div className="text-term-blue font-bold text-ui-lg text-center tracking-[0.15em] mb-4 relative"
+    <div className="game-card-premium holo-frame relative flex h-full max-h-[480px] w-full max-w-[340px] flex-col overflow-hidden break-words rounded-2xl border border-t-white/20 bg-cosmic-deep/85 p-5 backdrop-blur-xl" style={{ '--accent-color': isCenter ? '#00ffff' : '#a855f7' }}>
+      <div className="relative mb-4 max-w-full truncate text-center text-base font-bold uppercase tracking-[0.12em] text-term-blue md:text-lg"
         style={{ textShadow: '0 0 12px rgba(0,255,255,0.3)' }}
       >
         {family.name}
@@ -27,7 +27,7 @@ export default function FamilyCarouselCard({ family, paradigms, selectedParadigm
         </div>
       )}
 
-      <div className="space-y-2 flex-1 relative">
+      <div className="relative max-h-[220px] flex-1 space-y-2 overflow-y-auto break-words text-xs leading-normal md:text-sm">
         {paradigms.map((p) => {
           const isSelected = p.id === selectedParadigmId;
           return (

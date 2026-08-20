@@ -15,10 +15,15 @@ export default function Carousel3D({
   const motionRef = useRef({ current: 0, target: 0, velocity: 0, dragging: false, moved: false, lastX: 0 });
   const frameRef = useRef(0);
   const n = items.length;
-  const wNum = typeof itemWidth === 'number' ? itemWidth : 220;
-  const hNum = typeof itemHeight === 'number' ? itemHeight : 300;
-  const angleStep = n ? 360 / n : 0;
-  const radius = n > 1 ? Math.min(wNum * 2.2, Math.max(wNum * 0.75, (wNum / 2) / Math.tan(Math.PI / n))) : 0;
+  const requestedWidth = typeof itemWidth === 'number' ? itemWidth : 220;
+  const requestedHeight = typeof itemHeight === 'number' ? itemHeight : 300;
+  const wNum = Math.min(340, requestedWidth);
+  const hNum = Math.min(480, requestedHeight);
+  const angleStep = n > 1 ? 360 / n : 0;
+  const radius = n > 1
+    ? Math.min(350, Math.round((wNum / 2) / Math.tan(Math.PI / Math.max(n, 3))))
+    : 0;
+  const stageRadius = Math.min(120, Math.max(0, radius));
 
   const normalize = useCallback((index) => ((index % n) + n) % n, [n]);
 
@@ -93,21 +98,21 @@ export default function Carousel3D({
   return (
     <div className="relative flex w-full select-none flex-col items-center overflow-visible">
       <div
-        className="relative w-full cursor-grab overflow-visible active:cursor-grabbing"
-        style={{ height: `${hNum + 92}px`, perspective: '1200px', touchAction: 'none' }}
+        className="relative mx-auto flex h-[520px] w-full max-w-6xl cursor-grab items-center justify-center overflow-hidden active:cursor-grabbing"
+        style={{ perspective: '1400px', touchAction: 'none' }}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerUp}
       >
-        <div ref={stageRef} className="absolute left-1/2 top-4" style={{ width: `${wNum}px`, height: `${hNum}px`, marginLeft: `${-wNum / 2}px`, transformStyle: 'preserve-3d' }}>
+        <div ref={stageRef} className="relative shrink-0" style={{ width: `${wNum}px`, height: `${hNum}px`, transformStyle: 'preserve-3d' }}>
           {items.map((item, index) => {
             const isCenter = index === centerIndex;
             return (
-              <div key={item.id || index} className="absolute inset-0" style={{ transform: `rotateY(${index * angleStep}deg) translateZ(${radius}px)`, transformStyle: 'preserve-3d' }}>
+              <div key={item.id || index} className="absolute inset-0 overflow-hidden" style={{ transform: `rotateY(${index * angleStep}deg) translateZ(${stageRadius}px)`, transformStyle: 'preserve-3d', backfaceVisibility: 'hidden' }}>
                 <div
-                  className="h-full w-full transition-[opacity,transform,filter] duration-500 ease-out"
-                  style={{ opacity: isCenter ? 1 : 0.5, transform: isCenter ? 'translateZ(24px) scale(1.03)' : 'scale(0.82)', filter: isCenter ? 'none' : 'saturate(0.65) brightness(0.7)', cursor: 'pointer', backfaceVisibility: 'hidden' }}
+                  className="h-full max-h-[480px] w-full max-w-[340px] overflow-hidden break-words transition-[opacity,transform,filter] duration-500 ease-out"
+                  style={{ opacity: isCenter ? 1 : 0.5, transform: isCenter ? 'scale(1.05)' : 'scale(0.82)', filter: isCenter ? 'none' : 'saturate(0.65) brightness(0.7)', cursor: 'pointer', backfaceVisibility: 'hidden' }}
                   onClick={() => {
                     if (motionRef.current.moved) return;
                     if (isCenter) onItemClick?.(item, index);

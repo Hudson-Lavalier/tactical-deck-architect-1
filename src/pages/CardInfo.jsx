@@ -35,7 +35,7 @@ export default function CardInfo() {
   return (
     <div className="cosmic-shell relative flex min-h-screen flex-col overflow-x-hidden p-4 font-mono text-term-text md:p-6">
       <CosmicBackground density={60} />
-      <div className="relative z-10 flex flex-1 flex-col">
+      <div className="relative z-10 flex flex-1 flex-col gap-4">
         <div className="mb-4 flex items-center gap-3">
           <button onClick={() => navigate('/')} className="hud-control rounded-lg p-1 text-term-dim transition-all hover:-translate-y-0.5 hover:text-term-green">
             <ArrowLeft className="h-6 w-6" />
@@ -64,7 +64,7 @@ export default function CardInfo() {
         </div>
 
         {overview && (
-          <div className="cyber-panel mb-4 grid gap-5 rounded-2xl border border-white/10 border-t-white/20 bg-cosmic-deep/80 p-4 backdrop-blur-xl lg:grid-cols-[minmax(0,1fr)_auto] lg:p-5">
+          <div className="cyber-panel grid max-h-[140px] gap-4 overflow-y-auto rounded-xl border border-white/10 border-t-white/20 bg-cosmic-deep/80 p-4 backdrop-blur-xl lg:grid-cols-[minmax(0,1fr)_auto]">
             <div className="min-w-0">
               <div className="mb-3 text-ui-xs font-bold uppercase tracking-[0.22em] text-term-blue">Category overview</div>
               <RichText text={overview} className="card-overview-copy" />
@@ -87,7 +87,7 @@ export default function CardInfo() {
             </GlassPanel>
           </div>
         ) : (
-          <div className="flex min-h-[28rem] flex-1 items-center overflow-visible py-2">
+          <div className="relative flex min-h-[520px] w-full flex-1 items-center overflow-hidden">
             <Carousel3D
               key={activeCategory.id}
               items={cards}
@@ -115,16 +115,16 @@ function CardCarouselCard({ card, isCenter }) {
   const alignmentInfo = card.alignment ? ALIGNMENT_COLORS[card.alignment] : null;
   const accent = alignmentInfo?.glow || '#a855f7';
   return (
-    <div className={`game-card-premium holo-frame relative flex h-full w-full flex-col overflow-hidden rounded-2xl border border-t-white/20 bg-cosmic-deep/90 p-4 backdrop-blur-xl transition-all duration-500 ${isCenter ? 'opacity-100' : 'opacity-70'}`} style={{ '--accent-color': accent }}>
+    <div className={`game-card-premium holo-frame relative flex h-full max-h-[480px] w-full max-w-[340px] flex-col overflow-hidden break-words rounded-2xl border border-t-white/20 bg-cosmic-deep/90 p-4 backdrop-blur-xl transition-all duration-500 ${isCenter ? 'opacity-100' : 'opacity-70'}`} style={{ '--accent-color': accent }}>
       <div className="flex min-w-0 items-start justify-between gap-2">
-        <span className="accent-border accent-bg-subtle max-w-[65%] truncate rounded-md border px-2 py-1 text-ui-xs font-bold uppercase tracking-[0.14em]" style={{ color: accent }}>{alignmentInfo?.name || 'Unaligned'}</span>
-        <span className="max-w-[35%] truncate text-right text-[10px] font-bold uppercase tracking-[0.12em] text-term-faint">{card.subcategory || card.category?.replace(/_/g, ' ')}</span>
+        <span className="accent-border accent-bg-subtle max-w-[65%] truncate rounded-md border px-2 py-1 text-[10px] font-bold uppercase tracking-[0.14em] md:text-xs" style={{ color: accent }}>{alignmentInfo?.name || 'Unaligned'}</span>
+        <span className="max-w-[35%] truncate text-right text-[10px] font-bold uppercase tracking-[0.12em] text-term-faint md:text-xs">{card.subcategory || card.category?.replace(/_/g, ' ')}</span>
       </div>
       <div className="game-card-concept relative my-3 flex min-h-24 items-center justify-center overflow-hidden rounded-xl border border-white/10 bg-cosmic-deep/80 px-3 py-4 text-center">
         <div className="game-card-grid pointer-events-none absolute inset-0 opacity-40" />
-        <div className="accent-text-glow relative z-10 text-ui-lg font-bold uppercase leading-tight tracking-[0.06em]" style={{ color: accent }}>{card.name || 'UNNAMED'}</div>
+        <div className="accent-text-glow relative z-10 max-w-full truncate text-base font-bold uppercase leading-tight tracking-[0.06em] md:text-lg" style={{ color: accent }}>{card.name || 'UNNAMED'}</div>
       </div>
-      <div className="cyber-richtext min-h-0 flex-1 overflow-y-auto rounded-xl border border-white/10 bg-cosmic-deep/55 p-3 pr-2">
+      <div className="cyber-richtext min-h-0 max-h-[220px] flex-1 overflow-y-auto break-words rounded-xl border border-white/10 bg-cosmic-deep/55 p-3 pr-2 text-xs leading-normal md:text-sm">
         {card.text ? <RichText text={card.text} alignment={card.alignment} /> : <div className="text-ui-md italic text-term-faint">No text defined</div>}
       </div>
       {card.category && <div className="holo-slot-core mt-3 truncate border-t border-white/10 pt-2 text-ui-xs font-bold uppercase tracking-[0.16em]">{card.category.replace(/_/g, ' ')}</div>}
@@ -135,7 +135,7 @@ function CardCarouselCard({ card, isCenter }) {
 function computeDims() {
   const vh = typeof window !== 'undefined' ? window.innerHeight : 900;
   const vw = typeof window !== 'undefined' ? window.innerWidth : 1200;
-  const cardH = Math.min(Math.round(vh * 0.55), 560);
-  const cardW = Math.min(Math.round(cardH * 0.72), Math.round((vw - 120) / 3));
-  return { cardW: Math.max(280, cardW), cardH: Math.max(320, cardH) };
+  const cardH = Math.min(480, Math.max(320, Math.round(vh * 0.5)));
+  const cardW = Math.min(340, Math.max(280, Math.round(cardH * 0.7), Math.round((vw - 120) / 5)));
+  return { cardW, cardH };
 }

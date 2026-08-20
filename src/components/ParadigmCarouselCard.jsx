@@ -12,16 +12,16 @@ export default function ParadigmCarouselCard({ paradigm, isCenter, isSelected, o
   return (
     <div
       onClick={isCenter ? onClick : undefined}
-      className={`game-card-premium holo-frame accent-border relative flex h-full w-full flex-col overflow-hidden rounded-2xl border border-t-white/20 bg-cosmic-deep/85 p-5 backdrop-blur-xl transition-all duration-300 ${isCenter ? 'cursor-pointer' : ''} ${isSelected ? 'animate-selection-pulse' : ''}`}
+      className={`game-card-premium holo-frame accent-border relative flex h-full max-h-[480px] w-full max-w-[340px] flex-col overflow-hidden break-words rounded-2xl border border-t-white/20 bg-cosmic-deep/85 p-5 backdrop-blur-xl transition-all duration-300 ${isCenter ? 'cursor-pointer' : ''} ${isSelected ? 'animate-selection-pulse' : ''}`}
       style={{ '--accent-color': accent }}
     >
       {/* Header */}
       <div className="flex justify-between items-start mb-2 relative">
         <div>
-          <div className="accent-text-glow text-ui-lg font-bold uppercase leading-tight tracking-[0.05em]" style={{ color: accent }}>
+          <div className="accent-text-glow max-w-full truncate text-base font-bold uppercase leading-tight tracking-[0.05em] md:text-lg" style={{ color: accent }}>
             {paradigm.name}
           </div>
-          <div className="text-term-faint text-ui-sm mt-0.5">{paradigm.category}</div>
+          <div className="mt-0.5 truncate text-[10px] font-bold uppercase text-term-faint md:text-xs">{paradigm.category}</div>
         </div>
         {isSelected && (
           <div className="flex items-center gap-1.5 shrink-0">
@@ -35,7 +35,7 @@ export default function ParadigmCarouselCard({ paradigm, isCenter, isSelected, o
         <span className="font-bold text-ui-md" style={{ color: accent }}>{alignmentInfo.name}</span>
       </div>
 
-      <div className="flex-1 overflow-y-auto pr-1 min-h-0 relative">
+      <div className="relative min-h-0 max-h-[220px] flex-1 overflow-y-auto break-words pr-1 text-xs leading-normal md:text-sm">
         <RichText text={paradigm.text} alignment={paradigm.alignment} />
       </div>
 
