@@ -2,6 +2,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 const TAP_THRESHOLD = 6;
+const ANGLE_STEP = 28;
+const MOMENTUM_MS = 180;
 
 export default function Carousel3D({
   items,
@@ -13,10 +15,14 @@ export default function Carousel3D({
   loop = true,
 }) {
   const [activeIndex, setActiveIndex] = useState(0);
+  const [dragOffset, setDragOffset] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
   const pointerRef = useRef(null);
   const count = items.length;
   const width = Math.min(320, Number(itemWidth) || 320);
   const height = Math.min(460, Number(itemHeight) || 460);
+  const snapDistance = Math.max(130, width * 0.48);
+  const radius = Math.min(560, Math.max(390, width * 1.42));
 
   const normalizeIndex = (index) => {
     if (!count) return 0;
@@ -24,7 +30,10 @@ export default function Carousel3D({
     return Math.max(0, Math.min(count - 1, index));
   };
 
-  const focusIndex = (index) => setActiveIndex(normalizeIndex(index));
+  const focusIndex = (index) => {
+    setDragOffset(0);
+    setActiveIndex(normalizeIndex(index));
+  };
 
   const relativeOffset = (index) => {
     let offset = index - activeIndex;
@@ -37,61 +46,75 @@ export default function Carousel3D({
 
   useEffect(() => {
     setActiveIndex(0);
+    setDragOffset(0);
   }, [count]);
 
   useEffect(() => {
     if (count && onCenterChange) onCenterChange(items[activeIndex], activeIndex);
   }, [activeIndex, count, items, onCenterChange]);
 
-  const handlePointerDown = (event, index) => {
+  const handlePointerDown = (event) => {
+    const item = event.target.closest('[data-carousel-index]');
+    if (!item) return;
+    const now = performance.now();
     pointerRef.current = {
       pointerId: event.pointerId,
-      index,
+      index: Number(item.dataset.carouselIndex),
       startX: event.clientX,
       startY: event.clientY,
       lastX: event.clientX,
-      lastY: event.clientY,
+      lastTime: now,
+      velocityX: 0,
     };
+    setIsDragging(true);
     event.currentTarget.setPointerCapture?.(event.pointerId);
   };
 
   const handlePointerMove = (event) => {
-    if (!pointerRef.current || pointerRef.current.pointerId !== event.pointerId) return;
-    pointerRef.current.lastX = event.clientX;
-    pointerRef.current.lastY = event.clientY;
+    const pointer = pointerRef.current;
+    if (!pointer || pointer.pointerId !== event.pointerId) return;
+    const now = performance.now();
+    const elapsed = Math.max(1, now - pointer.lastTime);
+    const instantaneousVelocity = (event.clientX - pointer.lastX) / elapsed;
+    pointer.velocityX = pointer.velocityX * 0.68 + instantaneousVelocity * 0.32;
+    pointer.lastX = event.clientX;
+    pointer.lastTime = now;
+    setDragOffset((event.clientX - pointer.startX) / snapDistance);
   };
 
-  const handlePointerUp = (event) => {
+  const finishPointer = (event, cancelled = false) => {
     const pointer = pointerRef.current;
     if (!pointer || pointer.pointerId !== event.pointerId) return;
     if (event.currentTarget.hasPointerCapture?.(event.pointerId)) {
       event.currentTarget.releasePointerCapture(event.pointerId);
     }
 
-    const endX = event.clientX ?? pointer.lastX;
-    const endY = event.clientY ?? pointer.lastY;
-    const deltaX = endX - pointer.startX;
-    const deltaY = endY - pointer.startY;
+    const deltaX = event.clientX - pointer.startX;
+    const deltaY = event.clientY - pointer.startY;
     const movement = Math.hypot(deltaX, deltaY);
     pointerRef.current = null;
+    setIsDragging(false);
+
+    if (cancelled) {
+      setDragOffset(0);
+      return;
+    }
 
     if (movement < TAP_THRESHOLD) {
+      setDragOffset(0);
       if (pointer.index === activeIndex) onItemClick?.(items[pointer.index], pointer.index);
       else focusIndex(pointer.index);
       return;
     }
 
-    if (Math.abs(deltaX) > Math.abs(deltaY)) {
-      const steps = Math.max(1, Math.round(Math.abs(deltaX) / Math.max(80, width * 0.45)));
-      focusIndex(activeIndex + (deltaX < 0 ? steps : -steps));
+    if (Math.abs(deltaX) <= Math.abs(deltaY)) {
+      setDragOffset(0);
+      return;
     }
-  };
 
-  const handlePointerCancel = (event) => {
-    if (event.currentTarget.hasPointerCapture?.(event.pointerId)) {
-      event.currentTarget.releasePointerCapture(event.pointerId);
-    }
-    pointerRef.current = null;
+    const projectedOffset = deltaX / snapDistance + (pointer.velocityX * MOMENTUM_MS) / snapDistance;
+    const steps = Math.round(projectedOffset);
+    focusIndex(activeIndex - (steps || (deltaX < 0 ? -1 : 1)));
   };
 
   if (!count) return null;
@@ -99,44 +122,43 @@ export default function Carousel3D({
   return (
     <div className="relative flex w-full select-none flex-col items-center">
       <div
-        className="relative mx-auto flex h-[500px] w-full max-w-6xl items-center justify-center overflow-hidden py-4"
-        style={{ perspective: '1200px', transformStyle: 'preserve-3d', touchAction: 'pan-y' }}
+        className={`relative mx-auto flex h-[500px] w-full max-w-[1800px] items-center justify-center overflow-hidden px-2 py-4 ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+        style={{ perspective: '1400px', transformStyle: 'preserve-3d', touchAction: 'pan-y' }}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={(event) => finishPointer(event)}
+        onPointerCancel={(event) => finishPointer(event, true)}
       >
         {items.map((item, index) => {
-          const offset = relativeOffset(index);
+          const offset = relativeOffset(index) + dragOffset;
           const distance = Math.abs(offset);
-          const angle = offset * 28;
-          const translateX = offset * (width * 0.45);
-          const translateZ = -distance * 110 + (offset === 0 ? 40 : 0);
-          const scale = Math.max(0.65, 1 - distance * 0.18);
-          const opacity = Math.max(0, 1 - distance * 0.35);
-          const zIndex = 100 - distance;
-          const isActive = offset === 0;
+          const angle = offset * ANGLE_STEP;
+          const radians = angle * (Math.PI / 180);
+          const translateX = Math.sin(radians) * radius;
+          const translateZ = Math.cos(radians) * radius - radius + (distance < 0.001 ? 32 : 0);
+          const scale = Math.max(0.72, 1 - distance * 0.08);
+          const zIndex = Math.round(100 - distance * 10);
+          const isActive = Math.abs(relativeOffset(index)) < 0.001;
+          const isVisible = distance <= 5.25;
 
           return (
             <div
               key={item.id || index}
               data-carousel-index={index}
-              className={`absolute left-1/2 top-1/2 overflow-hidden break-words transition-[transform,opacity,filter] duration-500 ease-out ${isActive ? 'pointer-events-auto' : opacity > 0 ? 'pointer-events-auto' : 'pointer-events-none'}`}
+              className={`absolute left-1/2 top-1/2 overflow-hidden break-words opacity-100 ${isDragging ? 'transition-none' : 'transition-[transform,filter] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]'} ${isVisible ? 'pointer-events-auto visible' : 'pointer-events-none invisible'}`}
               style={{
                 width: `${width}px`,
                 height: `${height}px`,
                 maxWidth: '320px',
                 maxHeight: '460px',
-                opacity,
                 zIndex,
                 transform: `translate(-50%, -50%) translateX(${translateX}px) translateZ(${translateZ}px) rotateY(${angle}deg) scale(${scale})`,
                 transformStyle: 'preserve-3d',
                 backfaceVisibility: 'hidden',
-                filter: isActive ? 'none' : 'saturate(0.68) brightness(0.72)',
-                cursor: 'pointer',
+                filter: isActive ? 'brightness(1.06) saturate(1.05)' : `brightness(${Math.max(0.58, 0.9 - distance * 0.06)}) saturate(0.82)`,
               }}
-              onPointerDown={(event) => handlePointerDown(event, index)}
-              onPointerMove={handlePointerMove}
-              onPointerUp={handlePointerUp}
-              onPointerCancel={handlePointerCancel}
             >
-              <div className={`relative h-full max-h-[460px] w-full max-w-[320px] overflow-hidden break-words ${isActive ? 'pointer-events-auto' : ''}`}>
+              <div className={`relative h-full max-h-[460px] w-full max-w-[320px] overflow-hidden break-words opacity-100 ${isActive ? 'pointer-events-auto' : ''}`}>
                 {renderItem(item, isActive)}
               </div>
             </div>

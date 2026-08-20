@@ -9,11 +9,14 @@ import { ALL_CARDS } from '@/data/cards';
 import { CARD_OVERVIEWS } from '@/data/cardOverviews';
 import Carousel3D from '@/components/Carousel3D';
 import RichText from '@/components/RichText';
+import CardDetail from '@/components/game/CardDetail';
 import { ALIGNMENT_COLORS } from '@/components/game/terminalTheme';
 
 export default function CardInfo() {
   const navigate = useNavigate();
   const [activeCategoryId, setActiveCategoryId] = useState(null);
+  const [showOverview, setShowOverview] = useState(false);
+  const [selectedCard, setSelectedCard] = useState(null);
   const categories = Object.values(CARD_CATEGORIES);
   const activeCategory = categories.find((category) => category.id === activeCategoryId) || categories[0];
   const cards = ALL_CARDS[activeCategory?.id] || [];
@@ -64,12 +67,15 @@ export default function CardInfo() {
         </div>
 
         {overview && (
-          <div className="cyber-panel grid max-h-[140px] gap-4 overflow-y-auto rounded-xl border border-white/10 border-t-white/20 bg-cosmic-deep/80 p-4 backdrop-blur-xl lg:grid-cols-[minmax(0,1fr)_auto]">
-            <div className="min-w-0">
-              <div className="mb-3 text-ui-xs font-bold uppercase tracking-[0.22em] text-term-blue">Category overview</div>
-              <RichText text={overview} className="card-overview-copy" />
+          <div className="cyber-panel grid gap-4 rounded-xl border border-white/10 border-t-white/20 bg-cosmic-deep/80 p-4 backdrop-blur-xl xl:grid-cols-[minmax(0,1fr)_auto]">
+            <div className="flex min-w-0 flex-col justify-between gap-3">
+              <div>
+                <div className="mb-2 text-ui-xs font-bold uppercase tracking-[0.22em] text-term-blue">Category overview</div>
+                <div className="card-overview-copy max-h-16 overflow-hidden text-ui-sm text-term-dim"><RichText text={overview} /></div>
+              </div>
+              <button onClick={() => setShowOverview(true)} className="hud-control w-fit rounded-lg border border-term-blue/35 bg-term-blue/10 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.16em] text-term-blue transition-all hover:-translate-y-0.5 hover:shadow-[0_0_16px_rgba(0,255,255,0.2)] md:text-xs">Click to view full overview</button>
             </div>
-            <div className="grid grid-cols-2 gap-2 self-start sm:grid-cols-4 lg:grid-cols-2">
+            <div className="grid grid-cols-2 gap-2 self-start sm:grid-cols-3 xl:max-w-xl">
               <MetaTag label="Cards" value={cards.length} color="#00ffff" />
               <MetaTag label="System" value={activeCategory.system} color="#a855f7" />
               {Object.entries(ALIGNMENT_COLORS).map(([key, info]) => (
@@ -92,21 +98,37 @@ export default function CardInfo() {
               key={activeCategory.id}
               items={cards}
               renderItem={(card, isCenter) => <CardCarouselCard card={card} isCenter={isCenter} />}
+              onItemClick={(card) => setSelectedCard(card)}
               itemWidth={dims.cardW}
               itemHeight={dims.cardH}
             />
           </div>
         )}
       </div>
+
+      {showOverview && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 font-mono backdrop-blur-xl" onClick={() => setShowOverview(false)}>
+          <div className="cyber-panel relative flex max-h-[84vh] w-full max-w-4xl flex-col overflow-hidden rounded-2xl border border-term-blue/30 border-t-white/20 bg-slate-950/90 p-6" onClick={(event) => event.stopPropagation()}>
+            <div className="mb-4 border-b border-white/10 pb-4 pr-12">
+              <div className="text-ui-xs font-bold uppercase tracking-[0.22em] text-term-faint">Category documentation</div>
+              <h2 className="mt-2 text-ui-xl font-bold uppercase tracking-[0.12em] text-term-blue">{activeCategory.name}</h2>
+            </div>
+            <div className="card-overview-copy min-h-0 flex-1 overflow-y-auto pr-3 text-ui-sm leading-relaxed text-term-text md:text-ui-md"><RichText text={overview} /></div>
+            <button onClick={() => setShowOverview(false)} className="hud-control absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-cosmic-deep/80 font-bold text-term-faint hover:text-term-text" aria-label="Close overview">✕</button>
+          </div>
+        </div>
+      )}
+
+      {selectedCard && <CardDetail card={selectedCard} readOnly onClose={() => setSelectedCard(null)} />}
     </div>
   );
 }
 
 function MetaTag({ label, value, color }) {
   return (
-    <div className="holo-frame relative min-w-28 rounded-lg border border-white/10 bg-cosmic-deep/60 px-3 py-2" style={{ '--accent-color': color }}>
+    <div className="holo-frame relative min-w-32 overflow-hidden rounded-lg border border-white/10 bg-cosmic-deep/60 px-3 py-2" style={{ '--accent-color': color }}>
       <div className="text-[9px] font-bold uppercase tracking-[0.18em] text-term-faint">{label}</div>
-      <div className="mt-1 max-w-36 truncate text-ui-sm font-bold uppercase" style={{ color }}>{value}</div>
+      <div className="mt-1 break-words text-ui-sm font-bold uppercase leading-tight" style={{ color }}>{value}</div>
     </div>
   );
 }
@@ -115,7 +137,7 @@ function CardCarouselCard({ card, isCenter }) {
   const alignmentInfo = card.alignment ? ALIGNMENT_COLORS[card.alignment] : null;
   const accent = alignmentInfo?.glow || '#a855f7';
   return (
-    <div className={`game-card-premium holo-frame relative flex h-full max-h-[460px] w-full max-w-[320px] flex-col overflow-hidden break-words rounded-2xl border border-t-white/20 bg-cosmic-deep/90 p-4 backdrop-blur-xl transition-all duration-500 ${isCenter ? 'pointer-events-auto opacity-100' : 'opacity-70'}`} style={{ '--accent-color': accent }}>
+    <div className={`game-card-premium holo-frame relative flex h-full max-h-[460px] w-full max-w-[320px] flex-col overflow-hidden break-words rounded-2xl border border-t-white/20 bg-cosmic-deep/90 p-4 opacity-100 backdrop-blur-xl transition-all duration-500 ${isCenter ? 'pointer-events-auto' : ''}`} style={{ '--accent-color': accent }}>
       <div className="flex min-w-0 items-start justify-between gap-2">
         <span className="accent-border accent-bg-subtle max-w-[65%] truncate rounded-md border px-2 py-1 text-[10px] font-bold uppercase tracking-[0.14em] md:text-xs" style={{ color: accent }}>{alignmentInfo?.name || 'Unaligned'}</span>
         <span className="max-w-[35%] truncate text-right text-[10px] font-bold uppercase tracking-[0.12em] text-term-faint md:text-xs">{card.subcategory || card.category?.replace(/_/g, ' ')}</span>

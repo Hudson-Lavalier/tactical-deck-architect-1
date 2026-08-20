@@ -99,6 +99,7 @@ export default function PhilosophyBuild() {
             PARADIGM FAMILIES
           </div>
           <Carousel3D
+            loop
             items={families}
             renderItem={(family, isCenter) => (
               <FamilyCarouselCard
@@ -158,6 +159,7 @@ export default function PhilosophyBuild() {
           <div className="relative z-10 flex-1 flex flex-col justify-center max-w-6xl mx-auto w-full px-4">
             <Carousel3D
               key={activeFamily.id}
+              loop
               items={paradigmsInActiveFamily}
               renderItem={(paradigm, isCenter) => (
                 <ParadigmCarouselCard
