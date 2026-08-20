@@ -3,7 +3,7 @@ import Card from '@/components/game/Card';
 import { ALIGNMENT_COLORS } from '@/components/game/terminalTheme';
 
 // TwofoldDomain — special rendering for the Twofold Reality domain.
-// A small center card (Twofold Reality) flanked by its two attached domain
+// The full-size Twofold Reality card is flanked by two smaller attached domain
 // cards (left / right). A SWITCH control under the domain shows switches
 // remaining this turn and opens the side-selection modal.
 export default function TwofoldDomain({ domain, domainAttached, onDomainClick, onSwitch, isPlayerTurn, domainPlacedBy }) {
@@ -21,7 +21,7 @@ export default function TwofoldDomain({ domain, domainAttached, onDomainClick, o
 
       <div className="text-term-text font-mono text-[14px] font-bold tracking-[0.2em]">── TWOFOLD DOMAIN ──</div>
 
-      <div className="flex items-center justify-center gap-3 flex-1 min-h-0">
+      <div className="flex items-center justify-center gap-2 flex-1 min-h-0">
         {/* Left attached (Grounding) */}
         <div className="flex flex-col items-center gap-1">
           <div className="text-term-faint font-mono text-[9px] tracking-[0.15em]">LEFT · GROUNDING</div>
@@ -39,10 +39,10 @@ export default function TwofoldDomain({ domain, domainAttached, onDomainClick, o
           )}
         </div>
 
-        {/* Center — small Twofold card */}
+        {/* Center — full-size Twofold card */}
         <div className="flex flex-col items-center gap-1">
           <div className="text-term-faint font-mono text-[9px] tracking-[0.15em]">TWOFOLD</div>
-          <Card card={domain} size="small" onClick={() => onDomainClick(domain)} />
+          <Card card={domain} size="domain" onClick={() => onDomainClick(domain)} />
         </div>
 
         {/* Right attached (System) */}
