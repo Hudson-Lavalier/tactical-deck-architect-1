@@ -9,7 +9,7 @@ import { ALL_CARDS } from '@/data/cards';
 import { CARD_OVERVIEWS } from '@/data/cardOverviews';
 import Carousel3D from '@/components/Carousel3D';
 import RichText from '@/components/RichText';
-import ItemViewer from '@/components/game/ItemViewer';
+import CardDetail from '@/components/game/CardDetail';
 import { ALIGNMENT_COLORS } from '@/components/game/terminalTheme';
 
 export default function CardInfo() {
@@ -71,11 +71,11 @@ export default function CardInfo() {
             <div className="flex min-w-0 flex-col justify-between gap-3">
               <div>
                 <div className="mb-2 text-ui-xs font-bold uppercase tracking-[0.22em] text-term-blue">Category overview</div>
-                <div className="card-overview-copy text-ui-sm text-term-dim"><RichText text={overview} /></div>
+                <div className="card-overview-copy max-h-16 overflow-hidden text-ui-sm text-term-dim"><RichText text={overview} /></div>
               </div>
               <button onClick={() => setShowOverview(true)} className="hud-control w-fit rounded-lg border border-term-blue/35 bg-term-blue/10 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.16em] text-term-blue transition-all hover:-translate-y-0.5 hover:shadow-[0_0_16px_rgba(0,255,255,0.2)] md:text-xs">Click to view full overview</button>
             </div>
-            <div className="flex min-w-0 flex-wrap gap-2 self-start xl:max-w-xl">
+            <div className="grid grid-cols-2 gap-2 self-start sm:grid-cols-3 xl:max-w-xl">
               <MetaTag label="Cards" value={cards.length} color="#00ffff" />
               <MetaTag label="System" value={activeCategory.system} color="#a855f7" />
               {Object.entries(ALIGNMENT_COLORS).map(([key, info]) => (
@@ -119,14 +119,14 @@ export default function CardInfo() {
         </div>
       )}
 
-      {selectedCard && <ItemViewer card={selectedCard} onClose={() => setSelectedCard(null)} />}
+      {selectedCard && <CardDetail card={selectedCard} readOnly onClose={() => setSelectedCard(null)} />}
     </div>
   );
 }
 
 function MetaTag({ label, value, color }) {
   return (
-    <div className="holo-frame relative min-w-0 flex-1 basis-32 overflow-hidden rounded-lg border border-white/10 bg-slate-950 px-3 py-2" style={{ '--accent-color': color }}>
+    <div className="holo-frame relative min-w-32 overflow-hidden rounded-lg border border-white/10 bg-cosmic-deep/60 px-3 py-2" style={{ '--accent-color': color }}>
       <div className="text-[9px] font-bold uppercase tracking-[0.18em] text-term-faint">{label}</div>
       <div className="mt-1 break-words text-ui-sm font-bold uppercase leading-tight" style={{ color }}>{value}</div>
     </div>
@@ -137,7 +137,7 @@ function CardCarouselCard({ card, isCenter }) {
   const alignmentInfo = card.alignment ? ALIGNMENT_COLORS[card.alignment] : null;
   const accent = alignmentInfo?.glow || '#a855f7';
   return (
-    <div className={`game-card-premium holo-frame relative flex h-full max-h-[460px] w-full max-w-[320px] flex-col overflow-hidden break-words rounded-2xl border border-t-white/20 bg-slate-950 p-4 opacity-100 transition-all duration-500 ${isCenter ? 'pointer-events-auto' : ''}`} style={{ '--accent-color': accent }}>
+    <div className={`game-card-premium holo-frame relative flex h-full max-h-[460px] w-full max-w-[320px] flex-col overflow-hidden break-words rounded-2xl border border-t-white/20 bg-cosmic-deep/90 p-4 opacity-100 backdrop-blur-xl transition-all duration-500 ${isCenter ? 'pointer-events-auto' : ''}`} style={{ '--accent-color': accent }}>
       <div className="flex min-w-0 items-start justify-between gap-2">
         <span className="accent-border accent-bg-subtle max-w-[65%] truncate rounded-md border px-2 py-1 text-[10px] font-bold uppercase tracking-[0.14em] md:text-xs" style={{ color: accent }}>{alignmentInfo?.name || 'Unaligned'}</span>
         <span className="max-w-[35%] truncate text-right text-[10px] font-bold uppercase tracking-[0.12em] text-term-faint md:text-xs">{card.subcategory || card.category?.replace(/_/g, ' ')}</span>

@@ -6,7 +6,7 @@ export default function FamilyCarouselCard({ family, paradigms, selectedParadigm
   const selected = selectedParadigmId ? paradigms.find((p) => p.id === selectedParadigmId) : null;
 
   return (
-    <div className={`game-card-premium holo-frame relative flex h-full max-h-[460px] w-full max-w-[320px] flex-col overflow-hidden break-words rounded-2xl border border-t-white/20 bg-slate-950 p-5 opacity-100 ${isCenter ? 'pointer-events-auto' : ''}`} style={{ '--accent-color': isCenter ? '#00ffff' : '#a855f7' }}>
+    <div className={`game-card-premium holo-frame relative flex h-full max-h-[460px] w-full max-w-[320px] flex-col overflow-hidden break-words rounded-2xl border border-t-white/20 bg-cosmic-deep/85 p-5 backdrop-blur-xl ${isCenter ? 'pointer-events-auto' : ''}`} style={{ '--accent-color': isCenter ? '#00ffff' : '#a855f7' }}>
       <div className="relative mb-4 max-w-full truncate text-center text-base font-bold uppercase tracking-[0.12em] text-term-blue md:text-lg"
         style={{ textShadow: '0 0 12px rgba(0,255,255,0.3)' }}
       >

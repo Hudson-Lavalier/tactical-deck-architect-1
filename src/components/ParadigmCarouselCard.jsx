@@ -12,7 +12,7 @@ export default function ParadigmCarouselCard({ paradigm, isCenter, isSelected, o
   return (
     <div
       onClick={isCenter ? onClick : undefined}
-      className={`game-card-premium holo-frame accent-border relative flex h-full max-h-[460px] w-full max-w-[320px] flex-col overflow-hidden break-words rounded-2xl border border-t-white/20 bg-slate-950 p-5 opacity-100 transition-all duration-300 ${isCenter ? 'pointer-events-auto cursor-pointer' : ''} ${isSelected ? 'animate-selection-pulse' : ''}`}
+      className={`game-card-premium holo-frame accent-border relative flex h-full max-h-[460px] w-full max-w-[320px] flex-col overflow-hidden break-words rounded-2xl border border-t-white/20 bg-cosmic-deep/85 p-5 backdrop-blur-xl transition-all duration-300 ${isCenter ? 'pointer-events-auto cursor-pointer' : ''} ${isSelected ? 'animate-selection-pulse' : ''}`}
       style={{ '--accent-color': accent }}
     >
       {/* Header */}
