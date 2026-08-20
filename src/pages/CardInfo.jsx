@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, BookOpen } from 'lucide-react';
 
 import CosmicBackground from '@/components/CosmicBackground';
 import GlassPanel from '@/components/GlassPanel';
@@ -17,14 +17,17 @@ export default function CardInfo() {
   const [activeCategoryId, setActiveCategoryId] = useState(null);
   const [showOverview, setShowOverview] = useState(false);
   const [selectedCard, setSelectedCard] = useState(null);
+
   const categories = Object.values(CARD_CATEGORIES);
   const activeCategory = categories.find((category) => category.id === activeCategoryId) || categories[0];
   const cards = ALL_CARDS[activeCategory?.id] || [];
   const overview = CARD_OVERVIEWS[activeCategory?.id];
+
   const alignmentCounts = cards.reduce((counts, card) => {
     if (card.alignment) counts[card.alignment] = (counts[card.alignment] || 0) + 1;
     return counts;
   }, {});
+
   const [dims, setDims] = useState(() => computeDims());
 
   const handleTabClick = useCallback((id) => setActiveCategoryId(id), []);
@@ -38,7 +41,9 @@ export default function CardInfo() {
   return (
     <div className="cosmic-shell relative flex min-h-screen flex-col overflow-x-hidden p-4 font-mono text-term-text md:p-6">
       <CosmicBackground density={60} />
-      <div className="relative z-10 flex flex-1 flex-col gap-4">
+
+      <div className="relative z-10 flex flex-1 flex-col">
+        {/* Header */}
         <div className="mb-4 flex items-center gap-3">
           <button onClick={() => navigate('/')} className="hud-control rounded-lg p-1 text-term-dim transition-all hover:-translate-y-0.5 hover:text-term-green">
             <ArrowLeft className="h-6 w-6" />
@@ -46,7 +51,8 @@ export default function CardInfo() {
           <h1 className="text-ui-xl font-bold uppercase tracking-[0.2em] text-term-blue drop-shadow-[0_0_8px_rgba(0,255,255,0.45)]">Card Info</h1>
         </div>
 
-        <div className="cyber-panel mb-4 flex flex-wrap justify-center gap-2 rounded-2xl border border-white/10 border-t-white/20 bg-cosmic-deep/75 p-2 backdrop-blur-xl">
+        {/* Category Tab Bar */}
+        <div className="cyber-panel mb-3 flex flex-wrap justify-center gap-2 rounded-2xl border border-white/10 border-t-white/20 bg-cosmic-deep/75 p-2 backdrop-blur-xl">
           {categories.map((category) => {
             const count = (ALL_CARDS[category.id] || []).length;
             const isActive = category.id === activeCategory.id;
@@ -54,7 +60,11 @@ export default function CardInfo() {
               <button
                 key={category.id}
                 onClick={() => handleTabClick(category.id)}
-                className={`hud-control relative rounded-lg border-t border-t-white/10 px-4 py-2 text-ui-sm font-bold uppercase tracking-[0.12em] backdrop-blur-md transition-all duration-300 ${isActive ? 'border border-term-blue/40 bg-term-blue/10 text-term-blue shadow-[inset_0_-2px_0_rgba(0,255,255,0.8),0_0_14px_rgba(0,255,255,0.12)]' : 'border border-transparent text-term-faint glass-card hover:-translate-y-0.5 hover:text-term-text'}`}
+                className={`hud-control relative rounded-lg border-t border-t-white/10 px-4 py-2 text-ui-sm font-bold uppercase tracking-[0.12em] backdrop-blur-md transition-all duration-300 ${
+                  isActive
+                    ? 'border border-term-blue/40 bg-term-blue/10 text-term-blue shadow-[inset_0_-2px_0_rgba(0,255,255,0.8),0_0_14px_rgba(0,255,255,0.12)]'
+                    : 'border border-transparent text-term-faint glass-card hover:-translate-y-0.5 hover:text-term-text'
+                }`}
               >
                 {category.name}<span className="ml-1.5 text-ui-xs opacity-70">[{count}]</span>
               </button>
@@ -62,29 +72,44 @@ export default function CardInfo() {
           })}
         </div>
 
-        <div className="hud-kicker mb-3 text-center text-ui-sm font-bold uppercase tracking-[0.2em] text-term-faint">
-          {activeCategory.name} · {activeCategory.system} system
+        {/* Inline Category HUD Header & Metadata Strip */}
+        <div className="cyber-panel mb-2 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-white/10 border-t-white/20 bg-cosmic-deep/80 px-4 py-2.5 backdrop-blur-xl">
+          {/* Active Category Title & Overview Trigger */}
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="text-ui-sm font-bold uppercase tracking-[0.2em] text-term-blue">
+              {activeCategory.name} <span className="text-term-faint">·</span> {activeCategory.system} SYSTEM
+            </div>
+            {overview && (
+              <button
+                onClick={() => setShowOverview(true)}
+                className="hud-control flex items-center gap-1.5 rounded-lg border border-term-blue/40 bg-term-blue/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-term-blue transition-all hover:-translate-y-0.5 hover:bg-term-blue/20"
+              >
+                <BookOpen className="h-3.5 w-3.5" /> OVERVIEW
+              </button>
+            )}
+          </div>
+
+          {/* Embedded Stats Chips (Cards, Grounding, System, Adaptation) */}
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="flex items-center gap-1.5 rounded-md border border-white/10 bg-black/40 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em]">
+              <span className="text-term-faint">CARDS:</span>
+              <span className="text-term-blue">{cards.length}</span>
+            </div>
+
+            {Object.entries(ALIGNMENT_COLORS).map(([key, info]) => (
+              <div
+                key={key}
+                className="flex items-center gap-1.5 rounded-md border border-white/10 bg-black/40 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em]"
+                style={{ color: info.glow }}
+              >
+                <span className="opacity-75">{info.name}:</span>
+                <span>{alignmentCounts[key] || 0}</span>
+              </div>
+            ))}
+          </div>
         </div>
 
-        {overview && (
-          <div className="cyber-panel grid gap-4 rounded-xl border border-white/10 border-t-white/20 bg-cosmic-deep/80 p-4 backdrop-blur-xl xl:grid-cols-[minmax(0,1fr)_auto]">
-            <div className="flex min-w-0 flex-col justify-between gap-3">
-              <div>
-                <div className="mb-2 text-ui-xs font-bold uppercase tracking-[0.22em] text-term-blue">Category overview</div>
-                <div className="card-overview-copy max-h-28 overflow-y-auto text-ui-sm text-term-dim"><RichText text={overview} /></div>
-              </div>
-              <button onClick={() => setShowOverview(true)} className="hud-control w-fit rounded-lg border border-term-blue/35 bg-term-blue/10 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.16em] text-term-blue transition-all hover:-translate-y-0.5 hover:shadow-[0_0_16px_rgba(0,255,255,0.2)] md:text-xs">Click to view full overview</button>
-            </div>
-            <div className="grid grid-cols-2 gap-2 self-start sm:grid-cols-3 xl:max-w-xl">
-              <MetaTag label="Cards" value={cards.length} color="#00ffff" />
-              <MetaTag label="System" value={activeCategory.system} color="#a855f7" />
-              {Object.entries(ALIGNMENT_COLORS).map(([key, info]) => (
-                <MetaTag key={key} label={info.name} value={alignmentCounts[key] || 0} color={info.glow} />
-              ))}
-            </div>
-          </div>
-        )}
-
+        {/* Centered 3D Carousel */}
         {cards.length === 0 ? (
           <div className="flex flex-1 items-center justify-center">
             <GlassPanel className="cyber-panel max-w-xl border-t border-t-white/20 p-12 text-center backdrop-blur-xl">
@@ -93,7 +118,7 @@ export default function CardInfo() {
             </GlassPanel>
           </div>
         ) : (
-          <div className="relative flex min-h-[520px] w-full flex-1 items-center overflow-hidden">
+          <div className="relative flex flex-1 items-center justify-center overflow-hidden py-2">
             <Carousel3D
               key={activeCategory.id}
               items={cards}
@@ -106,6 +131,7 @@ export default function CardInfo() {
         )}
       </div>
 
+      {/* Full Category Overview Modal */}
       {showOverview && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 font-mono backdrop-blur-xl" onClick={() => setShowOverview(false)}>
           <div className="cyber-panel relative flex max-h-[84vh] w-full max-w-4xl flex-col overflow-hidden rounded-2xl border border-term-blue/30 border-t-white/20 bg-slate-950/90 p-6" onClick={(event) => event.stopPropagation()}>
@@ -119,16 +145,8 @@ export default function CardInfo() {
         </div>
       )}
 
+      {/* 3D Item Inspection Modal */}
       {selectedCard && <ItemViewer card={selectedCard} onClose={() => setSelectedCard(null)} />}
-    </div>
-  );
-}
-
-function MetaTag({ label, value, color }) {
-  return (
-    <div className="holo-frame relative min-w-32 overflow-hidden rounded-lg border border-white/10 bg-cosmic-deep/60 px-3 py-2" style={{ '--accent-color': color }}>
-      <div className="text-[9px] font-bold uppercase tracking-[0.18em] text-term-faint">{label}</div>
-      <div className="mt-1 break-words text-ui-sm font-bold uppercase leading-tight" style={{ color }}>{value}</div>
     </div>
   );
 }
@@ -143,7 +161,6 @@ function CardCarouselCard({ card, isCenter }) {
       }`}
       style={{ '--accent-color': accent, boxShadow: 'none' }}
     >
-      {/* Background surface glow on hover (behind all text) */}
       <div
         className="absolute inset-0 -z-10 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
         style={{
