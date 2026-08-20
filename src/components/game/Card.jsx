@@ -5,11 +5,11 @@ import { ALIGNMENT_COLORS, ALIGNMENT_GLOW, ALIGNMENT_TEXT } from './terminalThem
 // Glass frame with alignment-tinted depth + top sheen.
 // Size tiers scaled up to fill the viewport (desktop-first).
 const SIZES = {
-  small: { box: 'game-card-small aspect-[5/7] w-16 max-w-full', name: 'text-[10px]', body: 'text-[8px]', cat: 'text-[7px]', label: 'text-[9px]' },
-  medium: { box: 'game-card-medium aspect-[5/7] w-20 max-w-full', name: 'text-[11px]', body: 'text-[9px]', cat: 'text-[8px]', label: 'text-[10px]' },
-  normal: { box: 'game-card-normal aspect-[5/7] w-24 max-w-full', name: 'text-[13px]', body: 'text-[10px]', cat: 'text-[8px]', label: 'text-[11px]' },
-  hand: { box: 'game-card-hand aspect-[5/7] w-28 max-w-full', name: 'text-[14px]', body: 'text-[10px]', cat: 'text-[8px]', label: 'text-[11px]' },
-  large: { box: 'game-card-large aspect-[5/7] w-28 max-w-full', name: 'text-[14px]', body: 'text-[10px]', cat: 'text-[8px]', label: 'text-[11px]' },
+  small: { box: 'game-card-small aspect-[5/7] w-16 max-w-full', name: 'text-[10px]', body: 'text-[8px]', cat: 'text-[7px]', label: 'text-[8.5px]' },
+  medium: { box: 'game-card-medium aspect-[5/7] w-20 max-w-full', name: 'text-[11px]', body: 'text-[9px]', cat: 'text-[8px]', label: 'text-[9px]' },
+  normal: { box: 'game-card-normal aspect-[5/7] w-24 max-w-full', name: 'text-[13px]', body: 'text-[10px]', cat: 'text-[8px]', label: 'text-[10px]' },
+  hand: { box: 'game-card-hand aspect-[5/7] w-28 max-w-full', name: 'text-[14px]', body: 'text-[10px]', cat: 'text-[8px]', label: 'text-[10px]' },
+  large: { box: 'game-card-large aspect-[5/7] w-28 max-w-full', name: 'text-[14px]', body: 'text-[10px]', cat: 'text-[8px]', label: 'text-[10px]' },
   handView: { box: 'game-card-hand-view aspect-[5/7] w-48 max-w-[70vw] md:w-56', name: 'text-[18px]', body: 'text-[13px]', cat: 'text-[10px]', label: 'text-[13px]' },
   xlarge: { box: 'game-card-xlarge aspect-[5/7] w-48 max-w-full', name: 'text-[18px]', body: 'text-[13px]', cat: 'text-[10px]', label: 'text-[13px]' },
   inspection: { box: 'game-card-inspection aspect-[5/7] w-48 max-w-full', name: 'text-[18px]', body: 'text-[13px]', cat: 'text-[10px]', label: 'text-[13px]' },
@@ -66,11 +66,10 @@ export default function Card({ card, faceDown = false, size = 'normal', onClick,
     >
       <div className="game-card-rim pointer-events-none absolute inset-0" />
       <div className="relative grid h-full min-h-0 grid-rows-[auto_minmax(0,0.72fr)_minmax(0,1.28fr)] gap-1 p-1.5 font-mono">
-        <header className="flex min-w-0 items-center justify-between gap-1">
-          <span className={`${textClass} ${s.label} accent-border accent-bg-subtle min-w-0 max-w-[75%] truncate rounded border px-1.5 py-0.5 font-bold uppercase tracking-[0.12em]`}>
+        <header className="flex w-full items-center justify-center min-w-0">
+          <span className={`${textClass} ${s.label} accent-border accent-bg-subtle w-full min-w-0 truncate rounded border px-1 py-0.5 text-center font-bold uppercase tracking-[0.08em]`}>
             {alignment?.name || 'Unaligned'}
           </span>
-          <span className="game-card-tier flex aspect-square w-5 shrink-0 items-center justify-center rounded-full border border-white/15 text-[9px] font-bold text-term-text">◆</span>
         </header>
 
         <section className="game-card-concept relative flex min-h-0 items-center justify-center overflow-hidden rounded-md border border-white/10 bg-cosmic-deep/75 px-1.5 py-1 text-center">
