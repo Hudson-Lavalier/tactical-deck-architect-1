@@ -1,59 +1,26 @@
 import React from 'react';
 
-// BoardSurface — Full-Viewport Flex Container
-// TopBar (100% width) -> Dual Top-HUD Row -> Battlefield Center -> Hand Fan Bottom (Zero Bottom Bar)
+// BoardSurface — the single 2.5D tilted glass plane.
+// One forced-perspective surface (top recedes, bottom near) holding all 8
+// grid regions. Children are placed via grid-area by the parent (GameBoard).
 export default function BoardSurface({ children, accent = '#00ffff' }) {
-  const childArray = React.Children.toArray(children);
-
-  let topBar = null;
-  let helpStrip = null;
-  let oppPoints = null;
-  let playerPoints = null;
-  let battlefield = null;
-  let handFan = null;
-
-  // Dynamically assign elements by props so child order or wrappers never break placement
-  childArray.forEach((child) => {
-    if (!child) return;
-    const props = child.props || {};
-
-    if (props.isOpponent === true) {
-      oppPoints = child;
-    } else if (props.isOpponent === false && props.player) {
-      playerPoints = child;
-    } else if (props.turn !== undefined || props.onEndGame) {
-      topBar = child;
-    } else if (props.drawPiles || props.opponentSlots || props.playerQueue) {
-      battlefield = child;
-    } else if (props.cards !== undefined && props.onSelectCard) {
-      handFan = child;
-    } else {
-      helpStrip = child;
-    }
-  });
-
   return (
-    <div className="fixed inset-0 flex h-screen w-screen flex-col justify-between overflow-hidden bg-slate-950 p-2 md:p-3 font-mono antialiased">
-      {/* Top Assembly: TopBar + Help + Dual Top-HUD Row */}
-      <div className="flex w-full flex-col gap-2 shrink-0 z-30">
-        {topBar}
-        {helpStrip}
-
-        {/* Dual Top-HUD Row: Opponent Top-Left | Player Top-Right */}
-        <div className="flex w-full items-start justify-between gap-4 px-1">
-          <div className="flex justify-start">{oppPoints}</div>
-          <div className="flex justify-end">{playerPoints}</div>
-        </div>
-      </div>
-
-      {/* Center Battlefield */}
-      <div className="relative flex-1 min-h-0 w-full flex items-center justify-center overflow-visible my-1 z-10">
-        {battlefield}
-      </div>
-
-      {/* Bottom Region: Player Hand Fan ONLY (Zero bottom bar) */}
-      <div className="shrink-0 w-full flex items-end justify-center overflow-visible pb-1 z-30">
-        {handFan}
+    <div className="absolute inset-0 flex items-center justify-center overflow-visible p-2 md:p-3 lg:p-4" style={{ perspective: '2000px' }}>
+      <div
+        className="game-board-surface cosmic-sheen relative grid h-full w-full gap-1 overflow-visible rounded-2xl border-t border-t-white/20 p-2 backdrop-blur-xl md:gap-2 md:p-3"
+        style={{
+          '--accent-color': accent,
+          transform: 'rotateX(2deg)',
+          transformOrigin: 'center 52%',
+          gridTemplateColumns: 'minmax(0, 1fr)',
+          gridTemplateRows: 'auto auto auto minmax(0, 1fr) minmax(0, auto) auto',
+          gridTemplateAreas:
+            '"topbar" "help" "opp-points" "battlefield" "hand" "player-points"',
+          background: 'linear-gradient(155deg, rgba(15,23,42,0.86), rgba(2,6,23,0.82) 48%, rgba(12,8,24,0.88))',
+        }}
+      >
+        <div className="game-board-edge pointer-events-none absolute inset-0 rounded-2xl" />
+        {children}
       </div>
     </div>
   );
