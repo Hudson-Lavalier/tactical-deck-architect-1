@@ -13,9 +13,8 @@ export default function BoardSurface({ children, accent = '#00ffff' }) {
           transform: 'rotateX(2deg)',
           transformOrigin: 'center 52%',
           gridTemplateColumns: 'minmax(0, 1fr)',
-          gridTemplateRows: 'auto auto auto minmax(0, 1fr) minmax(0, auto) auto',
-          gridTemplateAreas:
-            '"topbar" "help" "opp-points" "battlefield" "hand" "player-points"',
+          gridTemplateRows: 'auto auto minmax(0, 1fr) auto',
+          gridTemplateAreas: '"topbar" "help" "battlefield" "hand"',
           background: 'linear-gradient(155deg, rgba(15,23,42,0.86), rgba(2,6,23,0.82) 48%, rgba(12,8,24,0.88))',
         }}
       >

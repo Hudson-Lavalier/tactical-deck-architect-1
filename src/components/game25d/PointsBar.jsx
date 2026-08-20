@@ -1,8 +1,6 @@
 import React from 'react';
 import { ALIGNMENT_COLORS } from '@/components/game/terminalTheme';
 
-// PointsBar — 2.5D-styled point readout: Victory Standard bars + circular
-// General Tally icons + hand count. Sits on the tilted plane.
 export default function PointsBar({ player, isOpponent = false, handCount }) {
   if (!player) return null;
 
@@ -11,73 +9,43 @@ export default function PointsBar({ player, isOpponent = false, handCount }) {
     ? Object.entries(victoryProfile).filter(([, target]) => target > 0)
     : [];
 
-  const totalTarget = required.reduce((sum, [, t]) => sum + t, 0);
-  const totalEarned = required.reduce((sum, [k, t]) => sum + Math.min(points[k] || 0, t), 0);
-  const overallPct = totalTarget > 0 ? Math.min(100, (totalEarned / totalTarget) * 100) : 0;
-
   return (
-    <div className={`grid w-full min-w-0 grid-cols-[minmax(0,1fr)_auto_auto_auto] items-center justify-center gap-4 font-mono ${isOpponent ? 'text-ui-sm' : 'text-ui-md'}`}>
-      {/* Victory Standard */}
-      <div className="flex w-full min-w-0 flex-col gap-1">
-        <div className="text-term-text tracking-[0.2em] text-[12px] font-bold">
-          {isOpponent ? 'OPPONENT' : 'YOU'} · VICTORY STANDARD
+    <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-2 font-mono">
+      <div className="min-w-0">
+        <div className={`mb-1 flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.14em] text-term-text ${isOpponent ? '' : 'justify-end'}`}>
+          <span>{isOpponent ? 'Opponent' : 'Player'} victory standard</span>
+          {handCount != null && <span className="shrink-0 text-term-blue">Hand: {handCount}</span>}
         </div>
-        {required.map(([key, target]) => {
-          const info = ALIGNMENT_COLORS[key];
-          const cur = points[key] || 0;
-          const pct = Math.min(100, (cur / target) * 100);
-          return (
-            <div key={key} className="grid w-full min-w-0 grid-cols-[auto_1fr_auto] items-center gap-2" style={{ '--accent-color': info.glow }}>
-              <span style={{ color: info.glow }} className="accent-text-glow min-w-0 max-w-[7rem] truncate text-left text-[12px] font-bold">
-                {info.name}
-              </span>
-              <div className="h-1.5 w-full min-w-0 overflow-hidden rounded bg-term-purple/10">
-                <div
-                  className="h-full transition-[width,box-shadow] duration-300"
-                  style={{ width: `${pct}%`, background: info.glow, boxShadow: '0 0 6px color-mix(in srgb, var(--accent-color) 50%, transparent)' }}
-                />
+        <div className="flex min-w-0 items-center gap-2">
+          {required.map(([key, target]) => {
+            const info = ALIGNMENT_COLORS[key];
+            const current = points[key] || 0;
+            const percent = Math.min(100, (current / target) * 100);
+            return (
+              <div key={key} className="min-w-0 flex-1" style={{ '--accent-color': info.glow }}>
+                <div className="mb-0.5 flex items-center justify-between gap-1 text-[10px] font-bold leading-none">
+                  <span className="truncate" style={{ color: info.glow }}>{info.name}</span>
+                  <span className="shrink-0 tabular-nums" style={{ color: info.glow }}>{current}/{target}</span>
+                </div>
+                <div className="h-1.5 overflow-hidden rounded-full bg-white/5">
+                  <div className="h-full rounded-full transition-[width] duration-300" style={{ width: `${percent}%`, background: info.glow, boxShadow: `0 0 6px ${info.glow}` }} />
+                </div>
               </div>
-              <span style={{ color: info.glow }} className="text-right text-[12px] font-bold tabular-nums">
-                {cur}/{target}
-              </span>
-            </div>
-          );
-        })}
-        {/* Weighted overall */}
-        <div className="mt-0.5 grid w-full min-w-0 grid-cols-[auto_1fr_auto] items-center gap-2">
-          <span className="min-w-0 max-w-[7rem] truncate text-left text-[12px] font-bold tracking-[0.15em] text-term-text">WEIGHTED</span>
-          <div className="h-2 w-full min-w-0 overflow-hidden rounded bg-term-purple/10">
-            <div
-              className="h-full transition-[width,box-shadow] duration-300"
-              style={{ width: `${overallPct}%`, background: 'linear-gradient(90deg, #00ff41, #00ffff, #a855f7)', boxShadow: '0 0 8px rgba(168,85,247,0.4)' }}
-            />
-          </div>
-          <span className="text-right text-[12px] font-bold tabular-nums text-term-text">{totalEarned}/{totalTarget}</span>
+            );
+          })}
         </div>
       </div>
 
-      <div className="h-12 w-px bg-term-purple/20" />
-
-      {/* General Tally — circular icons */}
-      <div className="flex flex-col gap-1">
-        <div className="text-term-text tracking-[0.2em] text-[12px] font-bold">GENERAL TALLY</div>
-        <div className="flex gap-2">
+      <div className="shrink-0 border-l border-white/10 pl-2">
+        <div className="mb-1 text-center text-[9px] font-bold uppercase tracking-[0.12em] text-term-faint">General tally</div>
+        <div className="flex gap-1.5">
           {Object.entries(ALIGNMENT_COLORS).map(([key, info]) => (
-            <div key={key} className="flex flex-col items-center gap-0.5" style={{ '--accent-color': info.glow }}>
-              <div className="accent-border accent-bg-subtle accent-glow flex aspect-square w-7 items-center justify-center rounded-full border">
-                <span style={{ color: info.glow }} className="accent-text-glow text-[13px] font-bold">
-                  {points[key]}
-                </span>
-              </div>
-              <span style={{ color: info.glow }} className="text-[10px] font-bold">{info.label}</span>
+            <div key={key} className="flex h-6 w-6 items-center justify-center rounded-full border bg-cosmic-deep/75 text-[10px] font-bold tabular-nums" style={{ borderColor: `${info.glow}66`, color: info.glow, boxShadow: `inset 0 0 8px ${info.glow}18` }} title={`${info.name}: ${points[key] || 0}`}>
+              {points[key] || 0}
             </div>
           ))}
         </div>
       </div>
-
-      {handCount != null && (
-        <div className="ml-1 text-term-text text-[12px] font-bold tracking-[0.15em]">HAND: {handCount}</div>
-      )}
     </div>
   );
 }
