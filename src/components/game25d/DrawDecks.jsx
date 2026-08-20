@@ -9,14 +9,14 @@ export default function DrawDecks({ piles, onDraw, disabled }) {
   ];
 
   return (
-    <div className="game-draw-decks flex w-full min-w-0 max-w-24 shrink flex-col items-center gap-3 md:gap-5">
-      <div className="text-term-text font-mono text-[12px] font-bold tracking-[0.2em] text-center">DRAW</div>
+    <div className="game-draw-decks mx-auto flex w-full min-w-0 max-w-24 shrink flex-col items-center justify-center gap-3 overflow-visible md:gap-5">
+      <div className="hud-kicker text-center font-mono text-[11px] font-bold uppercase tracking-[0.25em] text-term-text">Archives</div>
       {decks.map((d) => (
         <div
           key={d.id}
           onClick={() => !disabled && onDraw?.(d.id)}
-          className={`game-draw-deck accent-border relative flex aspect-[5/7] w-full max-w-24 flex-col items-center justify-center rounded-lg glass-card cosmic-sheen transition-[transform,box-shadow] ${
-            disabled ? 'cursor-not-allowed opacity-40' : 'accent-glow cursor-pointer'
+          className={`game-draw-deck accent-border relative z-20 flex aspect-[5/7] w-full max-w-24 flex-col items-center justify-center rounded-xl glass-card cosmic-sheen transition-all duration-300 ease-out ${
+            disabled ? 'cursor-not-allowed opacity-40' : 'cursor-pointer opacity-100 hover:-translate-y-2 active:translate-y-0 active:scale-95'
           }`}
           style={{ '--accent-color': d.color }}
         >
@@ -25,7 +25,7 @@ export default function DrawDecks({ piles, onDraw, disabled }) {
           </div>
           <div className="text-term-text font-mono text-base font-bold mt-2">{d.count}</div>
           {!disabled && (
-            <div className="text-term-text font-mono text-[9px] font-bold mt-1 tracking-[0.15em]">[ DRAW ]</div>
+            <div className="mt-1 font-mono text-[9px] font-bold uppercase tracking-[0.18em] text-term-faint">Access</div>
           )}
         </div>
       ))}

@@ -12,12 +12,12 @@ export default function Battlefield({
   onPersistentClick, placementEffect,
 }) {
   return (
-    <div className="game-battlefield relative grid h-full min-h-0 w-full grid-cols-[minmax(4.5rem,0.55fr)_minmax(0,2fr)_minmax(9rem,1.15fr)_minmax(0,2fr)] items-center gap-2 overflow-visible px-4 md:gap-4 md:px-8 lg:gap-6 lg:px-12">
+    <div className="game-battlefield relative mx-auto grid h-full min-h-0 w-full grid-cols-[minmax(4.5rem,0.55fr)_minmax(0,2fr)_minmax(9rem,1.15fr)_minmax(0,2fr)_minmax(4.5rem,0.55fr)] place-items-center gap-2 overflow-visible px-4 md:gap-4 md:px-8 lg:gap-6 lg:px-12">
       <div className="game-draw-position relative z-10 flex min-w-0 justify-center">
         <DrawDecks piles={drawPiles} onDraw={onDraw} disabled={drawDisabled} />
       </div>
 
-      <div className="game-board-side flex min-w-0 flex-col items-center justify-center gap-2 md:gap-3">
+      <div className="game-board-side mx-auto flex w-full min-w-0 flex-col items-center justify-center gap-2 overflow-visible md:gap-3">
         <PersistentRow
           slots={opponentSlots}
           onSlotClick={onPersistentClick}
@@ -36,7 +36,7 @@ export default function Battlefield({
           domainPlacedBy={domainPlacedBy}
         />
 
-      <div className="game-board-side flex min-w-0 flex-col items-center justify-center gap-2 md:gap-3">
+      <div className="game-board-side mx-auto flex w-full min-w-0 flex-col items-center justify-center gap-2 overflow-visible md:gap-3">
         <QueueLane queuedCards={playerQueue} isActive={isPlayerTurn} accent="#00ff41" label="PLAYER QUEUE" onCardClick={onQueueCardClick} />
         <PersistentRow
           slots={playerSlots}

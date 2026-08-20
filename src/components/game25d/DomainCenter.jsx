@@ -24,35 +24,33 @@ export default function DomainCenter({ domain, modifiers, onDomainClick, domainA
   }
 
   return (
-    <div className="relative z-10 flex h-full min-h-0 w-full min-w-0 flex-col items-center gap-1.5 overflow-visible" style={{ '--accent-color': accent }}>
-      {domain && <div className="accent-bloom pointer-events-none absolute -inset-[15%] -z-10 rounded-full" />}
-
-      <div className="text-term-text font-mono text-[14px] font-bold tracking-[0.2em]">── SHARED DOMAIN ──</div>
+    <div className="relative z-10 mx-auto flex h-full min-h-0 w-full min-w-0 flex-col items-center justify-center gap-1.5 overflow-visible" style={{ '--accent-color': accent }}>
+      <div className="hud-kicker text-center font-mono text-[12px] font-bold uppercase tracking-[0.25em] text-term-text">Shared Domain</div>
 
       <div className="grid min-h-0 w-full flex-1 grid-cols-[minmax(0,0.55fr)_minmax(7rem,1fr)_minmax(0,0.55fr)] items-center justify-center gap-1 overflow-visible md:gap-2">
-        <div className="flex flex-col gap-1">
+        <div className="flex min-w-0 flex-col items-center justify-center gap-1">
           {modifiers?.opponent?.map((mod, i) => (
             <Card key={mod.id || i} card={mod} size="medium" />
           ))}
         </div>
 
         {domain ? (
-          <div className="relative w-full max-w-44 justify-self-center overflow-visible">
-            <div className="accent-dot-field pointer-events-none absolute -inset-2 rounded opacity-25" />
+          <div className="game-domain-card relative z-20 mx-auto aspect-[5/7] w-full max-w-44 justify-self-center overflow-visible opacity-100">
+            <div className="accent-dot-field pointer-events-none absolute -inset-2 rounded opacity-20" />
             <Card card={domain} size="domain" onClick={() => onDomainClick(domain)} />
           </div>
         ) : (
           <div
-            className="game-domain-empty accent-border flex aspect-[5/7] w-full max-w-44 items-center justify-center justify-self-center rounded border border-dashed glass-card"
+            className="game-domain-empty holo-slot accent-border mx-auto flex aspect-[5/7] w-full max-w-44 items-center justify-center justify-self-center rounded-xl"
           >
             <div className="text-center">
-              <div className="text-term-purple font-mono text-sm">[ NO DOMAIN ]</div>
-              <div className="text-term-faint font-mono text-[9px] mt-1">PLACE DOMAIN</div>
+              <div className="holo-slot-core font-mono text-xs font-bold uppercase tracking-[0.22em]">Domain Socket</div>
+              <div className="mt-1 font-mono text-[9px] uppercase tracking-[0.16em] text-term-faint">Awaiting construct</div>
             </div>
           </div>
         )}
 
-        <div className="flex flex-col gap-1">
+        <div className="flex min-w-0 flex-col items-center justify-center gap-1">
           {modifiers?.player?.map((mod, i) => (
             <Card key={mod.id || i} card={mod} size="medium" />
           ))}
@@ -60,8 +58,8 @@ export default function DomainCenter({ domain, modifiers, onDomainClick, domainA
       </div>
 
       {domain && (
-        <div className="text-term-text font-mono text-[12px] font-bold">
-          ACTIVE:{' '}
+        <div className="hud-status font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-term-faint">
+          Active matrix ·{' '}
           <span className="accent-text-glow" style={{ color: accent }}>
             {ALIGNMENT_COLORS[domain.alignment]?.name || 'SPECIAL'}
           </span>

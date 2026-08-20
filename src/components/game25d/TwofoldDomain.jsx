@@ -13,25 +13,23 @@ export default function TwofoldDomain({ domain, domainAttached, onDomainClick, o
   const canSwitch = isPlayerTurn && domainPlacedBy === 'player' && switchesLeft > 0;
 
   return (
-    <div className="relative z-10 flex h-full min-h-0 w-full min-w-0 flex-col items-center gap-1.5 overflow-visible" style={{ '--accent-color': accent }}>
-      <div className="accent-bloom pointer-events-none absolute -inset-[15%] -z-10 rounded-full" />
-
-      <div className="text-term-text font-mono text-[14px] font-bold tracking-[0.2em]">── TWOFOLD DOMAIN ──</div>
+    <div className="relative z-10 mx-auto flex h-full min-h-0 w-full min-w-0 flex-col items-center justify-center gap-1.5 overflow-visible" style={{ '--accent-color': accent }}>
+      <div className="hud-kicker text-center font-mono text-[12px] font-bold uppercase tracking-[0.25em] text-term-text">Twofold Domain</div>
 
       <div className="grid min-h-0 w-full flex-1 grid-cols-[minmax(0,1fr)_minmax(3.5rem,0.7fr)_minmax(0,1fr)] items-center justify-center gap-1 overflow-visible md:gap-2">
         {/* Left attached (Grounding) */}
         <div className="flex w-full min-w-0 flex-col items-center gap-1">
           <div className="text-center font-mono text-[9px] tracking-[0.15em] text-term-faint">LEFT · GROUNDING</div>
           {attached.left ? (
-            <div className={`relative w-full max-w-24 ${attached.activeSide === 'left' ? '' : 'opacity-60'}`}>
+            <div className={`relative z-20 mx-auto aspect-[5/7] w-full max-w-24 overflow-visible ${attached.activeSide === 'left' ? 'opacity-100' : 'opacity-70'}`}>
               {attached.activeSide === 'left' && (
                 <div className="accent-halo pointer-events-none absolute -inset-1 rounded" style={{ '--accent-color': ALIGNMENT_COLORS.A.glow }} />
               )}
               <Card card={attached.left} size="medium" onClick={() => onDomainClick(attached.left)} />
             </div>
           ) : (
-            <div className="game-persistent-empty flex aspect-[5/7] w-full max-w-24 items-center justify-center rounded border-dashed glass-card" style={{ borderColor: 'rgba(0,255,65,0.2)' }}>
-              <span className="text-term-faint font-mono text-[10px]">[ A ]</span>
+            <div className="game-persistent-empty holo-slot flex aspect-[5/7] w-full max-w-24 items-center justify-center rounded-xl" style={{ '--accent-color': ALIGNMENT_COLORS.A.glow }}>
+              <span className="holo-slot-core font-mono text-[9px] font-bold uppercase tracking-[0.16em]">Grounding socket</span>
             </div>
           )}
         </div>
@@ -39,7 +37,7 @@ export default function TwofoldDomain({ domain, domainAttached, onDomainClick, o
         {/* Center — small Twofold card */}
         <div className="flex w-full min-w-0 flex-col items-center gap-1">
           <div className="text-center font-mono text-[9px] tracking-[0.15em] text-term-faint">TWOFOLD</div>
-          <div className="w-full max-w-20">
+          <div className="game-domain-card relative z-20 mx-auto aspect-[5/7] w-full max-w-20 overflow-visible opacity-100">
             <Card card={domain} size="small" onClick={() => onDomainClick(domain)} />
           </div>
         </div>
@@ -48,15 +46,15 @@ export default function TwofoldDomain({ domain, domainAttached, onDomainClick, o
         <div className="flex w-full min-w-0 flex-col items-center gap-1">
           <div className="text-center font-mono text-[9px] tracking-[0.15em] text-term-faint">RIGHT · SYSTEM</div>
           {attached.right ? (
-            <div className={`relative w-full max-w-24 ${attached.activeSide === 'right' ? '' : 'opacity-60'}`}>
+            <div className={`relative z-20 mx-auto aspect-[5/7] w-full max-w-24 overflow-visible ${attached.activeSide === 'right' ? 'opacity-100' : 'opacity-70'}`}>
               {attached.activeSide === 'right' && (
                 <div className="accent-halo pointer-events-none absolute -inset-1 rounded" style={{ '--accent-color': ALIGNMENT_COLORS.B.glow }} />
               )}
               <Card card={attached.right} size="medium" onClick={() => onDomainClick(attached.right)} />
             </div>
           ) : (
-            <div className="game-persistent-empty flex aspect-[5/7] w-full max-w-24 items-center justify-center rounded border-dashed glass-card" style={{ borderColor: 'rgba(0,255,255,0.2)' }}>
-              <span className="text-term-faint font-mono text-[10px]">[ B ]</span>
+            <div className="game-persistent-empty holo-slot flex aspect-[5/7] w-full max-w-24 items-center justify-center rounded-xl" style={{ '--accent-color': ALIGNMENT_COLORS.B.glow }}>
+              <span className="holo-slot-core font-mono text-[9px] font-bold uppercase tracking-[0.16em]">System socket</span>
             </div>
           )}
         </div>
@@ -66,7 +64,7 @@ export default function TwofoldDomain({ domain, domainAttached, onDomainClick, o
       <button
         onClick={onSwitch}
         disabled={!canSwitch}
-        className="accent-border rounded px-3 py-1.5 text-ui-xs font-bold glass-card cosmic-sheen transition-[transform,box-shadow] hover:scale-105 disabled:cursor-not-allowed disabled:opacity-40"
+        className="accent-border hud-control rounded-lg px-3 py-1.5 text-ui-xs font-bold uppercase tracking-[0.16em] glass-card cosmic-sheen transition-all duration-300 ease-out hover:-translate-y-0.5 active:translate-y-0 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
         style={{ color: accent }}
       >
         SWITCH DOMAIN ({switchesLeft}/2){!canSwitch && switchesLeft === 0 ? ' — USED' : ''}

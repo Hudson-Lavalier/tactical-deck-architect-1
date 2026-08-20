@@ -23,7 +23,7 @@ export default function Card({ card, faceDown = false, size = 'normal', onClick,
 
   if (faceDown) {
     return (
-      <div className={`${s.box} rounded glass-card flex items-center justify-center relative overflow-hidden`}
+      <div className={`${s.box} game-card-premium relative z-20 flex items-center justify-center overflow-hidden rounded-xl glass-card opacity-100`}
       style={{ borderColor: 'rgba(168,85,247,0.2)' }}>
         
         <div className="absolute inset-0 opacity-15"
@@ -44,7 +44,7 @@ export default function Card({ card, faceDown = false, size = 'normal', onClick,
       onClick={onClick}
       data-card-interactive={onClick ? 'true' : undefined}
       aria-disabled={disabled}
-      className={`${s.box} accent-border rounded glass-card cosmic-sheen relative overflow-hidden cursor-pointer transition-[transform,box-shadow] duration-200 hover:scale-105 ${glowClass} ${selected ? 'ring-2 ring-offset-2 ring-offset-[#050308] scale-105' : ''} ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+      className={`${s.box} game-card-premium accent-border relative z-20 overflow-hidden rounded-xl glass-card cosmic-sheen cursor-pointer opacity-100 transition-all duration-300 ease-out hover:-translate-y-1 hover:scale-105 active:translate-y-0 active:scale-[0.98] ${glowClass} ${selected ? 'ring-2 ring-offset-2 ring-offset-[#050308] scale-105' : ''} ${disabled ? 'cursor-not-allowed opacity-50' : ''}`}
       style={{ '--accent-color': accent }}>
       
       <div className="absolute inset-0 pointer-events-none opacity-[0.06]"
