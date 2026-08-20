@@ -1,21 +1,13 @@
 import React from 'react';
 
-// BoardSurface — Dual Top-HUD Layout (Clears bottom vertical height)
+// BoardSurface — Full-Width Flex Container (Fixes grid truncation & restores centering)
 export default function BoardSurface({ children, accent = '#00ffff' }) {
   return (
-    <div className="fixed inset-0 flex h-screen w-screen items-center justify-center overflow-hidden bg-slate-950 p-2 md:p-3">
+    <div className="fixed inset-0 flex h-screen w-screen items-center justify-center overflow-hidden bg-slate-950 p-2 md:p-4">
       <div
-        className="game-board-surface relative grid h-full w-full gap-2 overflow-hidden rounded-2xl p-3 antialiased"
+        className="game-board-surface relative flex h-full w-full flex-col justify-between gap-2 overflow-hidden rounded-2xl p-3 antialiased"
         style={{
           '--accent-color': accent,
-          gridTemplateColumns: '1fr 1fr',
-          gridTemplateRows: 'auto auto minmax(0, 1fr) auto',
-          gridTemplateAreas: `
-            "topbar topbar"
-            "opp-points player-points"
-            "battlefield battlefield"
-            "hand hand"
-          `,
           background: 'radial-gradient(circle at 50% 50%, rgba(15,23,42,0.92) 0%, rgba(2,6,23,0.98) 100%)',
         }}
       >
