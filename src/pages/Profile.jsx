@@ -36,11 +36,11 @@ export default function Profile() {
   const handleEdit = useCallback((id) => { navigate(`/build?edit=${id}`); }, [navigate]);
 
   return (
-    <div className="min-h-screen cosmic-shell text-term-text font-mono p-4 md:p-8 relative overflow-hidden">
-      <CosmicBackground density={60} />
+    <div className="min-h-screen cosmic-shell layered-page text-term-text font-mono p-4 md:p-8 relative overflow-hidden">
+      <CosmicBackground density={36} />
 
       <div className="relative z-10 max-w-5xl mx-auto">
-        <div className="flex items-center gap-3 mb-6">
+        <div className="page-heading flex items-center gap-3 mb-6">
           <button onClick={() => navigate('/')} className="text-term-dim hover:text-term-green transition-colors">
             <ArrowLeft className="w-6 h-6" />
           </button>

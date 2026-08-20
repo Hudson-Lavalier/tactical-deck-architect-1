@@ -6,7 +6,7 @@ export default function FamilyCarouselCard({ family, paradigms, selectedParadigm
   const selected = selectedParadigmId ? paradigms.find((p) => p.id === selectedParadigmId) : null;
 
   return (
-    <div className="w-full h-full p-5 rounded glass-card cosmic-sheen flex flex-col relative overflow-hidden"
+    <div className="w-full h-full p-5 rounded layered-panel flex flex-col relative overflow-hidden"
       style={{ borderColor: isCenter ? 'rgba(0,255,255,0.25)' : 'rgba(168,85,247,0.12)' }}
     >
       <div className="text-term-blue font-bold text-ui-lg text-center tracking-[0.15em] mb-4 relative"

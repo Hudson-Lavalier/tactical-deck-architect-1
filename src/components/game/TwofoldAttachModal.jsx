@@ -16,7 +16,7 @@ export default function TwofoldAttachModal({ hand, onConfirm, onClose }) {
 
   return (
     <div className="fixed inset-0 bg-black/85 flex items-center justify-center z-50 font-mono" onClick={onClose}>
-      <div className="glass-panel p-6 max-w-2xl w-[90vw]" style={{ borderColor: '#a855f740' }} onClick={(e) => e.stopPropagation()}>
+      <div className="layered-panel p-6 max-w-2xl w-[90vw]" style={{ borderColor: '#a855f740' }} onClick={(e) => e.stopPropagation()}>
         <div className="text-term-purple text-ui-md tracking-[0.15em] mb-4 text-center font-bold">── ATTACH DOMAINS TO TWOFOLD REALITY ──</div>
 
         <div className="grid grid-cols-2 gap-4">

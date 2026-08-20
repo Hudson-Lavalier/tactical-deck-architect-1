@@ -14,7 +14,7 @@ import { checkVictory } from '../data/victoryProfiles';
 import { openResponseWindow } from './responseSystem';
 import { dispatchPlace, dispatchRemove, dispatchRoundEnd, dispatchDomainChangeAttempt } from './effects/dispatcher';
 import { emit } from './effects/eventBus';
-import { resetTurnUsage, clearDomainLock } from './effects/primitives';
+import { resetTurnUsage } from './effects/primitives';
 
 // Proceed with the turn after all queue resolutions are complete.
 // Called by startTurn (when no cards to resolve) or by closeResponseWindow
@@ -228,12 +228,10 @@ export function changeDomain(state, cardId, options = {}) {
 
   const oldDomain = state.domain;
   const oldDomainPlacedBy = state.domainPlacedBy;
-  if (oldDomain) dispatchRemove(state, oldDomainPlacedBy, oldDomain);
 
   state.domain = card;
   state.domainPlacedBy = state.currentPlayer;
   state.domainDuration = 0;
-  clearDomainLock(state);
   player.hand.splice(cardIndex, 1);
 
   logEvent(state, { type: 'domain_change', cardId });

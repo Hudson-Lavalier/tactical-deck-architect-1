@@ -12,7 +12,7 @@ export default function ParadigmCarouselCard({ paradigm, isCenter, isSelected, o
   return (
     <div
       onClick={isCenter ? onClick : undefined}
-      className={`w-full h-full p-5 rounded glass-card cosmic-sheen flex flex-col transition-all duration-300 relative overflow-hidden ${
+      className={`w-full h-full p-5 rounded layered-panel flex flex-col transition-all duration-300 relative overflow-hidden ${
         isCenter ? 'cursor-pointer' : ''
       }`}
       style={{

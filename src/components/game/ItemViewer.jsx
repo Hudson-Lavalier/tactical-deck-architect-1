@@ -58,7 +58,7 @@ export default function ItemViewer({ card, onClose }) {
 
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/90 p-5 font-mono" onClick={onClose}>
-      <div ref={cardRef} onClick={(event) => event.stopPropagation()} className="relative flex h-[min(78vh,720px)] w-[min(68vw,620px)] flex-col overflow-hidden rounded-xl border bg-cosmic-deep p-8" style={{ borderColor: `${accent}55`, boxShadow: `0 0 36px ${accent}20`, transformStyle: 'preserve-3d' }}>
+      <div ref={cardRef} onClick={(event) => event.stopPropagation()} className="layered-panel relative flex h-[min(78vh,720px)] w-[min(68vw,620px)] flex-col overflow-hidden rounded-xl border bg-cosmic-deep p-8" style={{ borderColor: `${accent}55`, boxShadow: `0 0 36px ${accent}20`, transformStyle: 'preserve-3d' }}>
         <div className="flex items-start justify-between border-b pb-4" style={{ borderColor: `${accent}25` }}>
           <div>
             <div className="text-2xl font-bold leading-tight" style={{ color: accent }}>{card.name || 'UNNAMED'}</div>

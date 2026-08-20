@@ -26,6 +26,7 @@
 // ════════════════════════════════════════════════════════════════
 
 import { discardCard } from '../primitives';
+import { getHandler } from '../eventBus';
 
 export default {
   // No point generation.
@@ -39,6 +40,9 @@ export default {
   // All three Domains are discarded when Twofold Reality is removed.
   onRemove(state, playerId, card) {
     if (state.domainAttached) {
+      const active = state.domainAttached.activeSide ? state.domainAttached[state.domainAttached.activeSide] : null;
+      const activeHandler = active ? getHandler(active.id) : null;
+      if (activeHandler?.onRemove) activeHandler.onRemove(state, playerId, active);
       if (state.domainAttached.left) discardCard(state, state.domainAttached.left, playerId);
       if (state.domainAttached.right) discardCard(state, state.domainAttached.right, playerId);
       state.domainAttached = null;

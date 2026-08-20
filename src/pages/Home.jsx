@@ -32,8 +32,8 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen cosmic-shell bg-cosmic-deep text-term-text font-mono relative overflow-hidden">
-      <CosmicBackground density={90} />
+    <div className="min-h-screen cosmic-shell layered-page bg-cosmic-deep text-term-text font-mono relative overflow-hidden">
+      <CosmicBackground density={36} />
 
       <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-4 py-8">
         {/* Title with orbital motif */}
@@ -52,7 +52,7 @@ export default function Home() {
             CARD GAME
           </h2>
           <div className="text-term-faint text-ui-xs mt-3 tracking-[0.3em] relative">
-            [ TITLE PENDING ]
+            TACTICAL DECK ARCHITECT
           </div>
         </div>
 
@@ -92,7 +92,7 @@ export default function Home() {
 
           <button
             onClick={handlePlayMatch}
-            className="group flex items-center gap-3 px-6 py-3.5 rounded border bg-cosmic-deep/90 transition-transform duration-200 hover:scale-[1.02]"
+            className="premium-control group flex items-center gap-3 px-6 py-3.5 rounded-lg transition-transform duration-200 hover:translate-x-1"
             style={{ borderColor: 'rgba(0,255,65,0.35)' }}
           >
             <Play className="w-5 h-5 text-term-green" style={{ filter: 'drop-shadow(0 0 6px rgba(0,255,65,0.5))' }} />
@@ -121,7 +121,7 @@ function MenuButton({ to, icon: Icon, label, color }) {
   return (
     <Link
       to={to}
-      className="group flex items-center gap-3 px-6 py-3.5 rounded border bg-cosmic-deep/90 transition-transform duration-200 hover:scale-[1.02]"
+      className="premium-control group flex items-center gap-3 px-6 py-3.5 rounded-lg transition-transform duration-200 hover:translate-x-1"
       style={{ borderColor: `${color}30` }}
     >
       <Icon className="w-5 h-5" style={{ color, filter: `drop-shadow(0 0 5px ${color}80)` }} />
@@ -134,7 +134,7 @@ function BuildSelectDialog({ onSelect, onClose, navigate }) {
   const [builds] = useState(() => getSavedBuilds());
 
   return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 font-mono p-4">
+    <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 font-mono p-4">
       <GlassPanel className="max-w-2xl w-full max-h-[80vh] flex flex-col" accent="#00ff41" glow>
         <div className="flex justify-between items-center p-4 border-b border-term-purple/15">
           <div className="text-term-green text-ui-lg font-bold tracking-[0.15em]">SELECT A BUILD</div>

@@ -46,11 +46,13 @@ export function dispatchAttach(state, playerId, card, target) {
 
 // End of a full round — the active Domain generates points per its rules.
 export function dispatchRoundEnd(state) {
-  const domain = state.domain;
+  let domain = state.domain;
   if (!domain) return;
+  if (domain.id === 'twofold_reality' && state.domainAttached?.activeSide) {
+    domain = state.domainAttached[state.domainAttached.activeSide] || domain;
+  }
   const handler = getEffect(domain.id);
-  if (handler?.onRoundEnd) handler.onRoundEnd(state, 'domain', domain);
-  emit(state, 'round_end', { round: state.roundCount });
+  if (handler?.onRoundEnd) handler.onRoundEnd(state, state.domainPlacedBy || 'domain', domain);
 }
 
 // A player attempts to change the Domain. Cancelable by active effects (locks).

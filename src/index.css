@@ -74,6 +74,13 @@
     --cosmic-glass: rgba(13, 13, 20, 0.62);
     --cosmic-glass-border: rgba(168, 85, 247, 0.16);
     --cosmic-glass-highlight: rgba(255, 255, 255, 0.04);
+    --surface-base: #090711;
+    --surface-raised: #121021;
+    --surface-well: #07060d;
+    --surface-header: rgba(168, 85, 247, 0.09);
+    --surface-line: rgba(168, 85, 247, 0.22);
+    --surface-line-bright: rgba(192, 132, 252, 0.42);
+    --surface-shadow: rgba(0, 0, 0, 0.62);
   }
 
   .dark {
@@ -134,16 +141,16 @@
 @layer components {
   /* Glassmorphism surface — translucent dark with hairline border + inner glow */
   .glass-panel {
-    background: linear-gradient(140deg, rgba(16, 12, 26, 0.92), rgba(8, 8, 16, 0.90));
-    border: 1px solid var(--cosmic-glass-border);
-    box-shadow: inset 0 1px 0 var(--cosmic-glass-highlight), 0 12px 44px rgba(0, 0, 0, 0.5);
-    border-radius: var(--radius);
+    background: linear-gradient(145deg, color-mix(in srgb, var(--surface-raised) 94%, var(--term-purple) 6%), var(--surface-base));
+    border: 1px solid var(--surface-line);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.055), inset 0 0 0 3px rgba(0,0,0,.2), 0 18px 48px var(--surface-shadow);
+    border-radius: calc(var(--radius) + 3px);
   }
 
   .glass-card {
-    background: linear-gradient(165deg, rgba(22, 16, 36, 0.94), rgba(10, 10, 18, 0.92));
-    border: 1px solid rgba(168, 85, 247, 0.14);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.035);
+    background: linear-gradient(160deg, color-mix(in srgb, var(--surface-raised) 92%, var(--term-purple) 8%), var(--surface-well));
+    border: 1px solid var(--surface-line);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.05), inset 0 0 0 2px rgba(0,0,0,.28), 0 8px 22px rgba(0,0,0,.32);
     border-radius: var(--radius);
   }
 
@@ -199,8 +206,68 @@
   /* Cosmic page shell — deep space gradient base */
   .cosmic-shell {
     background:
+      linear-gradient(rgba(168,85,247,.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,255,255,.02) 1px, transparent 1px),
       radial-gradient(ellipse 80% 60% at 20% 0%, rgba(26, 11, 46, 0.55), transparent 60%),
       radial-gradient(ellipse 70% 50% at 85% 100%, rgba(10, 22, 40, 0.5), transparent 55%),
       var(--cosmic-deep);
+    background-size: 44px 44px, 44px 44px, auto, auto, auto;
   }
+
+  .layered-page { background-color: var(--cosmic-deep); }
+  .layered-panel, .section-frame {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--section-accent, var(--term-purple)) 32%, transparent);
+    border-radius: calc(var(--radius) + 4px);
+    background: linear-gradient(150deg, color-mix(in srgb, var(--surface-raised) 94%, var(--section-accent, var(--term-purple)) 6%), var(--surface-base));
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.055), inset 0 0 0 3px rgba(0,0,0,.2), 0 18px 46px var(--surface-shadow);
+  }
+  .layered-panel::before, .section-frame::before {
+    content: ''; position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(90deg, var(--section-accent, var(--term-purple)), transparent 22%, transparent 78%, var(--section-accent, var(--term-purple))) top/100% 1px no-repeat;
+    opacity: .65;
+  }
+  .section-frame__header {
+    min-height: 46px; padding: 10px 15px; display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    border-bottom: 1px solid color-mix(in srgb, var(--section-accent) 24%, transparent);
+    background: linear-gradient(90deg, color-mix(in srgb, var(--section-accent) 10%, transparent), transparent 72%);
+  }
+  .section-frame__eyebrow { color: var(--term-faint); font-size: 10px; font-weight: 800; letter-spacing: .18em; text-transform: uppercase; }
+  .section-frame__title { color: var(--term-text); font-size: 15px; line-height: 1.25; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+  .section-frame__body { position: relative; padding: 15px; }
+  .section-frame__actions { flex: none; }
+  .inset-well { border: 1px solid var(--surface-line); background: var(--surface-well); box-shadow: inset 0 0 18px rgba(0,0,0,.55); border-radius: var(--radius); }
+  .premium-control { border: 1px solid var(--surface-line); background: linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.008)); box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 5px 16px rgba(0,0,0,.28); }
+  .page-heading { border-bottom: 1px solid var(--surface-line); padding-bottom: 14px; position: relative; }
+  .page-heading::after { content: ''; position: absolute; left: 0; bottom: -1px; width: 160px; height: 1px; background: linear-gradient(90deg, var(--term-purple), transparent); }
+  .effect-badge { position: absolute; right: 6px; bottom: 6px; z-index: 8; padding: 3px 6px; border: 1px solid rgba(255,115,115,.55); border-radius: 4px; background: rgba(46,8,14,.94); color: #ff9a9a; font-size: 8px; font-weight: 900; letter-spacing: .08em; }
+  .game-card::after { content: ''; position: absolute; inset: 4px; pointer-events: none; border: 1px solid color-mix(in srgb, currentColor 18%, transparent); border-radius: calc(var(--radius) - 2px); box-shadow: inset 0 0 16px rgba(0,0,0,.35); }
+  .game-card--back { background: radial-gradient(circle at 50% 42%, rgba(168,85,247,.24), transparent 28%), repeating-linear-gradient(45deg, rgba(192,132,252,.06) 0 1px, transparent 1px 7px), var(--surface-well); }
+}
+
+  .theme-preview { background: linear-gradient(145deg, rgba(168,85,247,.22), rgba(0,255,255,.06) 45%, rgba(0,0,0,.74)); }
+  .theme-preview::before { content: ''; position: absolute; inset: 10px; border: 1px solid rgba(192,132,252,.3); border-radius: 6px; box-shadow: inset 0 0 20px rgba(0,0,0,.5); }
+  .theme-preview--obsidian { background: linear-gradient(145deg, #17171d, #050507); }
+  .theme-preview--aether { background: linear-gradient(145deg, #0a2638, #03101b 55%, #0b0820); }
+
+:root[data-theme='obsidian'] {
+  --cosmic-deep: #030307; --cosmic-nebula-purple: #100c18; --cosmic-nebula-blue: #071018;
+  --surface-base: #07070a; --surface-raised: #101015; --surface-well: #030305;
+  --surface-header: rgba(255,255,255,.025); --surface-line: rgba(190,190,210,.16); --surface-line-bright: rgba(220,220,240,.3);
+}
+:root[data-theme='aether'] {
+  --cosmic-deep: #020810; --cosmic-nebula-purple: #10102a; --cosmic-nebula-blue: #061d30;
+  --surface-base: #06101a; --surface-raised: #0a1a28; --surface-well: #02070c;
+  --surface-header: rgba(0,255,255,.07); --surface-line: rgba(0,210,255,.22); --surface-line-bright: rgba(0,255,255,.4);
+}
+
+@media (max-height: 900px) and (min-width: 1025px) {
+  .game-board-plane { width: 112% !important; height: 112% !important; transform: rotateX(3deg) scale(.85) !important; }
+}
+@media (max-height: 760px) and (min-width: 1025px) {
+  .game-board-plane { width: 132% !important; height: 132% !important; transform: rotateX(2deg) scale(.72) !important; }
+}
+@media (max-width: 1024px) {
+  .game-board-plane { width: 100% !important; height: 100% !important; transform: none !important; overflow: auto !important; grid-template-rows: auto auto auto auto minmax(520px,1fr) auto auto auto !important; }
 }

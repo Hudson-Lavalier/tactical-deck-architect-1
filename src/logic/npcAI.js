@@ -17,6 +17,7 @@ import { DRAW_PILES, ALIGNMENT } from '../data/gameConstants';
 import { drawCard, placePersistent, changeDomain, endTurn } from '../engine/turnManager';
 import { determinePlayMode, getActionAllowance, canPlayActionCard } from '../engine/resolutionEngine';
 import { enqueueCard } from '../engine/queueSystem';
+import { switchTwofoldDomain } from '../engine/twofoldSystem';
 
 // ── Difficulty-scaled thresholds ────────────────────────────────────
 // d1 = easy (passive, rarely counters), d5 = hard (aggressive, smart).
@@ -109,6 +110,13 @@ function pickActionCard(state, player, playableCards) {
 export function executeNPCTurn(state) {
   const pileId = pickDrawPile(state);
   drawCard(state, pileId);
+
+  if (state.domain?.id === 'twofold_reality' && state.domainPlacedBy === 'opponent' && state.domainAttached) {
+    const alternate = state.domainAttached.activeSide === 'left' ? 'right' : 'left';
+    if (state.domainAttached[alternate] && Math.random() < smartActionChance(state.difficulty)) {
+      switchTwofoldDomain(state, 'opponent', alternate);
+    }
+  }
 
   const didBoardDev = decideBoardDevelopment(state);
   if (didBoardDev && state.phase === 'game_over') return;

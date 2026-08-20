@@ -41,7 +41,7 @@ export default function HandView({ cards, onSelectCard, onClose }) {
 
   return (
     <div className="fixed inset-0 z-40 flex flex-col items-center justify-center bg-black/85 font-mono" onClick={onClose}>
-      <div className="relative z-10 flex w-full flex-col items-center" onClick={(event) => event.stopPropagation()}>
+      <div className="layered-panel relative z-10 flex w-[96vw] flex-col items-center py-7" onClick={(event) => event.stopPropagation()}>
         <div className="mb-6 text-ui-lg font-bold tracking-[0.25em] text-term-text">── HAND VIEW ──</div>
         {cards.length === 0 ? (
           <div className="text-ui-md italic text-term-faint">[ HAND EMPTY ]</div>

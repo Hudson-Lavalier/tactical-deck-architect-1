@@ -15,7 +15,7 @@ export default function DrawDecks({ piles, onDraw, disabled }) {
         <div
           key={d.id}
           onClick={() => !disabled && onDraw?.(d.id)}
-          className={`relative w-20 h-28 rounded-lg glass-card cosmic-sheen flex flex-col items-center justify-center transition-[transform,box-shadow] ${
+          className={`relative w-20 h-28 rounded-lg layered-panel flex flex-col items-center justify-center transition-[transform,box-shadow] ${
             disabled ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'
           }`}
           style={{

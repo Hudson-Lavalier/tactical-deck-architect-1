@@ -25,7 +25,13 @@ export function getHandler(cardId) { return _getHandler(cardId); }
 // Collect every active persistent card: the shared Domain + both players' slots.
 function activeCards(state) {
   const cards = [];
-  if (state.domain) cards.push({ owner: 'domain', card: state.domain });
+  if (state.domain) {
+    cards.push({ owner: state.domainPlacedBy || 'domain', card: state.domain });
+    if (state.domain.id === 'twofold_reality' && state.domainAttached?.activeSide) {
+      const activeFlank = state.domainAttached[state.domainAttached.activeSide];
+      if (activeFlank) cards.push({ owner: state.domainPlacedBy || 'domain', card: activeFlank });
+    }
+  }
   for (const pid of ['player', 'opponent']) {
     const p = state.players?.[pid];
     if (!p?.persistentSlots) continue;

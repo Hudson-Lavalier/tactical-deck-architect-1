@@ -10,7 +10,7 @@ export default function TwofoldSwitchModal({ domainAttached, switchesLeft, onSwi
 
   return (
     <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 font-mono" onClick={onClose}>
-      <div className="glass-panel p-6 max-w-lg w-[90vw]" style={{ borderColor: '#a855f740' }} onClick={(e) => e.stopPropagation()}>
+      <div className="layered-panel p-6 max-w-lg w-[90vw]" style={{ borderColor: '#a855f740' }} onClick={(e) => e.stopPropagation()}>
         <div className="text-term-purple text-ui-md tracking-[0.15em] mb-2 text-center font-bold">── SWITCH ACTIVE DOMAIN ──</div>
         <div className="text-term-faint text-ui-xs text-center mb-4 tracking-[0.15em]">
           SWITCHES REMAINING: <span className="text-term-purple font-bold">{switchesLeft}/2</span>

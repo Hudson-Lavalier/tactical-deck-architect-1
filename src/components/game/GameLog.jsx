@@ -9,6 +9,9 @@ const EVENT_LABELS = {
   rhetoric_draw: 'RHETORIC DRAW',
   place_persistent: 'PLACE PERSISTENT',
   domain_change: 'DOMAIN CHANGE',
+  domain_change_blocked: 'DOMAIN CHANGE BLOCKED',
+  twofold_attach: 'TWOFOLD ATTACH',
+  twofold_switch: 'TWOFOLD SWITCH',
   enqueue: 'ENQUEUE',
   queue_full: 'QUEUE FULL',
   queue_collect: 'QUEUE COLLECT',
@@ -23,6 +26,9 @@ const EVENT_LABELS = {
   response_pass: 'RESPONSE PASS',
   rhetoric_response: 'RHETORIC RESPONSE',
   card_discarded: 'CARD DISCARDED',
+  effect_noop: 'EFFECT NEEDS WORK',
+  shield_added: 'SHIELD ADDED',
+  slot_disabled: 'SLOT DISABLED',
   victory: 'VICTORY',
   deck_exhaustion: 'DECK EXHAUSTION',
 };
@@ -43,7 +49,7 @@ export default function GameLog({ log }) {
       </button>
 
       {open && (
-        <div className="fixed right-0 top-0 bottom-0 w-80 max-w-[85vw] z-30 glass-panel flex flex-col"
+        <div className="fixed right-0 top-0 bottom-0 w-80 max-w-[85vw] z-30 layered-panel flex flex-col"
           style={{ borderRadius: '16px 0 0 16px', borderRight: 'none' }}
         >
           <div className="flex justify-between items-center p-3 border-b border-term-purple/15">

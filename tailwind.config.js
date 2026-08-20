@@ -76,7 +76,11 @@ module.exports = {
   				'term-blue': 'var(--term-blue)',
   				'cosmic-deep': 'var(--cosmic-deep)',
   				'cosmic-nebula-purple': 'var(--cosmic-nebula-purple)',
-  				'cosmic-nebula-blue': 'var(--cosmic-nebula-blue)'
+  				'cosmic-nebula-blue': 'var(--cosmic-nebula-blue)',
+				'surface-base': 'var(--surface-base)',
+				'surface-raised': 'var(--surface-raised)',
+				'surface-well': 'var(--surface-well)',
+				'surface-line': 'var(--surface-line)'
   				},
   		fontFamily: {
   				heading: ['var(--font-heading)'],

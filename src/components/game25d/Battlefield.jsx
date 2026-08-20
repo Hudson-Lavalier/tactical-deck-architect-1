@@ -22,7 +22,7 @@ export default function Battlefield({
   domainPlacedBy,
 }) {
   return (
-    <div className="relative flex items-center justify-center gap-5 min-h-0 overflow-hidden w-full h-full">
+    <div className="relative flex items-center justify-center gap-5 min-h-0 overflow-hidden w-full h-full rounded-xl border border-term-purple/20 bg-black/20 shadow-[inset_0_0_30px_rgba(0,0,0,.5)]">
       <div className="absolute left-0 top-1/2 -translate-y-1/2 z-10">
         <DrawDecks piles={drawPiles} onDraw={onDraw} disabled={drawDisabled} />
       </div>
