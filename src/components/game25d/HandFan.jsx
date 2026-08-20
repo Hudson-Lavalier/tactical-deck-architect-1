@@ -2,12 +2,10 @@ import React from 'react';
 import Card from '@/components/game/Card';
 import { HAND_LIMIT } from '@/data/gameConstants';
 
-// HandFan — dynamically overlapping hand fan locked to a compact center bay.
 export default function HandFan({ cards, onSelectCard, selectedCardId, disabled }) {
   const handCount = cards.length;
   const visible = cards.slice(0, HAND_LIMIT);
 
-  // Dynamic negative margin (overlap) based on card count to keep 10 cards tightly packed
   const overlapClass =
     handCount > 8
       ? '-ml-7 md:-ml-9'
@@ -18,7 +16,7 @@ export default function HandFan({ cards, onSelectCard, selectedCardId, disabled 
       : '';
 
   return (
-    <div className="game-hand-fan relative z-30 mx-auto flex h-full max-h-36 w-full max-w-lg items-end justify-center overflow-visible px-2 pb-0 md:max-w-xl">
+    <div className="game-hand-fan col-span-2 relative z-30 mx-auto flex h-full max-h-36 w-full max-w-lg items-end justify-center overflow-visible px-2 pb-0 md:max-w-xl">
       <div className="flex items-end justify-center overflow-visible">
         {visible.map((card, index) => {
           const midPoint = (visible.length - 1) / 2;
@@ -39,7 +37,6 @@ export default function HandFan({ cards, onSelectCard, selectedCardId, disabled 
                 index > 0 ? overlapClass : ''
               }`}
             >
-              {/* Hover wrapper elevates card upward without destroying rotational fan angle */}
               <div className="transition-transform duration-200 ease-out group-hover/handcard:-translate-y-8 group-hover/handcard:scale-110">
                 <Card
                   card={card}
