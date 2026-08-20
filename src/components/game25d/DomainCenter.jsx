@@ -54,7 +54,7 @@ export default function DomainCenter({ domain, modifiers, onDomainClick, domainA
           </div>
         ) : (
           <div
-            className="game-domain-empty w-60 h-72 rounded glass-card flex items-center justify-center"
+            className="game-domain-empty w-100 h-72 rounded glass-card flex items-center justify-center"
             style={{ borderColor: 'rgba(168,85,247,0.3)', borderStyle: 'dashed' }}
           >
             <div className="text-center">
