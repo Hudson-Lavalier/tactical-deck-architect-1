@@ -24,17 +24,12 @@ export default function DomainCenter({ domain, modifiers, onDomainClick, domainA
   }
 
   return (
-    <div className="flex flex-col items-center gap-1.5 relative shrink-0 h-full min-h-0">
-      {domain && (
-        <div
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[26rem] h-[26rem] rounded-full pointer-events-none -z-10"
-          style={{ background: `radial-gradient(circle, ${accent}30, transparent 70%)` }}
-        />
-      )}
+    <div className="relative z-10 flex h-full min-h-0 w-full min-w-0 flex-col items-center gap-1.5 overflow-visible" style={{ '--accent-color': accent }}>
+      {domain && <div className="accent-bloom pointer-events-none absolute -inset-[15%] -z-10 rounded-full" />}
 
       <div className="text-term-text font-mono text-[14px] font-bold tracking-[0.2em]">── SHARED DOMAIN ──</div>
 
-      <div className="flex items-center justify-center gap-2 flex-1 min-h-0">
+      <div className="grid min-h-0 w-full flex-1 grid-cols-[minmax(0,0.55fr)_minmax(7rem,1fr)_minmax(0,0.55fr)] items-center justify-center gap-1 overflow-visible md:gap-2">
         <div className="flex flex-col gap-1">
           {modifiers?.opponent?.map((mod, i) => (
             <Card key={mod.id || i} card={mod} size="medium" />
@@ -42,20 +37,13 @@ export default function DomainCenter({ domain, modifiers, onDomainClick, domainA
         </div>
 
         {domain ? (
-          <div className="relative">
-            <div
-              className="absolute -inset-2 rounded pointer-events-none opacity-25"
-              style={{
-                backgroundImage: `radial-gradient(circle, ${accent}80 1px, transparent 1.5px)`,
-                backgroundSize: '12px 12px',
-              }}
-            />
+          <div className="relative w-full max-w-44 justify-self-center overflow-visible">
+            <div className="accent-dot-field pointer-events-none absolute -inset-2 rounded opacity-25" />
             <Card card={domain} size="domain" onClick={() => onDomainClick(domain)} />
           </div>
         ) : (
           <div
-            className="game-domain-empty w-60 h-72 rounded glass-card flex items-center justify-center"
-            style={{ borderColor: 'rgba(168,85,247,0.3)', borderStyle: 'dashed' }}
+            className="game-domain-empty accent-border flex aspect-[5/7] w-full max-w-44 items-center justify-center justify-self-center rounded border border-dashed glass-card"
           >
             <div className="text-center">
               <div className="text-term-purple font-mono text-sm">[ NO DOMAIN ]</div>
@@ -74,7 +62,7 @@ export default function DomainCenter({ domain, modifiers, onDomainClick, domainA
       {domain && (
         <div className="text-term-text font-mono text-[12px] font-bold">
           ACTIVE:{' '}
-          <span style={{ color: accent, textShadow: `0 0 8px ${accent}60` }}>
+          <span className="accent-text-glow" style={{ color: accent }}>
             {ALIGNMENT_COLORS[domain.alignment]?.name || 'SPECIAL'}
           </span>
         </div>

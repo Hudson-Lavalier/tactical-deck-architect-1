@@ -5,10 +5,10 @@ import { Volume2, VolumeX } from 'lucide-react';
 // END GAME button (with confirmation handled by the parent) + mute toggle.
 export default function TopBar({ turn, isPlayerTurn, inResponseWindow, onEndGame, muted, onToggleMute }) {
   return (
-    <div className="flex justify-between items-center px-2">
+    <div className="grid w-full grid-cols-[1fr_auto_1fr] items-center gap-3 px-2">
       <button
         onClick={onEndGame}
-        className="px-3 py-1 rounded text-ui-xs font-bold glass-card transition-[transform,box-shadow] hover:scale-105"
+        className="justify-self-start rounded px-3 py-1 text-ui-xs font-bold glass-card transition-[transform,box-shadow] hover:scale-105"
         style={{ borderColor: '#ff444480', color: '#ff6666' }}
       >
         END GAME
@@ -21,7 +21,7 @@ export default function TopBar({ turn, isPlayerTurn, inResponseWindow, onEndGame
       </div>
       <button
         onClick={onToggleMute}
-        className="p-1.5 rounded glass-card transition-[transform,box-shadow] hover:scale-105"
+        className="justify-self-end rounded p-1.5 glass-card transition-[transform,box-shadow] hover:scale-105"
         style={{ borderColor: '#33333380' }}
         title={muted ? 'Unmute' : 'Mute'}
       >

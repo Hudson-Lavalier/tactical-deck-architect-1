@@ -9,19 +9,16 @@ export default function DrawDecks({ piles, onDraw, disabled }) {
   ];
 
   return (
-    <div className="game-draw-decks flex flex-col gap-6 shrink-0">
+    <div className="game-draw-decks flex w-full min-w-0 max-w-24 shrink flex-col items-center gap-3 md:gap-5">
       <div className="text-term-text font-mono text-[12px] font-bold tracking-[0.2em] text-center">DRAW</div>
       {decks.map((d) => (
         <div
           key={d.id}
           onClick={() => !disabled && onDraw?.(d.id)}
-          className={`game-draw-deck relative w-20 h-28 rounded-lg glass-card cosmic-sheen flex flex-col items-center justify-center transition-[transform,box-shadow] ${
-            disabled ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'
+          className={`game-draw-deck accent-border relative flex aspect-[5/7] w-full max-w-24 flex-col items-center justify-center rounded-lg glass-card cosmic-sheen transition-[transform,box-shadow] ${
+            disabled ? 'cursor-not-allowed opacity-40' : 'accent-glow cursor-pointer'
           }`}
-          style={{
-            borderColor: disabled ? `${d.color}20` : `${d.color}60`,
-            boxShadow: disabled ? 'none' : `0 0 16px ${d.color}25`,
-          }}
+          style={{ '--accent-color': d.color }}
         >
           <div className="font-mono text-[10px] font-bold tracking-[0.1em] text-center leading-tight" style={{ color: d.color }}>
             {d.label}

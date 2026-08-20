@@ -204,55 +204,29 @@
       var(--cosmic-deep);
   }
 
-  /* Horizontal game table: queue, persistent rows, domain, and hand stay legible. */
-  .game-queue-empty { margin: 0 !important; }
-  .game-queue-cell, .game-queue-lane .game-card-small { width: 5.5rem !important; height: 7.75rem !important; }
-  .game-card-medium, .game-persistent-empty { width: 7rem !important; height: 10rem !important; }
-  .game-draw-deck { width: 6.5rem !important; height: 9rem !important; }
-
-  @media (max-width: 2199px), (max-height: 1199px) {
-    .game-board-surface {
-      width: calc(100% - 32px) !important;
-      height: calc(100% - 24px) !important;
-      transform: rotateX(2deg) translateY(-4px) !important;
-      grid-template-rows: auto auto auto minmax(0, 1fr) auto auto !important;
-      gap: 0.25rem !important;
-      padding: 0.5rem !important;
-    }
-    .game-card-small { width: 4rem !important; height: 5.5rem !important; }
-    .game-queue-cell, .game-queue-lane .game-card-small { width: 4.75rem !important; height: 6.5rem !important; }
-    .game-card-medium, .game-persistent-empty { width: 5.5rem !important; height: 8rem !important; }
-    .game-card-normal { width: 5.5rem !important; height: 7.75rem !important; }
-    .game-card-domain { width: 11rem !important; max-height: 14rem !important; }
-    .game-draw-deck { width: 5.5rem !important; height: 7.75rem !important; }
-    .game-slot-label { padding-left: 0.5rem !important; padding-right: 0.5rem !important; }
-    .game-hand-fan { min-height: 8rem !important; padding-bottom: 0 !important; }
-    .game-battlefield-stage { gap: 1.5rem !important; padding-left: 6.5rem !important; padding-right: 6.5rem !important; }
-    .game-board-side { gap: 0.5rem !important; }
-    .game-draw-decks { gap: 1rem !important; }
+  /* Fluid board accents. Every dynamic color is supplied through --accent-color. */
+  .accent-border { border-color: color-mix(in srgb, var(--accent-color) 42%, transparent); }
+  .accent-border-soft { border-color: color-mix(in srgb, var(--accent-color) 18%, transparent); }
+  .accent-text-glow { text-shadow: 0 0 8px color-mix(in srgb, var(--accent-color) 55%, transparent); }
+  .accent-bg-subtle { background-color: color-mix(in srgb, var(--accent-color) 10%, transparent); }
+  .accent-glow {
+    box-shadow: 0 0 24px color-mix(in srgb, var(--accent-color) 18%, transparent), inset 0 0 40px rgba(0,0,0,0.38), inset 0 1px 0 rgba(255,255,255,0.05);
+  }
+  .accent-halo { box-shadow: 0 0 14px color-mix(in srgb, var(--accent-color) 50%, transparent); }
+  .accent-inset { box-shadow: inset 0 0 18px color-mix(in srgb, var(--accent-color) 8%, transparent); }
+  .accent-bloom { background: radial-gradient(circle, color-mix(in srgb, var(--accent-color) 20%, transparent), transparent 70%); }
+  .accent-dot-field {
+    background-image: radial-gradient(circle, color-mix(in srgb, var(--accent-color) 50%, transparent) 1px, transparent 1.5px);
+    background-size: 12px 12px;
   }
 
-  @media (max-width: 1499px), (max-height: 849px) {
-    .game-board-surface {
-      width: calc(100% - 16px) !important;
-      height: calc(100% - 12px) !important;
-      transform: rotateX(1.5deg) !important;
-      gap: 0.125rem !important;
-      padding: 0.375rem !important;
-    }
-    .game-card-small { width: 3.125rem !important; height: 4.25rem !important; }
-    .game-queue-cell, .game-queue-lane .game-card-small { width: 3.75rem !important; height: 5.125rem !important; }
-    .game-card-medium, .game-persistent-empty { width: 4.25rem !important; height: 6rem !important; }
-    .game-card-normal { width: 4.5rem !important; height: 6.5rem !important; }
-    .game-card-domain { width: 8rem !important; max-height: 11rem !important; }
-    .game-draw-deck { width: 4.75rem !important; height: 6.75rem !important; }
-    .game-persistent-row { gap: 0.375rem !important; }
-    .game-slot-label { padding: 0 !important; font-size: 0.5625rem !important; }
-    .game-hand-fan { min-height: 6.75rem !important; gap: 0.25rem !important; }
-    .game-battlefield-stage { gap: 0.75rem !important; padding-left: 5.25rem !important; padding-right: 5.25rem !important; }
-    .game-board-side { gap: 0.25rem !important; }
-    .game-draw-decks { gap: 0.75rem !important; }
-    .game-domain-empty { width: 8rem !important; height: 11rem !important; }
-    .game-queue-lane > div:first-child { font-size: 0.625rem !important; }
+  .game-board-surface {
+    border: 1px solid color-mix(in srgb, var(--accent-color) 40%, transparent);
+    box-shadow: 0 0 24px color-mix(in srgb, var(--accent-color) 14%, transparent), inset 0 0 40px rgba(0,0,0,0.38), inset 0 1px 0 rgba(255,255,255,0.05);
+  }
+
+  .game-board-edge {
+    border: 1px solid color-mix(in srgb, var(--accent-color) 12%, transparent);
+    box-shadow: inset 0 0 18px color-mix(in srgb, var(--accent-color) 7%, transparent);
   }
 }

@@ -15,10 +15,8 @@ export default function PointsBar({ player, isOpponent = false, handCount }) {
   const totalEarned = required.reduce((sum, [k, t]) => sum + Math.min(points[k] || 0, t), 0);
   const overallPct = totalTarget > 0 ? Math.min(100, (totalEarned / totalTarget) * 100) : 0;
 
-  const barW = isOpponent ? 'w-20' : 'w-28';
-
   return (
-    <div className={`flex items-center gap-4 font-mono ${isOpponent ? 'text-ui-sm' : 'text-ui-md'}`}>
+    <div className={`flex w-full min-w-0 flex-wrap items-center justify-center gap-x-4 gap-y-2 font-mono ${isOpponent ? 'text-ui-sm' : 'text-ui-md'}`}>
       {/* Victory Standard */}
       <div className="flex flex-col gap-1">
         <div className="text-term-text tracking-[0.2em] text-[12px] font-bold">
@@ -29,14 +27,14 @@ export default function PointsBar({ player, isOpponent = false, handCount }) {
           const cur = points[key] || 0;
           const pct = Math.min(100, (cur / target) * 100);
           return (
-            <div key={key} className="flex items-center gap-1.5">
-              <span style={{ color: info.glow, textShadow: `0 0 6px ${info.glow}50` }} className="font-bold w-14 text-[12px]">
+            <div key={key} className="flex min-w-0 items-center gap-1.5" style={{ '--accent-color': info.glow }}>
+              <span style={{ color: info.glow }} className="accent-text-glow w-14 shrink-0 font-bold text-[12px]">
                 {info.name}
               </span>
-              <div className={`${barW} h-1.5 bg-term-purple/10 rounded overflow-hidden`}>
+              <div className="h-1.5 w-[clamp(5rem,8vw,9rem)] min-w-0 overflow-hidden rounded bg-term-purple/10">
                 <div
                   className="h-full transition-[width,box-shadow] duration-300"
-                  style={{ width: `${pct}%`, background: info.glow, boxShadow: `0 0 6px ${info.glow}80` }}
+                  style={{ width: `${pct}%`, background: info.glow, boxShadow: '0 0 6px color-mix(in srgb, var(--accent-color) 50%, transparent)' }}
                 />
               </div>
               <span style={{ color: info.glow }} className="font-bold text-[12px] w-9">
@@ -48,7 +46,7 @@ export default function PointsBar({ player, isOpponent = false, handCount }) {
         {/* Weighted overall */}
         <div className="flex items-center gap-1.5 mt-0.5">
           <span className="text-term-text text-[12px] font-bold tracking-[0.15em] w-14">WEIGHTED</span>
-          <div className={`${barW} h-2 bg-term-purple/10 rounded overflow-hidden`}>
+          <div className="h-2 w-[clamp(5rem,8vw,9rem)] min-w-0 overflow-hidden rounded bg-term-purple/10">
             <div
               className="h-full transition-[width,box-shadow] duration-300"
               style={{ width: `${overallPct}%`, background: 'linear-gradient(90deg, #00ff41, #00ffff, #a855f7)', boxShadow: '0 0 8px rgba(168,85,247,0.4)' }}
@@ -65,12 +63,9 @@ export default function PointsBar({ player, isOpponent = false, handCount }) {
         <div className="text-term-text tracking-[0.2em] text-[12px] font-bold">GENERAL TALLY</div>
         <div className="flex gap-2">
           {Object.entries(ALIGNMENT_COLORS).map(([key, info]) => (
-            <div key={key} className="flex flex-col items-center gap-0.5">
-              <div
-                className="w-7 h-7 rounded-full flex items-center justify-center"
-                style={{ border: `1px solid ${info.glow}80`, boxShadow: `0 0 8px ${info.glow}40`, background: `${info.glow}15` }}
-              >
-                <span style={{ color: info.glow, textShadow: `0 0 6px ${info.glow}60` }} className="font-bold text-[13px]">
+            <div key={key} className="flex flex-col items-center gap-0.5" style={{ '--accent-color': info.glow }}>
+              <div className="accent-border accent-bg-subtle accent-glow flex aspect-square w-7 items-center justify-center rounded-full border">
+                <span style={{ color: info.glow }} className="accent-text-glow text-[13px] font-bold">
                   {points[key]}
                 </span>
               </div>

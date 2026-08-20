@@ -16,39 +16,43 @@ export default function QueueLane({ queuedCards, isActive, accent = '#888888', l
   }
 
   return (
-    <div className={`game-queue-lane flex flex-col gap-2 min-w-0 ${isActive ? '' : 'opacity-55'}`}>
-      <div className="text-term-text font-mono text-[12px] font-bold tracking-[0.15em] text-center">
+    <div
+      className={`game-queue-lane flex w-full min-w-0 flex-col gap-2 ${isActive ? '' : 'opacity-55'}`}
+      style={{ '--accent-color': accent }}
+    >
+      <div className="text-center font-mono text-[clamp(0.55rem,0.65vw,0.75rem)] font-bold tracking-[0.12em] text-term-text">
         {label} [{queuedCards.length}/{QUEUE_LIMIT}]
       </div>
-      <div className="rounded-lg p-2" style={{ border: `1px solid ${accent}40`, boxShadow: `inset 0 0 18px ${accent}10` }}>
-        <div className="flex flex-row gap-2 justify-center items-end">
-          {rows.map((row) =>
-          <div key={row} className="flex flex-col gap-2 items-center">
+      <div className="accent-border accent-inset min-w-0 rounded-lg border p-1.5 md:p-2">
+        <div className="grid min-w-0 grid-cols-4 items-end gap-1 md:gap-2">
+          {rows.map((row) => (
+            <div key={row} className="grid min-w-0 grid-rows-3 place-items-center gap-1 md:gap-2">
               {slots.map((col) => {
-              const cards = cardsByRow[row] || [];
-              const queued = cards[col];
-              if (queued) {
-                return (
-                  <div key={col} className="game-queue-cell relative flex items-center justify-center w-20 h-28">
+                const cards = cardsByRow[row] || [];
+                const queued = cards[col];
+                if (queued) {
+                  return (
+                    <div key={col} className="game-queue-cell relative flex aspect-[5/7] w-full max-w-20 items-center justify-center">
                       <Card card={queued.card} faceDown={hidden} size="small" onClick={!hidden ? () => onCardClick?.(queued.card) : undefined} />
-                      {queued.faceDown &&
-                    <div className="absolute -top-1 -right-1 text-[10px] font-mono bg-cosmic-deep px-1 rounded" style={{ color: accent }}>
+                      {queued.faceDown && (
+                        <div className="absolute -right-1 -top-1 rounded bg-cosmic-deep px-1 font-mono text-[10px]" style={{ color: accent }}>
                           {queued.turnsRemaining}T
                         </div>
-                    }
-                    </div>);
-
-              }
-              return (
-                <div key={col} className="game-queue-cell game-queue-empty w-20 h-28 rounded glass-card flex items-center justify-center mx-8 my-3 px-1" style={{ borderColor: `${accent}15` }}>
-                    <span className="text-term-faint font-mono text-[10px]">{row}T</span>
-                  </div>);
-
-            })}
+                      )}
+                    </div>
+                  );
+                }
+                return (
+                  <div key={col} className="game-queue-cell game-queue-empty accent-border-soft flex aspect-[5/7] w-full max-w-20 items-center justify-center rounded border border-dashed glass-card px-1">
+                    <span className="font-mono text-[10px] text-term-faint">{row}T</span>
+                  </div>
+                );
+              })}
             </div>
-          )}
+          ))}
         </div>
       </div>
-    </div>);
+    </div>
+  );
 
 }

@@ -11,7 +11,7 @@ export default function HandFan({ cards, onSelectCard, selectedCardId, disabled 
   const midPoint = (Math.min(handCount, HAND_LIMIT) - 1) / 2;
 
   return (
-    <div className="game-hand-fan flex items-end justify-center gap-1.5 pb-2 min-h-[10rem]">
+    <div className="game-hand-fan relative z-20 flex min-h-[clamp(6rem,12vh,10rem)] w-full items-end justify-center gap-1 overflow-visible px-4 pb-1 md:gap-1.5">
       {visible.map((card, index) => {
         const offset = index - midPoint;
         const angle = midPoint !== 0 ? (offset / midPoint) * fanAngle : 0;
@@ -26,7 +26,7 @@ export default function HandFan({ cards, onSelectCard, selectedCardId, disabled 
               transformOrigin: 'bottom center',
               zIndex: isSelected ? 100 : index,
             }}
-            className="transition-all duration-200"
+            className="w-[clamp(3.75rem,5.5vw,7rem)] shrink-0 overflow-visible transition-all duration-200"
           >
             <Card
               card={card}
