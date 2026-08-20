@@ -22,7 +22,6 @@ export default function Carousel3D({
   const width = Math.min(320, Number(itemWidth) || 320);
   const height = Math.min(460, Number(itemHeight) || 460);
   const snapDistance = Math.max(130, width * 0.48);
-  const radius = Math.min(560, Math.max(390, width * 1.42));
 
   const normalizeIndex = (index) => {
     if (!count) return 0;
@@ -133,10 +132,9 @@ export default function Carousel3D({
           const offset = relativeOffset(index) + dragOffset;
           const distance = Math.abs(offset);
           const angle = offset * ANGLE_STEP;
-          const radians = angle * (Math.PI / 180);
-          const translateX = Math.sin(radians) * radius;
-          const translateZ = Math.cos(radians) * radius - radius + (distance < 0.001 ? 32 : 0);
-          const scale = Math.max(0.72, 1 - distance * 0.08);
+          const translateX = offset * (width + 32);
+          const translateZ = -distance * 45;
+          const scale = Math.max(0.85, 1 - distance * 0.08);
           const zIndex = Math.round(100 - distance * 10);
           const isActive = Math.abs(relativeOffset(index)) < 0.001;
           const isVisible = distance <= 5.25;
