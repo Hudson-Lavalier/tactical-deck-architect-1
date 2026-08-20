@@ -29,7 +29,7 @@ export default function QueueLane({ queuedCards, isActive, accent = '#888888', l
               const queued = cards[col];
               if (queued) {
                 return (
-                  <div key={col} className="game-queue-cell relative flex items-center justify-center w-20 h-28">
+                  <div key={col} className="game-queue-cell relative flex items-center justify-center w-30 h-28">
                       <Card card={queued.card} faceDown={hidden} size="small" onClick={!hidden ? () => onCardClick?.(queued.card) : undefined} />
                       {queued.faceDown &&
                     <div className="absolute -top-1 -right-1 text-[10px] font-mono bg-cosmic-deep px-1 rounded" style={{ color: accent }}>
