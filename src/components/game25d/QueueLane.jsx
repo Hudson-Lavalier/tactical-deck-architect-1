@@ -16,14 +16,14 @@ export default function QueueLane({ queuedCards, isActive, accent = '#888888', l
   }
 
   return (
-    <div className={`game-queue-lane flex flex-col gap-1 min-w-0 ${isActive ? '' : 'opacity-55'}`}>
+    <div className={`game-queue-lane flex flex-col gap-2 min-w-0 ${isActive ? '' : 'opacity-55'}`}>
       <div className="text-term-text font-mono text-[12px] font-bold tracking-[0.15em] text-center">
         {label} [{queuedCards.length}/{QUEUE_LIMIT}]
       </div>
-      <div className="rounded-lg p-1.5" style={{ border: `1px solid ${accent}40`, boxShadow: `inset 0 0 18px ${accent}10` }}>
-        <div className="flex flex-row gap-1 justify-center items-end">
+      <div className="rounded-lg p-2" style={{ border: `1px solid ${accent}40`, boxShadow: `inset 0 0 18px ${accent}10` }}>
+        <div className="flex flex-row gap-2 justify-center items-end">
           {rows.map((row) =>
-          <div key={row} className="flex flex-col gap-1 items-center">
+          <div key={row} className="flex flex-col gap-2 items-center">
               {slots.map((col) => {
               const cards = cardsByRow[row] || [];
               const queued = cards[col];

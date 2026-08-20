@@ -12,35 +12,39 @@ export default function Battlefield({
   onPersistentClick, placementEffect,
 }) {
   return (
-    <div className="game-battlefield grid h-full min-h-0 w-full grid-cols-[auto_minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-5 overflow-hidden">
-      <DrawDecks piles={drawPiles} onDraw={onDraw} disabled={drawDisabled} />
-
-      <div className="game-board-side flex min-w-0 flex-col items-center justify-center gap-3">
-        <PersistentRow
-          slots={opponentSlots}
-          onSlotClick={onPersistentClick}
-          placementEffect={placementEffect?.playerId === 'opponent' ? placementEffect : null}
-        />
-        <QueueLane queuedCards={opponentQueue} isActive={!isPlayerTurn} accent="#888888" label="OPPONENT QUEUE" hidden />
+    <div className="game-battlefield relative flex h-full min-h-0 w-full items-center overflow-hidden">
+      <div className="game-draw-position absolute left-0 top-1/2 z-10 -translate-y-1/2">
+        <DrawDecks piles={drawPiles} onDraw={onDraw} disabled={drawDisabled} />
       </div>
 
-      <DomainCenter
-        domain={domain}
-        modifiers={modifiers}
-        onDomainClick={onDomainClick}
-        domainAttached={domainAttached}
-        onSwitchTwofold={onSwitchTwofold}
-        isPlayerTurn={isPlayerTurn}
-        domainPlacedBy={domainPlacedBy}
-      />
+      <div className="game-battlefield-stage grid w-full grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-8 px-32">
+        <div className="game-board-side flex min-w-0 flex-col items-center justify-center gap-3">
+          <PersistentRow
+            slots={opponentSlots}
+            onSlotClick={onPersistentClick}
+            placementEffect={placementEffect?.playerId === 'opponent' ? placementEffect : null}
+          />
+          <QueueLane queuedCards={opponentQueue} isActive={!isPlayerTurn} accent="#888888" label="OPPONENT QUEUE" hidden />
+        </div>
 
-      <div className="game-board-side flex min-w-0 flex-col items-center justify-center gap-3">
-        <QueueLane queuedCards={playerQueue} isActive={isPlayerTurn} accent="#00ff41" label="PLAYER QUEUE" onCardClick={onQueueCardClick} />
-        <PersistentRow
-          slots={playerSlots}
-          onSlotClick={onPersistentClick}
-          placementEffect={placementEffect?.playerId === 'player' ? placementEffect : null}
+        <DomainCenter
+          domain={domain}
+          modifiers={modifiers}
+          onDomainClick={onDomainClick}
+          domainAttached={domainAttached}
+          onSwitchTwofold={onSwitchTwofold}
+          isPlayerTurn={isPlayerTurn}
+          domainPlacedBy={domainPlacedBy}
         />
+
+        <div className="game-board-side flex min-w-0 flex-col items-center justify-center gap-3">
+          <QueueLane queuedCards={playerQueue} isActive={isPlayerTurn} accent="#00ff41" label="PLAYER QUEUE" onCardClick={onQueueCardClick} />
+          <PersistentRow
+            slots={playerSlots}
+            onSlotClick={onPersistentClick}
+            placementEffect={placementEffect?.playerId === 'player' ? placementEffect : null}
+          />
+        </div>
       </div>
     </div>
   );

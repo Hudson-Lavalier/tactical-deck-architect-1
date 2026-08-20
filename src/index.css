@@ -206,6 +206,8 @@
 
   /* Horizontal game table: queue, persistent rows, domain, and hand stay legible. */
   .game-queue-empty { margin: 0 !important; }
+  .game-queue-cell, .game-queue-lane .game-card-small { width: 5.5rem !important; height: 7.75rem !important; }
+  .game-card-medium, .game-persistent-empty { width: 7rem !important; height: 10rem !important; }
   .game-draw-deck { width: 6.5rem !important; height: 9rem !important; }
 
   @media (max-width: 2199px), (max-height: 1199px) {
@@ -217,14 +219,15 @@
       gap: 0.25rem !important;
       padding: 0.5rem !important;
     }
-    .game-card-small, .game-queue-cell { width: 4rem !important; height: 5.5rem !important; }
-    .game-card-medium, .game-persistent-empty { width: 5rem !important; height: 7rem !important; }
+    .game-card-small { width: 4rem !important; height: 5.5rem !important; }
+    .game-queue-cell, .game-queue-lane .game-card-small { width: 4.75rem !important; height: 6.5rem !important; }
+    .game-card-medium, .game-persistent-empty { width: 5.5rem !important; height: 8rem !important; }
     .game-card-normal { width: 5.5rem !important; height: 7.75rem !important; }
     .game-card-domain { width: 11rem !important; max-height: 14rem !important; }
     .game-draw-deck { width: 5.5rem !important; height: 7.75rem !important; }
     .game-slot-label { padding-left: 0.5rem !important; padding-right: 0.5rem !important; }
     .game-hand-fan { min-height: 8rem !important; padding-bottom: 0 !important; }
-    .game-battlefield { gap: 0.75rem !important; }
+    .game-battlefield-stage { gap: 1.5rem !important; padding-left: 6.5rem !important; padding-right: 6.5rem !important; }
     .game-board-side { gap: 0.5rem !important; }
     .game-draw-decks { gap: 1rem !important; }
   }
@@ -237,15 +240,16 @@
       gap: 0.125rem !important;
       padding: 0.375rem !important;
     }
-    .game-card-small, .game-queue-cell { width: 3.125rem !important; height: 4.25rem !important; }
-    .game-card-medium, .game-persistent-empty { width: 3.75rem !important; height: 5.375rem !important; }
+    .game-card-small { width: 3.125rem !important; height: 4.25rem !important; }
+    .game-queue-cell, .game-queue-lane .game-card-small { width: 3.75rem !important; height: 5.125rem !important; }
+    .game-card-medium, .game-persistent-empty { width: 4.25rem !important; height: 6rem !important; }
     .game-card-normal { width: 4.5rem !important; height: 6.5rem !important; }
     .game-card-domain { width: 8rem !important; max-height: 11rem !important; }
     .game-draw-deck { width: 4.75rem !important; height: 6.75rem !important; }
     .game-persistent-row { gap: 0.375rem !important; }
     .game-slot-label { padding: 0 !important; font-size: 0.5625rem !important; }
     .game-hand-fan { min-height: 6.75rem !important; gap: 0.25rem !important; }
-    .game-battlefield { gap: 0.375rem !important; }
+    .game-battlefield-stage { gap: 0.75rem !important; padding-left: 5.25rem !important; padding-right: 5.25rem !important; }
     .game-board-side { gap: 0.25rem !important; }
     .game-draw-decks { gap: 0.75rem !important; }
     .game-domain-empty { width: 8rem !important; height: 11rem !important; }
