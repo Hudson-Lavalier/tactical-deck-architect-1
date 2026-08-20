@@ -14,7 +14,7 @@ export default function PointsBar({ player, isOpponent = false, handCount }) {
   const overallPct = totalTarget > 0 ? Math.min(100, (totalEarned / totalTarget) * 100) : 0;
 
   return (
-    <div className="flex z-20 w-auto min-w-[13rem] max-w-xs flex-col gap-1 rounded-xl border border-white/10 bg-cosmic-deep/85 p-2.5 backdrop-blur-md shadow-md">
+    <div className="flex w-auto min-w-[13rem] max-w-xs flex-col gap-1 rounded-xl border border-white/10 bg-cosmic-deep/85 p-2 backdrop-blur-md shadow-md">
       {/* Header Row */}
       <div className="flex items-center justify-between border-b border-white/10 pb-1 gap-2">
         <div className="text-term-text tracking-[0.14em] text-[10px] font-bold">
