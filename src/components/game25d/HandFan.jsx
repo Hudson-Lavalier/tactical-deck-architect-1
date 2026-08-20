@@ -2,14 +2,14 @@ import React from 'react';
 import Card from '@/components/game/Card';
 import { HAND_LIMIT } from '@/data/gameConstants';
 
-export default function HandFan({ cards, onSelectCard, selectedCardId, disabled }) {
-  const visible = cards.slice(0, HAND_LIMIT);
-  const midPoint = (visible.length - 1) / 2;
+export default function HandFan({ cards, onSelectCard, selectedCardId, disabled, visible = true }) {
+  const visibleCards = cards.slice(0, HAND_LIMIT);
+  const midPoint = (visibleCards.length - 1) / 2;
   const fanAngle = Math.min(cards.length * 3, 22);
 
   return (
-    <div className="game-hand-fan relative z-30 mx-auto flex min-h-[clamp(7rem,13vh,10.5rem)] w-full items-end justify-center gap-1.5 overflow-visible px-4 pb-1 pt-10 select-none md:gap-2">
-      {visible.map((card, index) => {
+    <div className={`game-hand-fan relative z-30 mx-auto flex w-full items-end justify-center gap-1.5 overflow-visible select-none transition-all duration-300 ease-in-out md:gap-2 ${visible ? 'h-[clamp(7rem,13vh,10.5rem)] translate-y-0 px-4 pb-1 pt-10 opacity-100 pointer-events-auto' : 'h-0 translate-y-[150%] p-0 opacity-0 pointer-events-none'}`}>
+      {visibleCards.map((card, index) => {
         const offset = index - midPoint;
         const angle = midPoint !== 0 ? (offset / midPoint) * fanAngle : 0;
         const yOffset = Math.abs(offset) * 3;

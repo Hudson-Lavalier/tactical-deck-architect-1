@@ -61,6 +61,7 @@ export default function GameBoard() {
   const [showEndTurnDialog, setShowEndTurnDialog] = useState(false);
   const [showEndGameDialog, setShowEndGameDialog] = useState(false);
   const [showHandView, setShowHandView] = useState(false);
+  const [showBoardHand, setShowBoardHand] = useState(true);
   const [handViewerCard, setHandViewerCard] = useState(null);
   const [twofoldFlankCard, setTwofoldFlankCard] = useState(null);
   const [placementEffect, setPlacementEffect] = useState(null);
@@ -445,21 +446,33 @@ export default function GameBoard() {
         </div>
 
         {/* hand */}
-        <div style={{ gridArea: 'hand' }} className="flex min-h-0 items-end justify-center overflow-visible pb-1">
+        <div style={{ gridArea: 'hand' }} className="flex min-h-0 items-end justify-center overflow-visible">
           <HandFan
             cards={player.hand}
             onSelectCard={handleSelectCard}
             selectedCardId={selectedCardId}
             disabled={!isPlayerTurn}
+            visible={showBoardHand}
           />
         </div>
       </BoardSurface>
 
+      <button
+        onClick={() => setShowHandView((open) => !open)}
+        className="hud-control absolute bottom-3 left-3 z-50 min-w-[120px] rounded-xl border border-term-blue/40 bg-cosmic-deep/90 px-5 py-2.5 text-xs font-bold uppercase tracking-[0.14em] text-term-blue shadow-lg backdrop-blur-xl transition-all hover:-translate-y-1 md:text-sm"
+      >
+        Hand view
+      </button>
+
+      <button
+        onClick={() => setShowBoardHand((visible) => !visible)}
+        className="hud-control glass-card absolute bottom-3 left-1/2 z-50 -translate-x-1/2 rounded-xl border px-4 py-2 text-xs font-bold uppercase shadow-lg transition-all hover:-translate-y-1"
+      >
+        {showBoardHand ? 'Hide hand' : 'Show hand'}
+      </button>
+
       {phase === 'main' && isPlayerTurn && !inResponseWindow && (
-        <>
-          <button onClick={() => setShowHandView(true)} className="hud-control absolute bottom-6 left-6 z-40 min-w-[120px] rounded-xl border border-term-blue/40 bg-cosmic-deep/90 px-5 py-2.5 text-xs font-bold uppercase tracking-[0.14em] text-term-blue shadow-lg backdrop-blur-xl transition-all hover:-translate-y-1 md:text-sm">Hand view</button>
-          <button onClick={handleEndTurn} className="hud-control absolute bottom-6 right-6 z-40 min-w-[120px] rounded-xl border border-term-green/40 bg-cosmic-deep/90 px-5 py-2.5 text-xs font-bold uppercase tracking-[0.14em] text-term-green shadow-lg backdrop-blur-xl transition-all hover:-translate-y-1 md:text-sm">End turn</button>
-        </>
+        <button onClick={handleEndTurn} className="hud-control absolute bottom-6 right-6 z-40 min-w-[120px] rounded-xl border border-term-green/40 bg-cosmic-deep/90 px-5 py-2.5 text-xs font-bold uppercase tracking-[0.14em] text-term-green shadow-lg backdrop-blur-xl transition-all hover:-translate-y-1 md:text-sm">End turn</button>
       )}
 
       {/* ── Flat overlays ── */}
@@ -492,7 +505,7 @@ export default function GameBoard() {
       {showHandView && (
         <HandView
           cards={player.hand}
-          onSelectCard={(card) => { setShowHandView(false); setHandViewerCard(card); }}
+          onSelectCard={(card) => setHandViewerCard(card)}
           onClose={() => setShowHandView(false)}
         />
       )}
